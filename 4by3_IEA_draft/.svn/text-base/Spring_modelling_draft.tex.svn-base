@@ -1,0 +1,205 @@
+
+%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is the LaTeX source for the instructions to authors using
+% the LaTeX document class 'llncs.cls' for contributions to
+% the Lecture Notes in Computer Sciences series.
+% http://www.springer.com/lncs       Springer Heidelberg 2006/05/04
+%
+% It may be used as a template for your own input - copy it
+% to a new file with a new name and use it as the basis
+% for your article.
+%
+% NB: the document class 'llncs' has its own and detailed documentation, see
+% ftp://ftp.springer.de/data/pubftp/pub/tex/latex/llncs/latex2e/llncsdoc.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[runningheads,a4paper]{llncs2e/llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+%                   
+\usepackage[pdftex,dvipsnames]{xcolor}  
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\newcommand\info[1]{\textcolor{red}{#1}}
+%
+
+\usepackage{url}
+\urldef{\mailsa}\path|{bingbin.yu, jose.de_gea_fernandez, |  
+\urldef{\mailsb}\path| yohannes.kassahun, vinzenz.bargsten}@dfki.de | 
+%\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|    
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+%\title{Modeling a SEA's Spring by using a data-driven method}
+%\title{Learning the torque profile of a SEA's spring}
+\title{Learning the Elasticity of a Series-Elastic Actuator for Accurate Torque Control }
+
+% a short form should be given in case it is too long for the running head
+%\titlerunning{Learning the torque profile of a SEA's springions}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+\author{Bingbin Yu%
+%\thanks{Please note that the LNCS Editorial assumes that all authors have used
+%the western naming convention, with given names preceding surnames. This determines
+%the structure of the names in the running heads and the author index.}%
+\and Jos\'e de Gea Fern\'andez \and Yohannes Kassahun \and Vinzenz Bargsten}
+%
+\authorrunning{Lecture Notes in Computer Science: Authors' Instructions}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{DFKI, Robotics Innovation Center,\\
+Bremen, 28359, Germany\\
+\mailsa\\
+\mailsb\\
+%\mailsc\\
+}
+%\url{http://www.springer.com/lncs}}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+\toctitle{Lecture Notes in Computer Science}
+\tocauthor{Authors' Instructions}
+\maketitle
+
+\input{sections/Abstract}
+\input{sections/Introduction}
+\input{sections/Springdesign_analysis}
+% Following sections will be updated with new results
+\input{sections/Modelingmethod}
+\input{sections/Modelsvalidation}
+\input{sections/Torquecontrol}
+\input{sections/Conclusion}
+
+\begin{thebibliography}{4}
+%1
+\bibitem{Rollinson2013} Rollinson, D., Ford, S., Brown, B., Choset, H.: DESIGN AND MODELING OF A SERIES ELASTIC ELEMENT FOR SNAKE ROBOTS. In: Proceedings of the ASME 2013 Dynamic Systems and Control Conference, (2013)
+%rubber spring
+
+\bibitem{Paskarbeit2013} Paskarbeit, J., Annunziata, S., Basa, D., Schneider, A.: A self-contained, elastic joint drive for robotics applications based on a sensorized elastomer coupling—Design and identification, In: Sensors and Actuators A: Physical, vol. 199, pp. 56--66. Springer, Heidelberg (2013)
+% elastomo
+
+\bibitem{Edgington2009} Edgington, M., Kassahun, Y., Kirchner, F.: Dynamic motion modelling for legged robots. In: 2009 IEEE/RSJ International Conference on Intelligent Robots and Systems, pp. 4688--4694 (2009)
+
+\bibitem{Bishop1995} Bishop, C. M. Neural networks for pattern recognition. Oxford university press. (1995)
+
+
+\bibitem{Keras} Keras: Deep Learning library for Theano and TensorFlow, \url{https://keras.io/}
+
+\bibitem{Yu2013} Yu, H., Huang, S., Thakor, N.V., Chen, G., Toh, S.L.: A novel compact compliant actuator design for rehabilitation robots. In: 2013 IEEE international conference on rehabilitation robotics,(2013)
+%June 24-26 Seattle washington usa
+
+\bibitem{Rethink} Rethink Robotics, \url{www.rethinkrobotics.com}
+
+\bibitem{Bargsten2016} Bargsten, V., de Gea Fern\'andez, J.: COMPI: Development of a 6-DOF compliant robot arm for human-robot cooperation In: In Proceedings of the 8th International Workshop on Human-Friendly Robotics, (2015)
+
+\bibitem{Paine2014} Paine, N., Oh, S., Sentis, L.: Design and Control Considerations for High-Performance Series Elastic Actuators. In: IEEE/ASME TRANSACTIONS ON MECHATRONICS, vol.19, no.3, (2014)
+%survey of spring design, UT-SEA
+
+\bibitem{Pratt1995} Pratt, G.A., Williamson, M.M.: Series Elastic Actuators. In: IEEE  International  Conference  on  Intelligent  Robots  and  Systems, vol.1, pp. 399--406, (1995)
+
+\bibitem{Arumugom2009} Arumugom, S., Muthuraman, S., Ponselvan, V.: Modeling and application of series elastic actuators for force control multi legged robots. In: Journal of computing, vol.1,(2009)
+%ISSUE 1, Dec, ISSN: 2151-9617
+
+\bibitem{Kong2012} Kong, K., Bae, J., Tomizuka, M.: A Compact Rotary Series Elastic Actuator for Human Assistive Systems In: IEEE/ASME Transations of Mechatronics,vol.17,no.2,(2012)
+%No.2
+
+\bibitem{Stienen2010} Stienen, A.H.A., Hekman, E.E.G., Braak, H., Aalsma, A.M.M., Van der Helm, F.C.T., van der Kooij, H.: Design of a Rotational Hydroelastic Actuator for a Powered Exoskeleton for Upper Limb Rehabilitation. In: IEEE transactions on biomedical engineering, vol.57, no.3,(2010)
+
+\bibitem{Mallwitz:2015} Mallwitz, M., Will, N., Teiwes, J., Kirchner, E.A.: The {CAPIO} Active Upper Body Exoskeleton and its Application for Teleoperation. In: Proceedings of the 13th Symposium on Advanced Space Technologies in Robotics and Automation. ESA/Estec Symposium on Advanced Space Technologies in Robotics and Automation (ASTRA-2015), 2015
+
+\bibitem{Sudano2014} Sudano, A., Tagliamonte, N.L, Accoto, D., Guglielmelli, E.: A Resonant Parallel Elastic Actuator for Biorobotic Applications. In: 2014 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), (2014)
+
+\bibitem{Wyeth2008} Wyeth, G.: Demonstrating the Safety and Performance of a Velocity Sourced Series Elastic Actuator  In: 2008 IEEE International Conference on Robotics and Automation,(2008)
+
+\bibitem{Li2015} Li, Y., Feng, H.: Force control of series elastic acutator In: 2015 Fifth International Conference on Instrumentation and Measurement, Computer, Communication and Control, (2015)
+
+\bibitem{Ford2014} Ford, S., Rollinson, D., Willig, A., Choset, H.: Online Calibration of a Compact Series Elastic Actuator In: 2014 American Control Conference (2014)
+
+\bibitem{Lu2015} Lu, C., Mao,Y., Zhu, Q., Xiong, R.: Novel series elastic actuator design and velocity control In: Electric Machines and Control, vol.19, pp.83--88, (2015)
+
+\bibitem{Jose2016} de Gea Fern\'andez, J.,  Sprengel, H., Mallwitz, M., Zipper, M., Yu, B., Bargsten, V.: Designing Modular Series-Elastic Actuators for Safe Human-Robot Collaboration in Industrial Settings. In: Proceedings of the Climbing and Walking Robots and Support Technologies for Mobile Machines (CLAWAR),(2016)
+
+\bibitem{Zenzes2016} Zenzes, M., Kampmann, P., Stark, T., Schilling, M.: {NDLC}om: Simple Protocol for Heterogeneous Embedded Communication Networks, In: Proceedings of the Embedded World Exhibition and Conference, at Embedded World 2016 (2016)
+
+%\bibitem{Parietti2011} Parietti, F., Baud-Bovy, G., Gatti, E., Riener, R., Guzzella, L., Vallery, H.: Series Viscoelastic Actuators Can Match Human Force Perception. In: IEEE/ASME TRANSACTIONS ON MECHATRONICS, vol. 16, 5 (2011)
+%visco-elastic model
+
+%\bibitem{Austin2015} Austin, J., Schepelmann, A., Geyer, H.:Control and Evaluation of Series Elastic Actuators with Nonlinear Rubber Springs. In: 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems, (2015)
+
+%\bibitem{Vallery2007} Vallery, H., Ekkelenkamp, N., van der Kooij, H., Buss, M.: Passive and Accurate Torque Control of Series Elastic Actuators. In: Proceedings of the 2007 IEEE/RSJ International Conference on Intelligent Robots and Systems,(2007)
+%survey of torque control with SEA
+
+%\bibitem{Bingbin2014} Yu, B., Tibebu, A., Kassahun, Y., Bernhard, F., B. Vander Poorten, E. :Towards learning-based catheter distal section steering. In: Proceedings of the 4rd Joint Workshop on New Technologies for Computer/Robot Assisted Surgery (CRAS), pp. 167--170(2014)
+
+%\bibitem{Yu2015} Yu, H., Huang, S., Pan, Y., Zhao,G.:Huma-robot interaction control of rehabilitation robots with series elastic actuators. In: 2013 IEEE international conference on rehabilitation robotics,(2015)
+
+%\bibitem{Kong2009} Kong, K., Bae, J., Tomizuka, M.: Control of Rotary Series Elastic Actuator for Ideal Force-Mode Actuation in Human–Robot Interaction Applications In: IEEE/ASME Transations of Mechatronics,vol.14,no.1,(2009)
+
+%\bibitem{Thummel2001} Th{\"u}mmel, M., Otter, M., Bals, J.: Control of Robots with Elastic Joints based on Automatic Generation of Inverse Dynamics Models In: proceedings of the 2001 IEEE/RSJ International Conference on Intelligent Robots and Systems, (2001)
+
+\end{thebibliography}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

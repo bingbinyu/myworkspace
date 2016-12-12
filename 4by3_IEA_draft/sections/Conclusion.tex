@@ -1,0 +1,10 @@
+\section{Conclusion}
+\label{sec:Conclusion}
+In this paper, two data-driven modeling methods are proposed to account for the nonlinearities of the spring coupling of a rotary elastic actuator. The models are learned from the training experiments of the actuator and verified by estimating the output torque with given measured variables in the test experiments. The experiment result presents a comparable performances of the DGMM and the deep learning/NN methods, which show a significant advantage compared to a linear regression model. As compared to the DGMM model, the deep learning model shows a slight improvement in torque estimation. On the other side, the DGMM model captures multiple relationship among the observed variables, which is more flexible to be utilized once learned in multiple ways by choosing which variables are used as inputs and which ones as outputs of the model.
+
+The learned nonlinear spring model is then used as an torque estimation module for a torque controller, which cascades with  an inner motor current and deflection control loops. The proposed torque controller is verified by a set of experiments which demonstrated a precise torque control. 
+% in a short term.... in a long term... (future work).
+% implement the deep learning weights in FPGA.
+% improve the torque control structure. (bandwidth)
+%\todo[inline]{\normalsize conclusion will be added.}%\newline}
+%\listoftodos[Notes]

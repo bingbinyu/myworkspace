@@ -1,0 +1,23 @@
+\section{Abstract} 
+Series elastic actuators (SEAs) have been frequently used in torque control mode by using the elastic element as torque measuring device. In order to precisely control the torque, an ideal torque source is critical for higher level control strategies. The elastic elements are traditionally  metal springs which are normally considered as linear elements in the control scheme. However, many elastic elements are not perfectly linear, especially for an elastic element built out of multiple springs or using special materials \cite{Rollinson2013}\cite{Paskarbeit2013} and thus their nonlinearities are very noticeable. %Besides the nonlinearities of the springs, the resistive frictions also effects the torque measurement
+This paper presents two data-driven methods for learning the spring model of a series-elastic actuator: (1) a Dynamic Gaussian Mixture Model (DGMM) \cite{Edgington2009} is used to capture the relationship between actuator torque, velocity, spring deflection and its history. Once the DGMM is trained, the spring deflection can be estimated by using the conditional probability function which later is used for torque control. For comparison, (2) a deep-learning approach is also evaluated which uses the same variables as training data for learning the spring model. Results show that the data-driven methods improve the accuracy of the torque control as compared to traditional linear models. %These two approaches are evaluated with 
+\keywords{series-elastic actuators, nonlinear springs, DGMM, deep learning, torque control}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
+Series elastic actuators (SEAs) have been frequently used for torque control by using the elastic elements in torque measurment. Traditionally, linear springs are adopted as the elastic element which are modelled with Hooke's law. In recent years, for improving the torque resolution, nonlinear springs (NLSs) are investigated as the elastic elements of SEAs \cite{Rollinson2013},\cite{Parietti2011},\cite{Paskarbeit2013}. In order to generate desired torque with NLSs, the corresponding deflection should be estimated, therefore a high-precision torque-deflection model is required. This paper presents a data-based method for modeling a NLS'torque-deflection of a SEA. The dynamic gaussian mixture model(DGMM) \cite{Edgington2009} is employed to capture the relationship between actuator torque, spring deflection, motor current and history of them. Once the DGMM is trained, the spring deflection can be estimated by using conditional probability function which later is used in torque control.
+\fi
+\iffalse
+Rewrite:
+\begin{itemize}
+  \item Nonlinearity of the springs system exists in general(\cite{Kong2009}). Especially for the elastic element with multiple springs or with special material \cite{Rollinson2013}\cite{Paskarbeit2013}
+  \item learning the torque profile means learning the spring nonlinearity and the resistive force which include static friction (backdrivability) and visous friction. The function of the model is similar to a observer.
+%magnet torsional spring, paralle actuator
+\end{itemize}
+\fi
+

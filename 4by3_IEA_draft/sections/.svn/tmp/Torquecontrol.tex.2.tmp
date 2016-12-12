@@ -1,0 +1,34 @@
+\section{Torque control}
+Based on the learned spring models, a torque controller is proposed to control the spring torque to track the desired torque as precisely as possible. The complete torque control scheme of the SEA consists of three cascaded control loops for motor current, spring deflection and torque (see Fig. \ref{fig:controller_structure}). %An inner current loop is used to control the brushless DC motor in the PWM. 
+Two absolute encoders are installed at both sides of the spring coupling for measuring the rotation angle and calculate the spring deflection. A deflection PID controller is implemented into the FPGA which closes the loop with the spring deflection and then cascades with an inner motor current controller. The first derivative of the deflection and the velocity are calculated as the inputs of the DGMM model according to Eq.~\ref{eq:dgmm9}, the corresponding deflection value is estimated with the given desired torque, which is then controlled by the inner deflection and current controller.
+%In addition, a joint position and velocity controller are working in the background. They are activated only in case a set limit of velocity or position is reached and then override the deflection controller.
+
+%%%%%%%%%%%%%%%%%%%%  Figure: control structure   %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=1\textwidth, trim=2.5cm 13cm 2cm 8.5cm, clip]{images/torque_control_block_diagram.pdf}
+    \caption{Complete actuator torque control scheme \label{fig:controller_structure}}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The proposed torque control is verified in a torque tracking experiment. A sinusoidal reference and the measured torque are plotted in the upper plot of Figure~\ref{fig:torque_tracking_result} and the lower plot shows the tracking error.
+%The spring model is learned when the inclination of testbed equals zero and 
+
+%%%%%%%%%%%%%%%%%%%%  Figure: torque tracking    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[htb]
+\centering
+\advance\leftskip-1.1cm
+\vspace*{-1.1 cm}
+\includegraphics[width=1.2\columnwidth]{./images/4by3_dgmm_torquetrack_inclination47_new.png}
+ \caption{\textit{upper:} Result of the torque tracking with testbed inclination equals 46.9 degree, \textit{lower:} Torque tracking error.}
+ \label{fig:torque_tracking_result}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%Virtual Spring Element
+%Gravity Compensation
+%Zero Torque on Spring(Torque Control of High Compliant Series Elastic Actuator )
+
+%%***To evaluate force control performance, both a force-tracking experiment and a zero-force experiment are conducted.***
+

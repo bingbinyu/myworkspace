@@ -1,0 +1,88 @@
+\section{Spring modeling methods}
+Since the spring is used as a torque sensor for SEA, an accurate spring model is the basis of the successful torque control. As analysed in Section \ref{sec:SEAdesign}, the torque-deflection curve of the coil spring component presents hysteresis properties. In order to account the nonlinearities, two modeling approaches are proposed by using DGMM and deep learning methods respectively, which are introduced in next sections.
+\subsection{Spring modeling by using DGMM}
+ As a probabilistic modeling method, Gaussian mixture model (GMM) is widely used in modeling complex and multi-variables data. To model the spring torque with more variables besides deflection, dynamic Gaussian mixture model (DGMM) is studied, which represents a probability density function $P(x)$ as a variable-sized set of “weighted Gaussian” pairs (Eq.~\ref{eq:dgmm1}).
+\iffalse
+\begin{equation}
+    G={(g_{1}(x),\omega_{1})+(g_{2}(x),\omega_{2})+......(g_{m}(x),\omega_{m})},
+ \label{eq:dgmm1}
+\end{equation} 
+\fi
+\begin{equation}
+    P(x)=\Sigma_{i=1}^{m}\hat{\omega_{i}}g_{i}(x),
+ \label{eq:dgmm1}
+\end{equation} 
+
+where $g_{i}(x)$ is a multivariate Gaussian distribution 
+
+\begin{equation}
+    g_{i}(x)=p_{i}(x) \sim \mathcal{N}_{i}(\mu_{i},\Sigma_{i}),
+ \label{eq:dgmm2}
+\end{equation} 
+
+and $\hat{\omega_{i}}$ is the weight of the Gaussian
+
+\begin{equation}
+    \hat{\omega_{i}}=\omega_{i}/\Sigma_{k=1}^{m}.
+ \label{eq:dgmm3}
+\end{equation} 
+
+$x$ is the observation vector of the system. As Figure~\ref{fig:4by3_50Nm_actuator} shows, the torque to deflection curve of the spring coupling is nonlinear, therefore more variables: the rotation velocity $v$ and the history of the spring deflection $\delta^{\prime}$ are also used in the model. Consequently, the observation vector is:
+
+\begin{equation}
+    x=[\tau,\delta,\delta^{\prime},v],
+ \label{eq:dgmm4}
+\end{equation} 
+
+and the model of the system can be represented by:
+
+\begin{equation}
+    P[\tau,\delta,\delta^{\prime},v].
+ \label{eq:dgmm5}
+\end{equation} 
+
+The conditional mean for Gaussian $g_{i}$ is a linear function given by
+\begin{equation}
+	m_{i}(z)=E_{i}[Y|Z=z]=\mu_{i}^{z}+\Sigma_{i=1}^{YZ}(\Sigma_{i=1}^{ZZ})^{-1}(z-\mu_{i}^{z}),
+ \label{eq:dgmm6}
+\end{equation} 
+
+$\mu_{i}$ is the mean Gaussian $g_{i}$, then the conditional mean can be calculated by:
+
+\begin{equation}
+	E[Y|Z=z]=\Sigma_{i=1}^{m}\pi_{i}(z)m_{i}(z),
+ \label{eq:dgmm7}
+\end{equation} 
+where
+
+\begin{equation}
+	\pi_{i}(z)=\frac{\hat{\omega_{i}}\mathcal{N}(z;\mu_{i},\Sigma_{i})}{\Sigma_{k=1}^{m}\hat{\omega_{k}}\mathcal{N}(z;\mu_{k},\Sigma_{k})}.
+ \label{eq:dgmm8}
+\end{equation} 
+
+As a result, once a DGMM model $P[\tau,\delta,\delta^{\prime},v]$ is learned with a training data set, and according to Eq.~\ref{eq:dgmm7}, the output torque can be estimated  given $\delta$, $\delta^{\prime}$ and $v$ by:
+
+\begin{equation}
+	E[\tau|\delta, \delta^{\prime}, v].
+ \label{eq:dgmm9}
+\end{equation} 
+
+
+\subsection{Spring modeling by using deep learning method}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

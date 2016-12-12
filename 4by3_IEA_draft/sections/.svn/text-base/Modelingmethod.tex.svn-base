@@ -1,0 +1,87 @@
+\section{Spring modeling methods}
+\label{sec:ModelingMethods}
+Since a spring is used as a torque sensor in a series-elastic actuator, an accurate spring model is the basis of a successful and accurate torque control. As discussed in Section \ref{sec:SEAdesign}, the torque-deflection curve of the coil spring component exhibits a nonlinear property. In order to account for the nonlinearity, two data-driven modeling approaches are used: a dynamic Gaussian mixture model (DGMM) and (2) a neural network. Both methods will be described briefly in the following sections.
+
+
+\subsection{Spring modeling by DGMM}
+ As a probabilistic modeling method, Gaussian mixture models (GMM) \cite{Edgington2009} are widely used in modeling complex and multi-variable data. To model the spring with more variables besides deflection, a dynamic Gaussian mixture model (DGMM) is studied, which represents a probability density function $P(x)$ as a variable-sized set of “weighted Gaussian” pairs (Eq.~\ref{eq:dgmm1}).
+\iffalse
+\begin{equation}
+    G={(g_{1}(x),\omega_{1})+(g_{2}(x),\omega_{2})+......(g_{m}(x),\omega_{m})},
+ \label{eq:dgmm1}
+\end{equation} 
+\fi
+\begin{equation}
+    P(x)=\Sigma_{i=1}^{m}\hat{\omega_{i}}g_{i}(x),
+ \label{eq:dgmm1}
+\end{equation} where $g_{i}(x)$ is a multivariate Gaussian distribution 
+
+\begin{equation}
+    g_{i}(x)=p_{i}(x) \sim \mathcal{N}_{i}(\mu_{i},\Sigma_{i}),
+ \label{eq:dgmm2}
+\end{equation} and $\hat{\omega_{i}}$ is the weight of the Gaussian $g_{i}(x)$
+
+\begin{equation}
+    \hat{\omega_{i}}=\omega_{i}/\Sigma_{k=1}^{m}.
+ \label{eq:dgmm3}
+\end{equation} The quantity $x$ is the observation vector. As Figure~\ref{fig:4by3_50Nm_actuator} shows, the torque to deflection curve of the spring coupling is nonlinear, therefore more variables are required: the rotation velocity $v$ and the history of the spring deflection $\delta^{\prime}$. Consequently, the observation vector is
+
+\begin{equation}
+    x=[\tau,\delta,\delta^{\prime},v],
+ \label{eq:dgmm4}
+\end{equation} and the model of the system can be represented by
+
+\begin{equation}
+    P[\tau,\delta,\delta^{\prime},v].
+ \label{eq:dgmm5}
+\end{equation} As a result, once a DGMM model $P[\tau,\delta,\delta^{\prime},v]$ is learned with a training data set, the output torque can be estimated analytically as
+
+\begin{equation}
+	\mathbb{E}[\tau|\delta, \delta^{\prime}, v].
+ \label{eq:dgmm9}
+\end{equation} For control purposes one can also similarly estimate the deflection using
+
+\begin{equation}
+	\mathbb{E}[\delta|\tau, \delta^{\prime}, v].
+ \label{eq:dgmm10}
+\end{equation}
+
+%The conditional mean for Gaussian $g_{i}$ is a linear function given by
+%\begin{equation}
+%	m_{i}(z)=E_{i}[Y|Z=z]=\mu_{i}^{z}+\Sigma_{i=1}^{YZ}(\Sigma_{i=1}^{ZZ})^{-1}(z-\mu_{i}^{z}),
+% \label{eq:dgmm6}
+%\end{equation} 
+
+%$\mu_{i}$ is the mean Gaussian $g_{i}$, then the conditional mean can be calculated by:
+
+%\begin{equation}
+%	E[Y|Z=z]=\Sigma_{i=1}^{m}\pi_{i}(z)m_{i}(z),
+% \label{eq:dgmm7}
+%\end{equation} 
+%where
+
+%\begin{equation}
+%	\pi_{i}(z)=\frac{\hat{\omega_{i}}\mathcal{N}(z;\mu_{i},\Sigma_{i})}{\Sigma_{k=1}^{m}\hat{\omega_{k}}\mathcal{N}(z;\mu_{k},\Sigma_{k})}.
+% \label{eq:dgmm8}
+%\end{equation} 
+
+\subsection{Spring modeling by using neural network}
+
+An artificial neural network consists of an interconnected assembly of simple processing units \cite{Bishop1995}. In most of the cases, each processing unit calculates its output by taking a weighted sum of its inputs and transforming the sum by an activation function. In addition to the connection weights, the function represented by an artificial neural network is determined by the architecture of the neural network. Because of the possibility of optimizing a large number of parameters due to the advancement in computing, neural networks are used in various application areas such as computer vision, reinforcement learning, speech recognition and natural language processing resulting in progress beyond the state-of-the-art in terms of performance in most of the cases.
+
+In this paper, three layered neural networks with relu activation function are used for modeling the functions $\mathbb{E}[\tau|\delta, \delta^{\prime}, v]$ and $\mathbb{E}[\delta|\tau, \delta^{\prime}, v]$. A relu (rectifier function) is defined as $ f(a) = \max(0,a)$, where $a$ is a weighted sum of the inputs to a unit. Unlike DGMM, two separate networks are trained independently: once for $\mathbb{E}[\tau|\delta, \delta^{\prime}, v]$ and once for $\mathbb{E}[\delta|\tau, \delta^{\prime}, v]$. The neural networks are realized and trained using the open-source Deep Learning tool Keras \cite {Keras}. \info{some details about the exact structure of the NN? layers... input dimension...and so on...}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,64 @@
+\section{Introduction}
+
+In recent years, robots are increasingly developed to assist humans on direct physical interaction, not only in the field of %service
+assistance and rehabilitation robotics \cite{Yu2013}, but also start to be used in industrial scenarios \cite{Rethink}. For these robots that work close to humans in  shared workspaces,  safety is of outmost concern (especially for industrial robots which normally are fast and powerful). To achieve a safe human-robot interaction, one possible solution is to use a compliant actuator that is able to immediately sense the torque and accommodate for external force disturbances. For a rigid actuator, the torque can be measured by torque sensors, e.g. a load cell, a strain gauge or a current sensor, and then be controlled by using a feedback loop \cite{Bargsten2016}. Different from a rigid actuator, a serial elastic actuator (SEA) can estimate the torque from the deflection of its elastic element. Due to the passive compliance between the actuator and its link, SEAs provide additional benefits including lower reflected inertia, greater shock tolerance and more accurate force control.\\
+
+%In order to estimates the torque precisely with the elastic elements, an accurate torque-deflection model of the element is required. The elastic elements tranditionally are metal springs which are modelled by Hooke's Law.
+
+A large number of SEA designs has already been developed, for instance as surveyed in \cite{Paine2014},\cite{Yu2013}. A typical design is a linear SEA, in which the spring system either uses a single spring \cite{Pratt1995} or a set of serial-connected springs \cite{Arumugom2009}, which connect to the motor through a ball screw.  For a rotary series elastic actuator (RSEA)  the design of the elastic coupling that restricts the size and reduces the weight of the device is usually challenging. For example, Kong and Jeon developed a compact RSEA with a coil spring and worm gears for knee joint assistance \cite{Kong2012}; Stienen et al. developed a rotational hydroelastic actuator with a symmetric torsion spring for a powered exoskeleton \cite{Stienen2010}; or the elastic element of the CAPIO actuator \cite{Mallwitz:2015} includes a set of small disc springs placed at both sides of a lever which connects to the link. In recent years, new elastic materials are also utilized: scientists at the Carnegie Mellon University used nonlinear rubber as the elastic element of the actuators for their snake robots \cite{Rollinson2013}; Sudano et al. integrated a magnetic nonlinear torsion spring in a rotary elastic actuator for biorobotic applications \cite{Sudano2014}. However, due to mechanical effects caused by the construction itself, by the structure of the spring system (e.g. different initial pre-compression of coil springs),  or the properties of the materials, many of these elastic couplings show very poor linearity, which is usually neglected. In this work, we propose two data-driven methods for modeling the torque profile of an SEA, which consider the nonlinearity of the elastic couplings for realizing better torque control approaches. The data-driven modeling methods are validated and compared using a newly designed RSEA. 
+
+%A large number of SEA designs have already been developed, e.g. as surveyed in\cite{Paine2014},\cite{Yu2013}. A typical design is linear SEAs, the spring systems either use a single spring \cite{Pratt1995} or a set of serial-connected springs\cite{Arumugom2009} which connect to the motor through a ball screw (double check*). For a rotary series elastic actuator (RSEA), in order to limit the size and reduce the weight of the device, the design of the elastic coupling usually is more complicate. For example, Kong and Jeon developed a compact RSEA with a coil spring and worm gears for knee joint assistance\cite{Kong2012}; Stienen et al. developed a rotational hydroelastic actuator with a symmetric torsion spring for a powered exoskeleton\cite{Stienen2010}; the elastic element of CAPIO actuator\cite{Bargsten2016} which developed by DFKI GmbH includes a set of small disc springs placed at both sides of a lever which connects to the link. In recent years, new elastic materials are also utilized: scientists at the Carnegie Mellon University used nonlinear rubber as the elastic element of the actuators for their snake robots\cite{Rollinson2013}; ( the case of magnet coupling*).
+%Due to mechanical effects/structure of the spring system (e.g. different initial pre-compressions of coil springs) or the property/characteristic of the material, many of these elastic couplings show poor linearities.
+
+
+Various torque control approaches have already been proposed for SEAs, e.g. velocity-source control \cite{Wyeth2008}, a cascade control by using velocity or current in inner loop and torque in outer loop; or feedforward force control with disturbance observer \cite{Li2015}. The performances of these higher level control strategies are influenced by the torque sources, if the nonlinearity of the spring and resistive frictions are too large, a precise model of the elastic element and the frictions is needed. Therefore, Ford et al. \cite{Ford2014} proposed an online calibration method to compensate the nonlinear effects of the spring and accurately estimate the module’s output torque by using motor current and spring deflection together. Lu \cite{Lu2015}(full paper not accessable yet) modelled the nonlinearity of the spring of a SEA by using a BP neural network and realized a stable velocity control. 
+% cite paper : visco-elastic model from CMU
+%, see \cite{Vallery2007}(cite a newer one*) for a survey
+
+The paper is organized as follows. In Section \ref{sec:SEAdesign}, the hardware design of the RSEA and analysis of the spring coupling are presented. In Section \ref{sec:ModelingMethods}, the two modeling methods of the elastic element are discussed. The experimental validation of the two models is performed in Section \ref{sec:ModelValidation}. %where the velocity effects are not considered.
+In Section \ref{sec:TorqueControl}, based on the learned models, a torque control approache is demonstrated. Finally, a conclusion is given in Section \ref{sec:Conclusion}.
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Various torque control approaches have already been proposed for SEAs, e.g. velocity-source control \cite{Wyeth2008}, a cascade control by using velocity, current in inner closed loop and torque in outer loop;  feedforward force control with disturbance observer\cite{Li2015} %or.. . 
+%For a nonlinear SEA, the nonlinearity of the elastic element should also be compensated together with the other nonlinear effects of the system, such as the friction, stiction, backlash and reflected inertia in the gear train. %(backlash and reflected inertia in the gear train.?)
+
+
+% cite paper 3: 'Control of Robots with Elastic Joints based on Automatic Generation of Inverse Dynamics Models' Michael Th¨ummel, Martin Otter and Johann Bals
+% cite paper 4: 'Demonstrating the Safety and Performance of a Velocity Sourced Series Elastic Actuator' Gordon Wyeth, Member, IEEE
+% cite paper 5: "Design and Control Considerations for High-Performance Series Elastic Actuators"
+
+
+
+
+%then a pure high-gain PID approach can suffer from stability issues.
+%For a nonlinear SEA, the nonlinearity of the elastic element should also be compensated together with the other nonlinear effects of the system, such as the friction, stiction, backlash and reflected inertia in the gear train. %(backlash and reflected inertia in the gear train.?)
+
+%\todo[inline]{\small Introduction points:}
+
+%1)(comparing to rigid actuator) elastic actuator is better in initial touch of human-robot interaction and provides a cheap torque sensing.
+%2)linear spring model and non-linear spring model.
+%3)torque control method:  compare "torque-spring model+deflection control" to the other approaches. }
+%However,   current   SEA   designs   face   a   common   performance  limitation  due  to  the  compromise  on  the  spring  stiffness selection.
+%magnet torsional spring, paralle actuator
+
+%\cite{Yu2015} \cite{Austin2015}?
+
+%However,   current   SEA   designs   face   a   common    performance  limitation  due  to  the  compromise  on  the  spring   stiffness selection.
+
+%An ideal force source is the common building block for several higher level control strategies, including: operational space control, virtual model control, impedance control, and classical model-based control, among others. In this paper, we only consider classical model-based position control as an extension to a near-ideal force source. We create this near-ideal force source by developing a force control strategy which attempts to minimize measured force error by 
+
+%which takes an input of motor current and produces spring deflection as an observable output. 
+
+%The ideal force mode implies that: 1) the actuator has (output shaft) zero impedance so that it is perfectly back-drivable; and 2) the force (torque) output is exactly proportional to the controlinput.
+
+%In general, a spring is a nonlinear element, i.e., the spring force is a nonlinear function of the spring deflection
+
+
+
+
+

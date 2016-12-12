@@ -1,0 +1,53 @@
+from dgmm_spherical import dgmm_spherical
+import numpy as np
+import pylab as p
+
+filename = "./real_test/data_train.csv"
+dat = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
+dgmm_size_limit=5000
+dgmm = dgmm_spherical()
+dgmm.init_cov(0.01)
+data_save=[]
+sample_rate=1
+print dat["tau_mod"].shape
+for i in range(1,len(dat["time"])):
+    #observation_vector=np.array([np.concatenate((dat["tau_mod"][i],dat["q_spring_meas"][i]*180.0/np.pi,dat["dq_meas"][i]), axis=0)]).T  ##observation vector for dgmm model
+    #observation_vector=np.array([np.concatenate(([dat["tau_mod"][i]]), axis=0)]).T
+    if -3<(dat["tau_sensor"][i]-dat["tau_ref_traj"][i])<3  and 0.00001<abs(dat["tau_sensor"][i])<25: # remove the error sample of the torque measurement
+        observation_vector=np.array([np.concatenate(([dat["tau_mod"][i]],[dat["q_spring_meas"][i]*180.0/np.pi],[dat["dq_meas"][i]]), axis=0)]).T 
+        dgmm.update_online_kmeans(observation_vector,dgmm_size_limit)  ## use online kmeans method to train the dgmm
+        data_save.append(observation_vector)
+dgmm.SaveModel("./dgmm_model_track_20112016")  ##save the dgmm model
+"""
+filename = "./real_test/data_train.csv"
+dat_t = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
+
+dgmm = dgmm_spherical()
+dgmm.init_cov(0.2)
+dgmm.LoadModel("./dgmm_model_track_20112016")  
+input_indices = range(1,3) 
+output_indices = range(0,1)
+dgmm.partition(input_indices,output_indices)
+pre_tau=[]
+for i in range(1,len(dat_t["time"])):
+    if -3<(dat_t["tau_sensor"][i]-dat_t["tau_ref_traj"][i])<3  and 0.00001<abs(dat_t["tau_sensor"][i])<25: # remove the error sample of the torque measurement
+        in_vec=np.array([np.concatenate(([dat_t["q_spring_meas"][i]*180.0/np.pi],[dat_t["dq_meas"][i]]), axis=0)]).T ##input vector for dgmm model
+        out_vec = dgmm.predict_y_given_x(in_vec) ## output of the dgmm model is the predicted torque
+        pre_tau.append([out_vec,dat_t["tau_mod"][i],dat_t["q_spring_meas"][i]*180.0/np.pi]) #time, torque, deflection, pre_tau
+dat_pre=np.array(pre_tau)
+"""
+
+###################
+# plot DGMM result
+###################
+p.figure()
+p.rcParams['font.size'] = 16
+p.plot(dat_pre[:,0],dat_pre[:,2],'r+', label='Tau_ore')
+p.plot(dat_pre[:,1],dat_pre[:,2],'g+', label='Tau_meas')
+#p.plot(dat_pre[:,2],dat_pre[:,3],'+', label='Tau_pre')
+legend = p.legend(loc='upper right', shadow=True)
+p.ylabel('Torque (Nm)')
+p.xlabel('Deflection (Deg)')
+p.title('Torque estimation (DGMM)') 
+p.grid(True)
+p.show()
