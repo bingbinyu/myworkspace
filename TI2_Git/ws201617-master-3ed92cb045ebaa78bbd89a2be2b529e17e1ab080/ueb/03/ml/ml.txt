@@ -1,0 +1,104 @@
+Aufgabe 1 (4 Punkte)
+
+Pro richtiger Antwort 0.5 P., maximal 4.0 P. gesamt. Kleine
+Ungenauigkeiten in der Beschreibung sind erlaubt.
+
+0.5 P.: Für die Tastendrücke werden ein oder mehrere Interrupts ausgelöst
+        (abhängig von Pufferspeicher in der Tastatur).
+
+0.5 P.: Zur Bearbeitung der Tastaturinterrupts wird der Shell-Prozess
+        unterbrochen und vom Scheduler ggf. in den Zustand ready-to-run
+        versetzt.
+
+0.5 P.: Ein Systemcall wird ausgelöst, um die Datei 'ausgabe' zu öffnen
+        (ggf. mit Neuanlegen). (Je nach Implementierung könnte zuvor
+        noch ein Systemcall für stat() ausgelöst werden.)
+
+0.5 P.: Ein Kindprozess wird erzeugt (Systemcall -> Trap, optionales
+        Signal an Vaterprozess) und 'ls' gestartet (Systemcall -> Trap).
+
+0.5 P.: Ein Systemcall wird ausgelöst, um die Datei 'ls' lesend zu öffnen.
+
+0.5 P.: Systemcalls für das Auffinden von 'ls'.
+
+0.5 P.: Mittels Interrupt signalisiert die Festplatte (DMA kam in der
+        Vorlesung noch nicht vor), dass Daten gelesen worden sind.
+
+0.5 P.: Der neue Kindprozess ist im Zustand 'ready-to-run' und wird
+        später vom Scheduler zu 'running'.
+
+0.5 P.: Der Vaterprozess (Shell) wird blocked, weil der Kindprozess
+        (ls) im Vordergrund läuft. (Signale je nach Betriebssystem
+        unterschiedlich.)
+
+0.5 P.: 'ls -lR' iteriert über Verzeichnisse (Systemcalls -> Traps).
+
+0.5 P.: Die Daten werden in die Datei 'ausgabe' geschrieben.
+        (Systemcall -> Trap).
+
+0.5 P.: Der Kind-Prozess blockiert, bis die Daten erfolgreich
+        geschrieben worden sind.
+
+0.5 P.: Der Datenträger löst einen Interrupt aus, wenn eine
+        Schreiboperation erfolgreich war.
+
+0.5 P.: Der schreibende Kindprozess wird nach Bearbeitung des
+        Festplatteninterrupts in den Zustand ready-to-run versetzt und
+        später vom Scheduler in 'running'.
+
+0.5 P.: Der Kindprozess wird mit dem Signal SIGSTOP unterbrochen.
+        (Interrupt, Signal an Kindprozess, Signal an Vaterprozess)
+
+0.5 P.: Der Kindprozess wird mit dem Signal SIGCONT fortgesetzt.
+        (Interrupt, Signal an Kindprozess, evtl. Signal an Vaterprozess)
+
+0.5 P.: Nach dem Schreiben aller Eingabedaten wird die Datei ausgabe
+        geschlossen (Systemcall -> Trap).
+
+0.5 P.: Der Kindprozess terminiert und geht in den Zustand Zombie über.
+
+0.5 P.: Der Shellprozess wird nach Termination des Kindprozesses
+        aufgeweckt (-> 'ready to run' gefolgt von 'running') und
+        erhält das Signal SIGCHLD. 
+
+Aufgabe 2 (2 Punkte)
+
+0.5 P.  Initialisierung von struct sigaction
+        (sa_mask löschen mit sigemptyset,
+         sa_flags = SA_SIGINFO,
+         sa_sigaction = handler)
+0.5 P.  Setzen des Signalhandlers mit sigaction()
+0.5 P.  Aufruf von pause in Endlossschleife mit Fehlerabfrage
+0.5 P.  Signalhandler mit Ausgabe von si_signo oder num, si_pid, si_uid
+
+Aufgabe 3 (4 Punkte)
+
+Jeweils 1 Punkt pro richtiger Teilaufgabe:
+(siehe auch aufgabe3.ods)
+
+a) Konto für jeden Prozess würde monoton anwachsen, nach kurzer Zeit
+   kämen neue Prozesse selbst bei niedriger Priorität immer sofort
+   dran; Überlauf der Variablen zum Speichern des Kontostands
+   (mindestens eine der beiden Antworten muss genannt sein).
+
+b) Prozess B kommt doppelt so häufig an die Reihe wie B,
+   das sich wiederholende Muster ist BBA.
+
+c) Konto_B = 100/2 + 100/4 + 100/8 + ...
+           = 100 * (1/2 + 1/4 + 1/8 + ...)
+           = 100 * (1/2)/(1 - (1/2))
+           = 100 * 1
+           = 100
+    
+      (Auch richtig: wegen Abschneidens der Nachkommastellen kann der 
+       Kontostand von A nie größer werden als trunc((99+100)/2) == 99,
+       d. h. B würde bei einer Basisprioritaet größer 99 nie laufen.)
+
+d) Da wegen Bs geringer Priorität nur die verstrichende Zeit in die
+   Prioritätsberechnung eingeht, kommt der Prozess B fast sofort dran,
+   wenn das erwartete Ereignis eintritt. (Der Prozess wird nach dem
+   Eintritt des Ereignisses in die Run-Queue eingereiht und beim
+   nächsten Scheduling mit der neu berechneten Priorität
+   berücksichtigt.)  Wenn Prozess B die Zeitscheibe abgibt, erhält
+   Prozess A sofort den Rest der Zeitscheibe, ohne dass die
+   Prioritäten neu berechnet werden.

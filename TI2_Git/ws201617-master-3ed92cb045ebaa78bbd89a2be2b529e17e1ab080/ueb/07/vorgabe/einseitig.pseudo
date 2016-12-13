@@ -1,0 +1,30 @@
+Container storage[];
+unsigned int count = 0;
+
+erzeugen() {
+  while (true) {
+    storage.push_back(new Produkt);
+    count++;
+  }
+}
+
+verbrauchen() {
+  while (true) {
+    produkt = NULL;
+    if (count > 0) {
+      produkt = storage.pop_front();
+      count--;
+    }
+    if (produkt)
+      sell(produkt);
+  }
+}
+
+main() {
+  for (int i = 0; i < K; i++)
+    Thread Verbraucher(verbrauchen).start;
+
+  Thread Erzeuger(erzeugen).start;
+
+  wait();  
+}

@@ -1,0 +1,44 @@
+# -*- Makefile -*-
+TOP?=..
+SOURCE=$(lastword $(filter-out README.md, $(wildcard *.md)))
+BASE=$(basename $(SOURCE))
+NR?=$(shell echo -n $(BASE) | tr -d -c '[:digit:]')
+DUE=$(shell sed -ne 's/^\s*0*$(NR)\s*:\s*\([0-9.]\+\)/\1,/p; T; q' ../duedates |cut -d, -f1)
+TARGET=$(BASE).pdf
+DATE=$(shell date +%F)
+
+qnr=$(shell expr $(NR) - 2)
+q=$(wildcard $(TOP)/q/q$(qnr).md) $(sort $(wildcard $(TOP)/q/q$(qnr).*.md))
+ifneq ($(q), )
+Q=$(foreach qq, $(q), $(TOP)/q/qheader.md $(qq))
+endif
+
+PANDOC=TEXINPUTS=.:$(TOP)/lib/texmf:$(TOP)/lib:$$TEXINPUTS pandoc
+
+$(TARGET): $(SOURCE) $(Q)
+	$(PANDOC) -f markdown -t beamer --latex-engine=pdflatex --smart \
+        --data-dir=$(TOP)/lib \
+	--variable title="Tutorium Technische Informatik 2" \
+	--variable subtitle="WS 2016/17" \
+	--variable author="Olaf Bergmann" \
+	--variable institution="Universität Bremen" \
+	--variable date=$(DATE) \
+	--variable header-includes=\\graphicspath{{pic/}{$(TOP)/lib/pic/}} \
+	--variable fontfamily=times \
+	--variable graphics=1 \
+	--variable listings=1 \
+	--variable theme=Ti2 \
+	--variable outertheme=ti2 \
+	--variable colortheme=ti2 \
+	$(SOURCE) $(Q) -o $(TARGET)
+
+%.pdf: %.svg
+	inkscape --export-area-drawing -f $< -A $@
+
+.PHONY: clean distclean
+clean:
+	-rm -f $(TARGET)
+
+distclean: clean
+	-rm -f *~
+

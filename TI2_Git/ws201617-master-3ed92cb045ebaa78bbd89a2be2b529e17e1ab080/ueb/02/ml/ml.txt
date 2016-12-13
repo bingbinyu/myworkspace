@@ -1,0 +1,160 @@
+Musterlösung Übungsblatt 2, WS 2016/17
+
+Aufgabe 1 (4 Punkte)
+
+  [0.5 P] Heraussschneiden der letzten 128 Byte (z. B. `tail -c128`)
+  [0.5 P] Prüfen auf Zeichenkette "TAG" in den ersten drei Bytes.
+  [0.5 P] Auslesen der Felder title, artist, album
+  [0.5 P] Auslesen der Tracknummer, mit Prüfung, ob drittletztes Byte
+          den Wert 0 hat
+  [0.5 P] Leere Felder title, artist, album behandeln
+  [0.5 P] Leerzeichen und Minuszeichen in title, artist, album ersetzen
+  [0.5 P] Tracknummer auf zwei Ziffern padden, wenn kleiner als 100
+  [0.5 P] Dateinamen zusammensetzen
+
+  Bis zu 2 Punkte Abzug, wenn nicht mindestens mit den angegebenen
+  Dateien dokumentiert getestet worden ist.
+
+Aufgabe 2 (5 Punkte)
+
+  Bei ungenauen/unvollständigen Angaben nach Ermessen jeweils
+  0.25 P. oder mehr abziehen.
+
+  a)
+      [0.5 P]  Definierte Funktionen main(), fib() und show() jeweils ab
+               Offset 0 jeder Objektdatei.
+      [0.5 P]  Einträge für main(), fib(), show() in der Relocation Table
+      [0.5 P]  Einträge für die Aufrufe zu den undefinierten Funktionen in
+               der Relocation Table (main: ruft fib, show und __ls__ auf).
+      [0.5 P]  Einträge für die undefinierten Daten in der Relocation Table
+               (main und show benötigen cout).
+      [0.5 P]  Symboltabelle mit korrekten Verweisen auf Stringtabelle
+      [0.5 P]  Stringtabelle
+
+   b)
+      [0.5 P]  fib, show
+      [0.5 P]  korrekte Offsets für fib und show (TBD)
+
+   c)
+      [0.5 P]  Laufzeitumgebung mit Initialisierung und Einsprung zu main()
+               fehlt noch.
+      [0.5 P]  cout und __ls__ aus Standardbibliothek fehlt.
+
+Aufgabe 3 (1 Punkt)
+
+      In dieser Aufgabe sollte irgendein systematisches Vorgehen jenseits
+      von brute force dokumentiert sein. Je nachdem, wie weit sie gekommen
+      sind, kann in 0.25-Punkt-Schritten gearbeitet werden. Wer nur das
+      richtige Passwort nennt, bekommt keine Punkte. 
+
+      Als erstes sollte man das Programm ausprobieren (wenn man dem
+      Tutor vertraut -- paranoide Geister müssen es analysieren, ohne
+      es laufen zu lassen):
+
+         x03->./geheim 
+         Bitte das Passwort eingeben: 
+         Leider nein :-(
+         Bitte das Passwort eingeben: 
+         Leider nein :-(
+         ...)
+
+      Angucken mit gdb:
+         x03-> gdb ./geheim
+         ...
+         (gdb) info functions
+         All defined functions:
+
+         File geheim.cc:
+         bool check_password(char const*);
+         int main();
+         bool set_echo(bool);
+         ...      
+
+      Was passiert denn überhaupt?
+         (gdb) disass main
+         Dump of assembler code for function main():
+         ...
+         0x0000000000400bda <+90>:	xor    %edi,%edi
+         0x0000000000400bdc <+92>:	callq  0x400ed0 <set_echo(bool)>
+         *** vielleicht echo ausschalten? sehr verdaechtig ***
+         ...
+         0x0000000000400bfd <+125>:	callq  0x400b10 <_ZNSi7getlineEPclc@plt>
+         ...
+         *** getline! *** 
+         ...
+         0x0000000000400c23 <+163>:	callq  0x400f10 <check_password(char const*)>
+         *** check_password() mit einer Zeichenkette. *** 
+
+      Also mal in check_password() gucken:
+         (gdb) disass check_password
+         Dump of assembler code for function check_password(char const*):
+         0x0000000000400f10 <+0>:	lea    -0x78(%rsp),%rsi
+         0x0000000000400f15 <+5>:	xor    %eax,%eax
+         0x0000000000400f17 <+7>:	mov    %rdi,%r8
+         0x0000000000400f1a <+10>:	mov    $0xc,%ecx
+         0x0000000000400f1f <+15>:	xor    %edx,%edx
+         0x0000000000400f21 <+17>:	mov    %rsi,%rdi
+         0x0000000000400f24 <+20>:	rep stos %rax,%es:(%rdi)
+         0x0000000000400f27 <+23>:	movl   $0x32496554,-0x78(%rsp)
+         0x0000000000400f2f <+31>:	movb   $0x2d,-0x74(%rsp)
+         0x0000000000400f34 <+36>:	mov    $0x1,%eax
+         0x0000000000400f39 <+41>:	movb   $0x5f,-0x70(%rsp)
+         0x0000000000400f3e <+46>:	movw   $0x7369,-0x73(%rsp)
+         0x0000000000400f45 <+53>:	movb   $0x74,0x7(%rsi)
+         0x0000000000400f49 <+57>:	movl   $0x666e6965,-0x6f(%rsp)
+         0x0000000000400f51 <+65>:	movw   $0x6361,0xd(%rsi)
+         0x0000000000400f57 <+71>:	movb   $0x68,0xf(%rsi)
+         0x0000000000400f5b <+75>:	movl   $0x0,(%rdi)
+         0x0000000000400f61 <+81>:	nopl   0x0(%rax)
+         0x0000000000400f68 <+88>:	movzbl (%r8,%rdx,1),%ecx
+         0x0000000000400f6d <+93>:	cmp    %cl,(%rsi,%rdx,1)
+         0x0000000000400f70 <+96>:	sete   %cl
+         0x0000000000400f73 <+99>:	add    $0x1,%rdx
+         0x0000000000400f77 <+103>:	and    %ecx,%eax
+         0x0000000000400f79 <+105>:	cmp    $0x64,%rdx
+         0x0000000000400f7d <+109>:	jne    0x400f68 <check_password(char const*)+88>
+         0x0000000000400f7f <+111>:	repz retq 
+
+      Beobachtungen:
+         1. In dem Programm passiert soweit erstmal nichts Böses (unlink $HOME oder so...)
+         2. In check_password gibt es zwei Vergleiche. Nach dem zweiten wird
+            0x64 mal an Funktionsbeginn+88 gesprungen. %rdx scheint eine
+            Laufvariable zu sein.
+         3. Der Vergleich in +93 könnte demnach interessant sein.
+         4. Ansonsten gibt es wenig Hinweise auf statische Zeichenketten.
+
+      Setzen wir mal einen Breakpoint auf +93 und lassen das Programm laufen:
+         (gdb) b *0x0000000000400f6d
+         Breakpoint 1 at 0x400f6d: file geheim.cc, line 35.
+         (gdb) r
+         Starting program: /home/ti2/ueb/02/aufgabe3/geheim 
+         Bitte das Passwort eingeben: 
+
+         Breakpoint 1, 0x0000000000400f6d in check_password (
+             input=input@entry=0x601880 "foo") at geheim.cc:35
+         35	geheim.cc: No such file or directory.
+
+      Unsere Eingabe sehen wir als Argument der Funktion. Mal sehen,
+      was wir da sonst noch haben.      
+         (gdb) where full
+         #0  0x0000000000400f6d in check_password (input=input@entry=0x601880 "foo")
+             at geheim.cc:35
+                 i = <optimized out>
+                 pass = "TeI2-ist_einfach", '\000' <repeats 83 times>
+                 ok = <optimized out>
+         #1  0x0000000000400c28 in main () at geheim.cc:59
+                 ok = <optimized out>
+
+      Eine lokale Variable mit dem Namen pass. Dann versuchen wir es doch
+      ganz naiv mal damit:
+ 
+        (gdb) disable 1
+        (gdb) c
+        Continuing.
+        Leider nein :-(
+        Bitte das Passwort eingeben: 
+
+        Das war richtig!
+        [Inferior 1 (process 3398) exited normally]
+
+    

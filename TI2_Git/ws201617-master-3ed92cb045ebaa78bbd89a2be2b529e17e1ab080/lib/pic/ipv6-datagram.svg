@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="ipv6-datagram.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="397.40519"
+     inkscape:cy="686.51701"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1058"
+     inkscape:window-x="1600"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Sans L"
+       x="119.198"
+       y="99.78833"
+       id="text2985"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2987"
+         x="119.198"
+         y="99.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L">60 00 00 00</tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="122.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3022">00 27 06 40 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="144.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3024">20 01 06 38 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="167.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3026">07 08 30 e0 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="189.78833"
+         id="tspan2991"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L">00 00 00 00 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="212.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3028">00 00 00 17 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="234.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3030">20 01 04 20 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="257.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3032">11 01 00 01 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="279.78833"
+         id="tspan2993"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L">00 00 00 00 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="302.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3034">00 00 00 0a </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="324.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3036"></tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="347.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3054">81 5d 00 50 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="369.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3038">f5 87 7d 7d </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="392.28833"
+         id="tspan2995"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L">20 bf 3e 24 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="414.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3040">50 18 38 40 </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="437.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3042">5c 93 00 00</tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="459.78833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3052" /><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="482.28833"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L"
+         id="tspan3048">48 45 41 44 20 2f 20 48 54 54 50 2f 31 2e 30 0d 0a 0d 0a         </tspan><tspan
+         sodipodi:role="line"
+         x="119.198"
+         y="504.78833"
+         id="tspan2999"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L" /></text>
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible"
+       id="rect3056"
+       width="420"
+       height="220.43329"
+       x="281.78571"
+       y="84.306343" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Nimbus Sans L"
+       x="125.25891"
+       y="505.36459"
+       id="text3828"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3830"
+         x="125.25891"
+         y="505.36459"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Nimbus Mono L;-inkscape-font-specification:Nimbus Mono L">H  E  A  D     /     H  T  T  P  /  1  .  0 \r \n \r \n</tspan></text>
+  </g>
+</svg>

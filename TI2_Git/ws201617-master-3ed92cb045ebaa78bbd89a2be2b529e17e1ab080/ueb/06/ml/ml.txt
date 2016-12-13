@@ -1,0 +1,78 @@
+Übungsblatt 06, WS 2016/17
+
+Aufgabe 1 (4 Punkte)
+
+  0.5 P: blockweise Eingabe mit mmap()
+  0.5 P: Pagegröße mit sysconf(_SC_PAGESIZE) ermitteln
+  0.5 P: mmap() für Ausgabedatei
+  0.5 P: blockweise kopieren
+  0.5 P: Fehlerbehandlung
+  0.5 P: Freigeben der Seiten mit munmap()
+  1.0 P: Performance- und Funktionstests
+
+Aufgabe 2 (3 Punkte)
+
+  Berechnung (Runden erst am Ende erlaubt, sonst 0.5 P Abzug):
+
+  0.25 P: 139586400 B entspricht 272630 Datenblöcken.
+  0.25 P: Lesezeit für einen Block: 1/120 s * 1/1200  (≅ 7 μs)
+  0.25 P: Einlesen von 272630 Blöcken: 1/120 s * 1/1200 * 272630   (≅ 1893 ms)
+  0.25 P: Aufteilen auf 28 ganze Zylinder (272630/(8*1200) ≅ 28.4 ) und
+          3830 Blöcke die auf eine Spur im 29. Zylinder verteilt werden
+          (220 Blöcke auf der vierten Oberfläche)
+  0.25 P: pro Zylinder 7 mal Kopf umschalten (wegen 8 Oberflächen)
+          => 28 * 7 * 2.4 ms
+  0.25 P: 28 (!) Zylinderwechsel (wegen der 3830 überzähligen Blöcke)
+           plus die drei Kopfumschaltungen
+           im 29. Zylinder => 28 * 4 ms + 3 * 2.4 ms
+  0.25 P: Ergebnis: T = 1/120 s * 1/1200 * 272630 + 28 * 7 * 2.4 ms + 28 * 4 ms + 3 * 2.4 ms
+                       => T ≅ 19522.24 ms ≅ 19.52224 s
+
+  0.5 P: Datenrate: R = 139586400 B / T ≅ 7150122 B/s ≅ 6.8 MiB/s
+  
+b) Worst case (1.5 Punkte)
+
+  Berechnung (Runden erst am Ende erlaubt, sonst 0.5 P Abzug, aber nur einmal für beide Aufgaben):
+
+  0.25 P: schlechtestmögliche Verteilung der Blöcke: 4 ms Spurwechsel nach jedem Block nötig
+  0.25 P: Spurwechsel für 272630 Blöcke: 4 ms * 272630 (= 1090.52 s)
+          (im schlechtesten Fall steht der Lesekopf natürlich nicht auf der richtigen Spur,
+	   sondern muss auch erst positioniert werden)
+  0.25 P: Wartezeit von einer Umdrehung nach dem Spurwechsel, bis Kopf über richtigem Sektor:
+          für 272630 Blöcke: 1/120 s * 272630 (≅ 2271.92 s)
+  0.25 P: Ergebnis: R = 272630 * (1/120 s * 1/1200 + 1/120 s + 4 ms) ≅ 3364.33 s
+
+  0.5 P: Datenrate: 139586400 B / R ≅ 41490.1 B/s ≅ 40.5 KiB/s
+
+c) 1 Punkt
+
+     Es wird immer der komplette logische Block eingelesen. Vor jedem
+     logischen Block ist ein Spurwechsel erforderlich.
+
+     Es müssen ceil(272630/8) = 34079 logische Blöcke gelesen werden,
+     die Anzahl der Spurwechsel und die Wartezeit für die Umdrehung
+     einer Umdrehung bleiben gleich. Es ändert sich lediglich die
+     Zeit, die benötigt wird um einen logischen Block zu lesen.
+
+     0.5 P: 34079 logische Blöcke: T_lesen= 34079 * 8 * (1/120 s * 1/1200)
+                                          ≅ 1.89 s
+               => T = 34079 * 8 * 1000/120 ms * 1/1200 + 34079 * 1000/120 ms + 34079 * 4 ms ≅ 422.200 s
+
+     0.5 P: Datenrate: R = 139586400 B / T ≅ 330616 B/s ≅ 322 KiB/s
+
+Aufgabe 3 (3 Punkte)
+
+  d := 1/10000 s (Dauer für das Senden eines Bytes)
+  n := 0.005 s (Dauer für das Nachfüllen der Warteschlange)
+
+a) 0.5 P: 1/(d + n) B/s ≅ 196 B/s
+
+b) 0.5 P: 1024/(1024 * d + n) ≅ 9534 B/s
+
+c) 1 P: Das Senden von 25 Bytes dauert 25 * d = 2.5 ms
+        => Es muss noch 2.5 ms gewartet werden, bis
+           weitergesendet werden kann: 1024 B / (1024 * d + 0.0025 s) ≈ 9761 B/s
+ 
+d) 1 P: LWM * d >= 0.005 => LWM >= 0.005 / d => LWM >= 50 * d
+        => LWM muss mindestens 50 betragen.
+

@@ -1,0 +1,130 @@
+Aufgabe 1 (5 Punkte)
+
+  a) [1 P.] (0.25 Abzug für fehlende oder nicht-trivial falsche Angaben):
+
+     factorial: 0x0040054c—0x0040057c   (die letzte Instruktion, retq, ist 1 B lang)
+     main:      0x0040057d—0x004005e5
+
+  b) [1 P.] (0.25 Abzug für fehlende oder nicht-trivial falsche Angaben, zuviele Angaben):
+     -0x18(%rbp) = 0x7fffffffdf60 - 0x18 = 0x7fffffffdf48 = 140737488346952
+     -0x8(%rbp)  = 0x7fffffffdf60 - 0x08 = 0x7fffffffdf58 = 140737488346968
+
+  c)  [1 P.] (0.5 Abzug, wenn nur Anfangsadresse angegeben ist; bei nicht-trivialen Fehlern 0.25 Abzug)
+      0x40069c—0x4006b1 (Basisadresse + 21, denn "\n" ist ein Byte, aber es kommt noch das terminierende
+                         Nullbyte hinzu, d. h. die Zeichenkette ist 22 Bytes lang.)
+
+  d)  [2 P.]
+
+      0.5 P auf korrekte Ermittlung der Page-Nummern (teilen der virtuellen Adressen durch Pagegröße):
+            factorial: 0x0040054c—0x0040057c: liegt alles in Page 1024 (0x0040054c/0x1000, 0x0040057c/0x1000)
+            main:      0x0040057d—0x004005e5: liegt alles in Page 1024 (0x0040057d/0x1000, 0x004005e5/0x1000)
+            Stack:     alles in Page 34359738365 (0x7fffffffdf48/0x1000, 0x7fffffffdf58/0x1000),
+            Daten:     in Page 1024 (0x40069c/0x1000, 0x4006b1/0x1000)
+
+       0.5 P auf Ermittlung der korrekten Page-Frames
+            1024        -> 17363
+            34359738365 -> (frei Page muss selbst festgelegt werden)
+
+       1.0 P auf Berechnung der virtuellen Adresse nach Formel PA = PF * 4096 + PO,
+             wobei PF der soeben ermittelte Page-Frame ist, PO ist der Offset innerhalb
+             einer Page, also VA mod 4096 (PA: physische Adresse, VA: virtuelle Adresse)
+
+       -0.5 P, wenn Rechnung nicht angegeben
+       -0.5 P, wenn Page-Offset nicht einbezogen
+
+Aufgabe 2 (2 Punkte)
+
+      0.5 P.  ceil(33696325/512) = 65814 Datenblöcke werden benötigt
+
+      0.5 P. direkt/einfach-/zweifach-indirekt:
+               10    direkte Einträge
+               128   Einträge über einfach-indirekt
+               128^2 Einträge über zweifach-indirekt
+
+      0.5 P.:
+       verbleibend:
+       65814-(10+128+128^2) = 49292 Blöcke über dreifach-indirekt
+
+       -> 3 * 128^2 + 128 + 12
+
+       -> 1         dreifach-indirekt-Block
+          128^2 + 1 zweifach-indirekt-Blöcke
+
+      0.5 P.: gesamt: 1 + 1 + 128 + 1 + 4 + 386 + 65814 + 1 Inode
+                    = 66336
+
+      ggf. -0.25 P. bei kleineren Fehlern, 0.5 P bei größeren
+           1 P. Abzug, wenn Rechnung nicht angegeben
+
+Aufgabe 3 (3 Punkte)
+
+      open("...nikolaus.avi") 
+      - Zugriff auf Inode 0 ('/') in Inode-Tabelle 
+        - In Inode referenzierten Datenblock für Verzeichnis '/' einlesen
+        - Inode-Nummer 36 von home ermitteln
+        
+      - Laden von Block 9 zum Lesen von Inode 36 (home)
+        - In Inode 36 referenzierten Datenblock für Verzeichnis 'home' einlesen
+        - Inode-Nummer 99 von 'ti2' ermitteln
+        
+      - Einlesen von Block 2000 für Inode 99
+        - Inode-Nummer 206 von 'archive' ermitteln
+
+      - Laden von Block 3101 zum Lesen von Inode 206 (archive)
+        - In Inode 206 referenzierten Datenblock für Verzeichnis 'archive' einlesen
+        - Inode-Nummer 12783 von 'nikolaus.avi' ermitteln
+        
+      - Einlesen von Block 50 für Inode 12783
+
+      open("...meta") 
+      - Zugriff auf Inode 0 ('/') in Inode-Tabelle (Buffer-Cache)
+        - Zugriff auf Datenblock für Verzeichnis '/' im Buffer-Cache
+        - Inode-Nummer 36 von home ermitteln
+        
+      - Zugriff auf Block 9 im Buffer-Cache zum Lesen von Inode 36 (home)
+        - In Inode 36 referenzierten Datenblock für Verzeichnis 'home' im Buffer-Cache zugreifen
+        - Inode-Nummer 99 von 'ti2' ermitteln
+        
+      - Zugriff auf Block 2000 im Buffer-Cache für Inode 99
+        - Inode-Nummer 112 von 'meta' ermitteln
+
+      - Einlesen von Block 8521 zum Lesen von Inode 112 (meta)
+
+      lseek()
+      - Verschieben des Positionszeigers von f auf 12 * 1024^2 - 1 - 10000  = 12572911
+        (kein Plattenzugriff!)
+
+      read()
+      - Zugriff auf Inode  von 'nikolaus.avi' zum Ermitteln des Datenblocks 24556 (floor(12572911/512))
+        - Block 24556 befindet sich in der Dreifach-indirekt-Struktur
+        - Laden des Dreifach-indirekt-Blocks von der Festplatte
+        - Laden des referenzierten zweifach-indirekt-Blocks 0 (floor(8034/128^2) = 0)
+        - Laden des referenzierten einfach-indirekt-Blocks 62 (floor(8034/128) = 62)
+        - Lesen von 512 Bytes aus Datenblock, auf den Eintrag 98 zeigt
+        - Lesen von 512 Bytes aus Datenblock, auf den Eintrag 99 zeigt
+          ...
+        - Lesen von 512 Bytes aus Datenblock, auf den Eintrag 105 zeigt
+
+      write()
+      - Zugriff auf Inode 112 von 'meta'
+      - Anlegen des ersten Datenblocks.
+      - Schreiben von 512 B in ersten Datenblock.
+      - Anlegen des zweiten Datenblocks.
+      - Schreiben von 512 B in zweiten Datenblock.
+        ...
+      - Anlegen des achten Datenblocks.
+      - Schreiben von 512 B in achten Datenblock.
+
+
+    Bewertung:
+
+      Wir erwarten, dass aus der Lösung erkennbar ist, wie die
+      Abarbeitung der Systemaufrufe mit Bezug auf die Organisation der
+      Daten auf der Platte funktioniert. Bei fehlerhaften Angaben ggf.
+      kleinere Abzuege in 0.25er-Schritten.
+
+      1.0 P: das Laden von Inodes wird berücksichtigt
+      1.0 P: der Zugriff auf Datenblöcke von Dateien wird berücksichtigt
+      1.0 P: hinreichend korrekte Beschreibung der Auswirkungen von lseek()
+             und read()/write() (insbesondere Zugriff auf Datenblöcke, die
+             über Indirektblöcke erreicht werden)

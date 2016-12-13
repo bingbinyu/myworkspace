@@ -1,0 +1,57 @@
+Übungsblatt 4, WS 2016/17
+
+Aufgabe 1 (5 Punkte)
+ + 0.5 Sonderbehandlung absoluter Pfad 
+ + 0.5 getenv("PATH") + Ergebnis auswerten
+ + 0.5 Pfad (getenv("PATH")) parsieren
+ + 0.5 fork()
+ + 0.5 Ergebnis von fork() auswerten
+ + 0.5 execv()
+ + 0.5 Fehlerbehandlung von execv()
+ + 0.5 signal-Handler fuer SIGCHLD
+ + 0.5 wait() zum Aufsammeln der Kindprozesse
+ + 0.5 Vordergrund/Hintergrund
+
+mögliche Tests (siehe auch make check):
+ hallo
+ date
+ echo foo
+ /...
+ sleep 5
+ sleep 5 & + sleep 100 (auf das richtige Kind gewartet?)
+
+
+Aufgabe 2 (2 Punkte)
+
+2.a  (vgl. buddy_aufg2a.svg)
+
+     "x" markiert belegte Blöcke
+     
+  1 P fuer Aufteilung (ggf. weiter aufsplitten)
+        10: 10x + (6) + 16 + 32
+        12: 10x + (6) + 12x + (4) + 32
+         3: 10x + (6) + 12x + (4) + 3x + (1) + 4 + 8 + 16
+        16: 10x + (6) + 12x + (4) + 3x + (1) + 4 + 8 + 16x
+         1: 10x + (6) + 12x + (4) + 3x + (1) + 1x + (3) + 8 + 16x
+        20: FAIL
+         2: 10x + (6) + 12x + (4) + 3x + (1) + 1x + (3) + 2x + (2) + 4 + 16x
+
+2.b   (vgl. buddy_aufg2b.svg)
+
+   0.5 P:
+
+         freigeben von 3, 2, 16:
+
+         10x + (6) + 12x + (4) + 4 + 1x + (3) + 8 + 16
+
+   0.5 P:
+         21: FAIL
+
+
+Aufgabe 3 (3 Punkte)
+
+   siehe aufg3.svg
+
+   ggf. Abzüge von 0.25--0.5 P bei zu großen Ungenauigkeiten/Abweichungen von Musterlösung
+
+   -0.5 P, wenn Zusatzfrage nicht beantwortet (Prozess geht an Init-Prozess)
