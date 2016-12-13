@@ -1,0 +1,12 @@
+Test gestartet
+---------------------------------
+Test1 is in line 3. Test1 should be in line 3
+Test2 is in line 5. Test2 should be in line 5
+---------------------------------
+Test1 is in line 2. Test1 should be in line 2
+Test2 is in line 5. Test2 should be in line 5
+---------------------------------
+line 2 is (bye). line 2 should be (bye)
+---------------------------------
+Test beendet
+3 Testfälle. 0 Testfälle fehgeschlagen

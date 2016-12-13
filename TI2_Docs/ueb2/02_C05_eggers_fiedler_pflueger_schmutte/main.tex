@@ -1,0 +1,263 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+\usepackage{listings}
+\usepackage{rotating}
+\usepackage{nonfloat}
+\lstset{
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true  
+}
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{2}{14.11.2016}{Marc/Bingbin}{C05}%
+                {Tabea Eggers}{Jan Fiedler}%
+                {Florian Pflüger}{Jonas Schmutte}%
+
+%\begin{listing}{1}
+%\begin{listingcont}
+
+\section*{Aufgabe 1}
+Wir haben eine while-Schleife die Argument für Argument durchgeht bis kein weiteres mehr vorhanden ist. Hier wird falls es sich um einen ID3v1-Tag handelt, Titel, Interpret und Album ausgelesen und formatiert. Der Track wird ebenfalls angehängt. Leider ist uns nicht klar wie wir testen ob es einen Track gibt, deshalb hängen wir überall einen an. Anschließend wird die Datei dementsprechend umbenannt. Falls es sich nicht um einen ID3v1-Tag handelt wird eine entsprechende Meldung ausgegeben. Für die Ausgaben auf der Konsole verzichten wir auf Pfadangaben, da wir dies schöner finden.
+\lstinputlisting{aufgabe1/mp3-rename.sh}
+
+Zum Testen haben wir wieder ein kleines Testscript geschrieben:\\
+Befehl: \texttt{./test.sh}
+\lstinputlisting{aufgabe1/test.sh}
+hier folgen die Ausgaben:\\
+Befehl: \texttt{./test.sh >test\_result.txt}
+\lstinputlisting{aufgabe1/test_result.txt}
+Uns ist bewusst, dass \texttt{./mp3-rename.sh ./the\ programmer/bugs.mp3} nicht funktioniert, wir hatten aber keine Idee, wie wir dieses Problem beheben könnten. Wie man an den Ausgaben sieht funktioniert unser Skript aber mit diesen beiden Einschränkungen.
+
+
+
+\section*{Aufgabe 2}
+%------------------------------------------------------
+% Aufgabe 2
+%------------------------------------------------------
+\newcommand{\0}{\textbackslash0}
+
+\begin{minipage}{\linewidth}
+	\centering%
+	\tabcaption{Ursprünglicher Code}
+	
+	\rotatebox{90}{%
+	
+	\begin{tabular}{|r|rll||r|rll||r|rll|}
+		\multicolumn{4}{|l||}{main.s}                          & \multicolumn{4}{|l||}{fib.s}                 & \multicolumn{4}{|l|}{show.s}                   \\ \hline
+		0 & main: & pushq & \%rbp                           &  0 & fib\_\_Fm: & pushq & \%rbp             &  0 & show\_\_Fm: & pushq & \%rbp               \\
+		4 &       & movq  & \%rsp, \%rbp                    &  4 &            & movq  & \%rsp, \%rbp      &  4 &             & movq  & \%rsp, \%rbp        \\
+		8 &       & subq  & \$32, \%rsp                     &  8 &            & pushq & \%rsx             &  8 &             & subq  & \$16, \%rsp         \\
+		12 &       & movl  & \%edi, -20(\%rbp)               & 12 &            & subq  & \$40, \%rsp       & 12 &             & movq  & \%rdi, -8(\%rbp)    \\
+		16 &       & movq  & \%rsi, -32(\%rbp)               & 16 &            & movq  & \%rdi, -40(\%rbp) & 16 &             & movq  & -8(\%rbp), \%rax    \\
+		20 &       & cmpl  & \$1, -20(\%rbp)                 & 20 &            & movq  & \$1, -24(\%rbp)   & 20 &             & movq  & \%rax, \%rsi        \\
+		24 &       & jle   & .L2                             & 24 &            & cmpq  & \$1, -40(\%rbp)   & 24 &             & leaq  & cout(\%rip), \%rdi  \\
+		28 &       & movq  & -32(\%rbp), \%rax               & 28 &            & jbe   & .L2               & 28 &             & call  & \_\_ls\_\_7ostreamm \\
+		32 &       & addq  & \$8, \%ray                      & 32 &            & movq  & -40(\%rbp), \%rax & 32 &             & movl  & \$32, \%esi         \\
+		36 &       & movq  & (\%rax), \%rax                  & 36 &            & subq  & \$2, \%rax        & 36 &             & movq  & \%rax, \%rdi        \\
+		40 &       & movl  & \$10, \%edx                     & 40 &            & movq  & \%rax, \%rdi      & 40 &             & call  & \_\_ls\_\_7ostreamc \\
+		44 &       & movl  & \$0, \%esi                      & 44 &            & call  & fib\_\_Fm         & 44 &             & ret   &  \\
+		48 &       & movq  & \%rax, \%rdi                    & 48 &            & movq  & \%rax, \%rbx      &    &             &       &  \\
+		52 &       & call  & strtol                          & 52 &            & movq  & -40(\%rbp), \%rax &    &             &       &  \\
+		56 &       & movq  & \$0, -8(\%rbp)                  & 56 &            & subq  & \$1, \%rax        &    &             &       &  \\
+		60 &       & movq  & \%rax, -16(\%rbp)               & 60 &            & movq  & \%rax, \%rdi      &    &             &       &  \\
+		64 &  .L4: & movq  & -8(\%rbp), \%rax                & 64 &            & call  & fib\_\_Fm         &    &             &       &  \\
+		68 &       & cmpq  & -16(\%rbp), \%rax               & 68 &            & addq  & \%rbx, \%rax      &    &             &       &  \\
+		72 &       & ja    & .L3                             & 72 &            & movq  & \%rax, -24(\%rbp) &    &             &       &  \\
+		76 &       & movq  & -8(\%rbp), \%rax                & 76 &       .L2: & movq  & -24(\%rbp), \%rax &    &             &       &  \\
+		80 &       & movq  & \%rax, \%rdi                    & 80 &            & addq  & \$40, \%rsp       &    &             &       &  \\
+		84 &       & call  & fib\_Fm                         & 84 &            & popq  & \%rbx             &    &             &       &  \\
+		88 &       & movq  & \%ray, \%rdi                    & 88 &            & popq  & \%rbp             &    &             &       &  \\
+		92 &       & call  & show\_Fm                        & 92 &            & ret   &                   &    &             &       &  \\
+		96 &       & addq  & \$1,-8(\%rbp)                   &    &            &       &                   &    &             &       &  \\
+		100 &       & jmp   & .L4                             &    &            &       &                   &    &             &       &  \\
+		104 &  .L3: & movq  & endl\_\_F7ostream(\%rip), \%rax &    &            &       &                   &    &             &       &  \\
+		108 &       & movq  & \%rax, \%rsi                    &    &            &       &                   &    &             &       &  \\
+		112 &       & leaq  & cout(\%rip), \%rdi              &    &            &       &                   &    &             &       &  \\
+		116 &       & call  & \_\_ls\_\_7ostreamm             &    &            &       &                   &    &             &       &  \\
+		120 &  .L2: & movl  & \$0, \%eax                      &    &            &       &                   &    &             &       &  \\
+		124 &       & ret   &                                 &    &            &       &                   &    &             &       &
+	\end{tabular}%
+	}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+	\centering%
+	\tabcaption{Interne Sor"unge}
+	
+	
+	\rotatebox{90}{%
+	
+	\begin{tabular}{|r|rll||r|rll||r|rll|}
+		\multicolumn{4}{|l||}{main.s}                          & \multicolumn{4}{|l||}{fib.s}                 & \multicolumn{4}{|l|}{show.s}                   \\ \hline
+		0 & main: & pushq & \%rbp                           &  0 & fib\_\_Fm: & pushq & \%rbp             &  0 & show\_\_Fm: & pushq & \%rbp               \\
+		4 &       & movq  & \%rsp, \%rbp                    &  4 &            & movq  & \%rsp, \%rbp      &  4 &             & movq  & \%rsp, \%rbp        \\
+		8 &       & subq  & \$32, \%rsp                     &  8 &            & pushq & \%rsx             &  8 &             & subq  & \$16, \%rsp         \\
+		12 &       & movl  & \%edi, -20(\%rbp)               & 12 &            & subq  & \$40, \%rsp       & 12 &             & movq  & \%rdi, -8(\%rbp)    \\
+		16 &       & movq  & \%rsi, -32(\%rbp)               & 16 &            & movq  & \%rdi, -40(\%rbp) & 16 &             & movq  & -8(\%rbp), \%rax    \\
+		20 &       & cmpl  & \$1, -20(\%rbp)                 & 20 &            & movq  & \$1, -24(\%rbp)   & 20 &             & movq  & \%rax, \%rsi        \\
+		24 &       & jle   & 96                              & 24 &            & cmpq  & \$1, -40(\%rbp)   & 24 &             & leaq  & cout(\%rip), \%rdi  \\
+		28 &       & movq  & -32(\%rbp), \%rax               & 28 &            & jbe   & 48                & 28 &             & call  & \_\_ls\_\_7ostreamm \\
+		32 &       & addq  & \$8, \%ray                      & 32 &            & movq  & -40(\%rbp), \%rax & 32 &             & movl  & \$32, \%esi         \\
+		36 &       & movq  & (\%rax), \%rax                  & 36 &            & subq  & \$2, \%rax        & 36 &             & movq  & \%rax, \%rdi        \\
+		40 &       & movl  & \$10, \%edx                     & 40 &            & movq  & \%rax, \%rdi      & 40 &             & call  & \_\_ls\_\_7ostreamc \\
+		44 &       & movl  & \$0, \%esi                      & 44 &            & call  & fib\_\_Fm         & 44 &             & ret   &  \\
+		48 &       & movq  & \%rax, \%rdi                    & 48 &            & movq  & \%rax, \%rbx      &    &             &       &  \\
+		52 &       & call  & strtol                          & 52 &            & movq  & -40(\%rbp), \%rax &    &             &       &  \\
+		56 &       & movq  & \$0, -8(\%rbp)                  & 56 &            & subq  & \$1, \%rax        &    &             &       &  \\
+		60 &       & movq  & \%rax, -16(\%rbp)               & 60 &            & movq  & \%rax, \%rdi      &    &             &       &  \\
+		64 &  .L4: & movq  & -8(\%rbp), \%rax                & 64 &            & call  & fib\_\_Fm         &    &             &       &  \\
+		68 &       & cmpq  & -16(\%rbp), \%rax               & 68 &            & addq  & \%rbx, \%rax      &    &             &       &  \\
+		72 &       & ja    & 32                              & 72 &            & movq  & \%rax, -24(\%rbp) &    &             &       &  \\
+		76 &       & movq  & -8(\%rbp), \%rax                & 76 &       .L2: & movq  & -24(\%rbp), \%rax &    &             &       &  \\
+		80 &       & movq  & \%rax, \%rdi                    & 80 &            & addq  & \$40, \%rsp       &    &             &       &  \\
+		84 &       & call  & fib\_Fm                         & 84 &            & popq  & \%rbx             &    &             &       &  \\
+		88 &       & movq  & \%ray, \%rdi                    & 88 &            & popq  & \%rbp             &    &             &       &  \\
+		92 &       & call  & show\_Fm                        & 92 &            & ret   &                   &    &             &       &  \\
+		96 &       & addq  & \$1,-8(\%rbp)                   &    &            &       &                   &    &             &       &  \\
+		100 &       & jmp   & -36                             &    &            &       &                   &    &             &       &  \\
+		104 &  .L3: & movq  & endl\_\_F7ostream(\%rip), \%rax &    &            &       &                   &    &             &       &  \\
+		108 &       & movq  & \%rax, \%rsi                    &    &            &       &                   &    &             &       &  \\
+		112 &       & leaq  & cout(\%rip), \%rdi              &    &            &       &                   &    &             &       &  \\
+		116 &       & call  & \_\_ls\_\_7ostreamm             &    &            &       &                   &    &             &       &  \\
+		120 &  .L2: & movl  & \$0, \%eax                      &    &            &       &                   &    &             &       &  \\
+		124 &       & ret   &                                 &    &            &       &                   &    &             &       &
+	\end{tabular}
+	
+	
+	%
+	}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+	\centering%
+	\tabcaption{Globale Symbole und Relocation}
+	
+	\rotatebox{90}{%
+		
+	\begin{tabular}{|r|lcl||r|lcl||r|lcl|}
+		\multicolumn{4}{|l||}{main.s}                  & \multicolumn{4}{|l||}{fib.s}                   & \multicolumn{4}{|l|}{show.s}                  \\ \hline
+		\multicolumn{4}{|l||}{(Datensegment ist leer)} & \multicolumn{4}{|l||}{(Datensegment ist leer)} & \multicolumn{4}{|l|}{(Datensegment ist leer)} \\ \hline
+		& 52      & 1 &                             &   &        &   &                               &    & 24      & 1 &  \\
+		& 84      & 2 &                             &   &        &   &                               &    & 28      & 2 &  \\
+		& 92      & 3 &                             &   &        &   &                               &    & 40      & 3 &  \\
+		& 104     & 4 &                             &   &        &   &                               &    &         &   &  \\
+		& 116     & 5 &                             &   &        &   &                               &    &         &   &  \\ \hline
+		0 & 0       & T & 0                           & 0 & 0      & T & 0                             &  0 & 0       & T & 0                          \\
+		1 & 5       & U &                             &   &        &   &                               &  1 & 9       & U &  \\
+		2 & 12      & U &                             &   &        &   &                               &  2 & 14      & U &  \\
+		3 & 20      & U &                             &   &        &   &                               &  3 & 30      & U &  \\
+		4 & 29      & U &                             &   &        &   &                               &    &         &   &  \\
+		5 & 45      & U &                             &   &        &   &                               &    &         &   &  \\ \hline
+		0 & main    &   &                             & 0 & fib\_  &   &                               &  0 & show    &   &  \\
+		4 & \0str   &   &                             & 4 & \_Fm\0 &   &                               &  4 & \_\_Fm  &   &  \\
+		8 & tol\0   &   &                             &   &        &   &                               &  8 & \0cou   &   &  \\
+		12 & fib\_   &   &                             &   &        &   &                               & 12 & t\0\_\_ &   &  \\
+		16 & \_Fm\0  &   &                             &   &        &   &                               & 16 & ls\_\_  &   &  \\
+		20 & show    &   &                             &   &        &   &                               & 20 & 7ost    &   &  \\
+		24 & \_\_Fm  &   &                             &   &        &   &                               & 24 & ream    &   &  \\
+		28 & \0end   &   &                             &   &        &   &                               & 28 & m\0\_\_ &   &  \\
+		32 & l\_\_F  &   &                             &   &        &   &                               & 32 & ls\_\_  &   &  \\
+		36 & 7ost    &   &                             &   &        &   &                               & 36 & 7ost    &   &  \\
+		40 & ream    &   &                             &   &        &   &                               & 40 & ream    &   &  \\
+		44 & \0\_\_l &   &                             &   &        &   &                               & 44 & c\0     &   &  \\
+		48 & s\_\_7  &   &                             &   &        &   &                               &    &         &   &  \\
+		52 & ostr    &   &                             &   &        &   &                               &    &         &   &  \\
+		56 & eamm    &   &                             &   &        &   &                               &    &         &   &  \\
+		60 & \0      &   &                             &   &        &   &                               &    &         &   &  \\
+		64 &         &   &                             &   &        &   &                               &    &         &   &
+	\end{tabular}	
+		
+		%
+	}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+	\centering%
+	\tabcaption{Linken}
+		
+	\begin{tabular}{|r|lcl|}
+		\multicolumn{4}{|l||}{a.out}                   \\ \hline
+		\multicolumn{4}{|l||}{(Datensegment ist leer)} \\ \hline
+		& 52      & 1 &  \\
+		& 84      & 2 & WDISP 44                    \\
+		& 92      & 3 & WDISP 132                   \\
+		& 104     & 4 &  \\
+		& 116     & 5 &  \\
+		& 248     & 6 &  \\
+		& 252     & 7 &  \\
+		& 264     & 8 &  \\ \hline
+		0 & 0       & T & 0                           \\
+		1 & 5       & U &  \\
+		2 & 12      & T & 128                         \\
+		3 & 20      & T & 224                         \\
+		4 & 29      & U &  \\
+		5 & 45      & U &  \\
+		6 & 61      & U &  \\
+		7 & 66      & U &  \\
+		8 & 83      & U &  \\ \hline
+		0 & main    &   &  \\
+		4 & \0str   &   &  \\
+		8 & tol\0   &   &  \\
+		12 & fib\_   &   &  \\
+		16 & \_Fm\0  &   &  \\
+		20 & show    &   &  \\
+		24 & \_\_Fm  &   &  \\
+		28 & \0end   &   &  \\
+		32 & l\_\_F  &   &  \\
+		36 & 7ost    &   &  \\
+		40 & ream    &   &  \\
+		44 & \0\_\_l &   &  \\
+		48 & s\_\_7  &   &  \\
+		52 & ostr    &   &  \\
+		56 & eamm    &   &  \\
+		60 & \0cou   &   &  \\
+		64 & t\0\_\_ &   &  \\
+		68 & ls\_\_  &   &  \\
+		72 & 7ost    &   &  \\
+		76 & ream    &   &  \\
+		80 & m\0\_\_ &   &  \\
+		84 & ls\_\_  &   &  \\
+		88 & 7ost    &   &  \\
+		92 & ream    &   &  \\
+		96 & c\0     &   &
+	\end{tabular}	
+	
+\end{minipage}
+
+
+Wir gehen davon aus das die unterschiedlichen Segmente direkt hintereinander liegen,
+die leeren Zeilen haben wir nur hinzugefügt, damit wir die gleichen Segmente nebeneinander liegen haben.
+
+
+b) Beim linken können zwei Sprünge berechnet werden, den für "fib\_\_Fm" und "show\_\_Fm", mit dem Offsets von 44 und 132.
+Wir gehen davon aus das die Textsegmente jeweils hinten an das vorherige Textsegment angehängt werden
+und die String- und Symboltabelle sowie die Text/Data-Relocation-Table ergänzt werden.
+
+c) Die so erzeugt Datei kann nicht ausgeführt werden, weil noch nicht alle Symbole aufgelöst wurden, es fehlen alle Systemsymbole für die Ausgabe und Umwandlung.\\
+
+\section*{Aufgabe 3}
+Zunächst einmal gehen wir in das Programm mit \texttt{gdb geheim}. \\
+Dann bekommen wir eine Übersicht über das Programm mit Hilfe von \texttt{disassemble main}. \\
+Da wir das Passwort heraus finden sollen, ist uns direkt folgende Zeile aufgefallen: \\
+\texttt{0x0000000000400c23 <+163>:   callq  0x400f10 <check\_password(char const*)>} \\
+Um uns \texttt{check\_password} genauer anzusehen, sind wir mit \texttt{disassemble check\_password} in diesen Programmabschnitt gegangen. \\
+Dort fiel uns dann folgende Zeile auf: \\
+\texttt{0x0000000000400f7d <+109>:   jne    0x400f68 <check\_password(char const*)+88>} \\
+Diese wollten wir nun näher untersuchen und haben dafür zuerst einen Breakpoint mit \\ \texttt{break *0x0000000000400f7d} gesetzt. \\
+Anschließend muss das Programm mit Hilfe von \texttt{run} ausgeführt werden, um an die Stelle des Breakpoints zu kommen. \\
+Jetzt konnten wir die Programmstelle mit dem Befehl \texttt{x$\backslash$s \$rsi} näher untersuchen: \\
+\texttt{0x7fffde169a90: "TeI2-ist\_einfach"} \\
+Dies ist schon das Passwort. Um aber sicher zu gehen, haben wir dies noch weiter angesehen mit \texttt{info locals}: \\
+\texttt{i = 1} \\
+\texttt{pass = "TeI2-ist\_einfach", '$\backslash$000' <repeats 83 times>} \\
+\texttt{ok = false} \\
+Nun könnte man sich noch mit \texttt{p pass} (\texttt{\$1 = "TeI2-ist\_einfach", '$\backslash$000' <repeats 83 times>}) und \texttt{x \$1 } (\texttt{0x7fffde169a90: "TeI2-ist\_einfach"}) das ganze noch genauer ansehen, aber dies ist um das Passwort heraus zu finden nicht weiter nötig. \\
+gdb weiß so viel über das Programm, da gdb ein Debugger ist. Außerdem ist alles intern auf dem Rechner gespeichert, also kann alles ausgeführt und dadurch auch von gdb verarbeitet werden. gdb kann somit zur Laufzeit des Programms an einer Stelle das Programm anhalten und die aktuellen Variablen ansehen. Dies hat zur Folge, dass man z.B. ein Passwort herausfinden kann, indem man die Stelle des unbekannten Programms sucht, wo die Eingabe überprüft wird und dort dann schaut, welche Eingabe korrekt ist.
+
+\end{document}

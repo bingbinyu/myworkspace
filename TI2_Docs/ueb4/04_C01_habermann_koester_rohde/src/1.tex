@@ -1,0 +1,26 @@
+% !TeX root = ../04_C01_habermann_koester_rohde.tex
+
+Wir haben die Vorgabe um einen Debug-Modus erweitert, welcher lediglich einige Konsolenausgaben ermöglicht.
+
+\codeCpp{debug}{ti2sh}{Sourcen/ti2sh.cc}
+
+Weiterhin verfügt unser Programm über einen \C{Foldermode}, welcher später im Falle der Eingabe eines absoluten Pfades aktiviert wird. \clearpage
+
+\codeCpp{foldermode}{ti2sh}{Sourcen/ti2sh.cc}
+
+In dieser IF-Bedingung prüfen wir nun, da wir einen Fork erstellt haben, ob es sich bei unserem aktuell ausgeführten Programm um das Kind oder den Vater handelt, da beide ja den gleichen Code durchlaufen.
+Weiterhin initialisieren wir unsere Umgebundsvariablen und durchsuchen das erste Argument nach einen Slash.
+In diesem Fall gehen wir davon aus, dass ein absoluter Pfad eingegeben wurde, da andernfalls keiner vorhanden sein dürfte.
+Wir aktivieren also den \C{foldermode} bzw. setzen alternativ unsere Umgebungsvariable mit der Rückgabe von \m{getenv(``PATH'')}  und lassen diese (Liste von Pfaden) am Aufspalten, indem wir den Doppelpunkt als Token für \m{strtok} verwenden.
+
+\codeCpp{checkIfChild}{ti2sh}{Sourcen/ti2sh.cc}
+
+Hier wird der Pfad, unter dem wir nach dem Programm suchen, initialisiert.
+Wenn aber der \C{foldermode} aktiv ist, so wird der Pfad absolut auf die Eingabe gesetzt, andernfalls laufen wir in einer While-Schleife durch alle Pfade, die wir von \m{getenv} erhalten haben. \clearpage
+
+\codeCpp{initPath}{ti2sh}{Sourcen/ti2sh.cc}
+
+Im letzten Teil des Programmes iterieren wir weiter über jeden einzelnen Pfad und versuchen, das Programm unter diesem auszuführen.
+Wir rufen also einfach den Namen der Eingabe auf jedem der Environment-Pfade auf, bis wir keine Fehlermeldung (Return-Wert von \texttt{-1}) mehr erhalten.
+In diesem Falle beenden wir die while-Schleife, da wir davon ausgehen können, das Programm gefunden zu haben.
+Wenn das Programm im Hintergrund ausgeführt werden soll (\C{cmd.background==true}), warten wir, bis uns \m{wait(0)} mitteilt, dass die PID, die den Kindprozess repräsentiert, beendet wurde.

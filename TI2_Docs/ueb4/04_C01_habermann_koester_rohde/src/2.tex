@@ -1,0 +1,48 @@
+\subsection{}
+    Im Ausgangszustand ist der Speicher ein gro\ss{}er 64 KiB breiter Speicherblock.
+
+    \subsubsection{}
+        Es folgt eine 10 KiB gro\ss{}e Anforderung.
+        Hierf\"{u}r wird kein 64 KiB breiter Block ben\"{o}tigt, daher wird der Speicherblock in der Mitte geteilt, sodass zwei 32 KiB breite Bl\"{o}cke entstehen.
+        Danach wird der linke 32 KiB breite Block erneut zweigeteilt, sodass zwei 16 KiB breite Bl\"{o}cke entstehen.
+        In dem linken dieser beiden 16 KiB Bl\"{o}cke wird nun das 10 KiB breite Wort abgelegt.
+
+        \input{src/2a_1.tex}
+
+    \subsubsection{}
+        Es folgt nun eine 12 KiB Anforderung.
+        Diese wird in dem zweiten, 16 KiB breiten Block abgelegt.
+
+        \input{src/2a_2.tex}
+
+    \subsubsection{}
+        F\"{u}r die folgende 3 KiB Anforderung ist etwas mehr Aufwand notwendig.
+        Der noch freie 32 KiB Block wird ebenfalls nach o.g. Muster unterteilt, sodass zwei 4 KiB, ein 8 KiB und ein 16 KiB Block entstehen.
+        Das 3 KiB breite Wort wird in den linken der beiden 4 KiB breiten Bl\"{o}cke geschrieben.
+
+        \input{src/2a_3.tex}
+
+    \subsubsection{}
+        Die folgende Anforderung von 16 KiB wird direkt in den noch freien 16 KiB Block geschrieben.
+
+        \input{src/2a_4.tex}
+
+    \subsubsection{}
+        Die nun folgende 1 KiB gro\ss{}e Anforderung wird in den noch freien 4 KiB Block geschrieben.
+
+        \input{src/2a_5.tex}
+
+    \subsubsection{}
+        \input{src/2a_6.tex}
+
+    \subsubsection{}
+        F\"{u}r die letzte Anforderung von 2 KiB muss noch einmal etwas Aufwand betrieben werden.
+        Der noch vorhandene 8 KiB breite Block wird in zwei 4 KiB breite Bl\"{o}cke unterteilt, erst danach wird das 2 KiB breite Wort in die linke der beiden neuen Bl\"{o}cke geschrieben.
+        \input{src/2a_7.tex}
+
+\subsection{}
+    Nach dem Freigeben der Bl\"{o}cke mit den Worten der Breite 2 KiB, 16 KiB und 3 KiB sieht der Speicher wie folgt aus.
+
+    \input{src/2b.tex}
+
+    Man kann deutlich sehen, dass es keinen freien Speicherblock mit einer Gr\"{o}\ss{}e von mehr als 21 KiB gibt, weshalb die Anforderung von 21 KiB nicht erf\"{u}llt werden kann.

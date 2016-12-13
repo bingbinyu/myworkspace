@@ -1,0 +1,390 @@
+\documentclass{ti2}
+
+\usepackage{listings}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+
+\begin{document}
+
+%damit der Code nicht abgeschnitten wird, falls er zu lang ist.
+\lstset{linewidth=\linewidth,breaklines=true}
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{2}{14.11.2016}{Marc Hildebrandt}{C08}%
+                {Timo Jasper (Inf, 3.FS.)}{Thomas Tannous (Inf, 3.FS.)}%
+                {Oliver Hilbrecht (Inf, 3.FS.)}{Moritz Gerken (Inf, 3.FS.)}%
+
+\section{Aufgabe 1}
+Hier haben wir mit den Befehlen cat, tail und cut die nötigen Stellen
+aus dem Tag rausgeschnitten, die wir benötigten. 
+Dabei ist der String leer, falls nichts an der Stelle keine Angabe war.
+So haben wir wie erwartet die Angabe durch ein \_ ersetzt.
+Für die Titelnummer haben wir den Befehl dd benutzt um die nötigen
+Bytes zu bekommen. Mit \lstinline{hexdump} -e .. kriegen wir dann die Tracknummer aus dem Binärcode in eine Dezimal konvertiert.
+\lstinputlisting{src/aufgabe1/mp3-rename.sh}
+\subsection{Tests}
+Unsere Tests prüfen auf die wichtigen Randfälle. \\
+\lstinputlisting{src/aufgabe1/testarea.sh}
+\section{Aufgabe 2}%Was hier zu tun ist seht ihr in den Folien zu Vorlesung_4
+
+\subsection{main}
+
+\subsubsection{a (Text/Data-Relocation-Table, Symboltabelle und Stringtabelle für das a.out-Format)}
+
+Textsegment:
+\begin{tabular}{|c|l l l|}
+	\hline
+	0 & & & pushq	\%rbp\\
+	\hline
+	4 & & & movq	\%rsp, \%rbp\\
+	\hline
+	8 & & & subq	\$32, \%rsp\\
+	\hline
+	12 & & & movl	\%edi, -20(\%rbp)\\
+	\hline
+	16 & & & movq	\%rsi, -32(\%rbp)\\
+	\hline
+	20 & & & cmpl	\$1, -20(\%rbp)\\
+	\hline
+	24 & & & jle	+72\\
+	\hline
+	28 & & & movq	-32(\%rbp), \%rax\\
+	\hline
+	32 & & & addq	\$8, \%rax\\
+	\hline
+	36 & & & movq	(\%rax), \%rax\\
+	\hline
+	40 & & & movl	\$10, \%edx\\
+	\hline
+	44 & & & movl	\$0, \%esi\\
+	\hline
+	48 & & & movq	\%rax, \%rdi \\
+	\hline
+	52 & & & call	0 \\
+	\hline
+	56 & & & movq	\%rax, -16(\%rbp)\\
+	\hline
+	60 & & & movq	\$0, -8(\%rbp) \\
+	\hline
+	64 & & & movq	-8(\%rbp), \%rax\\
+	\hline
+	68 & & & cmpq	-16(\%rbp), \%rax\\
+	\hline
+	72 & & & ja	+32\\
+	\hline
+	76 & & & movq	-8(\%rbp), \%rax\\
+	\hline
+	80 & & & movq	\%rax, \%rdi\\
+	\hline
+	84 & & & call	0\\
+	\hline
+	88 & & & movq	\%rax, \%rdi\\
+	\hline
+	92 & & & call	show\_\_Fm\\
+	\hline
+	96 & & & addq	\$1, -8(\%rbp)\\
+	\hline
+	100 & & & jmp	-36\\
+	\hline
+	104 & & & movq	0(\%rip), \%rax\\
+	\hline
+	108 & & & movq	\%rax, \%rsi\\
+	\hline
+	112 & & & leaq	cout(\%rip), \%rdi\\
+	\hline
+	116 & & & call	0\\
+	\hline
+	120 & & & movl	\$0, \%eax\\
+	\hline
+	124 & & & ret \\
+	\hline
+\end{tabular}\\ \\ \\ \\ \\
+
+Datensegment, Relocation Tabelle, SymbolTabelle, String Tabelle :\\
+\begin{tabular}{|c| l l l|}	
+	\hline
+	& \multicolumn{3}{|c|}{(Datensegment ist leer)} \\
+	\hline
+	& 52 & 1 & \\
+	\hline
+	& 84 & 2 & \\
+	\hline
+	& 92 & 3 & \\
+	\hline
+	& 116 & 4 & \\
+	\hline
+	0 & 4 & Text & 0 \\
+	\hline
+	1 & 9 & UNDEFINED &  \\
+	\hline
+	2 & 23 & UNDEFINED &  \\
+	\hline
+	3 & 31 & UNDEFINED &  \\
+	\hline
+	4 & 40 & UNDEFINED &  \\
+	\hline
+	0 & \multicolumn{3}{|c|}{Länge (4 Bytes)} \\
+	\hline
+	4 & main & &  \\
+	\hline
+	8 & $\backslash0$str & & \\
+	\hline
+	12 & tol\_ & &  \\
+	\hline
+	16 & \_Fxc & & \\
+	\hline
+	20 & ci$\backslash0$f & &  \\
+	\hline
+	24 & ib\_\_ & & \\
+	\hline
+	28 & Fm$\backslash0$s & &  \\
+	\hline
+	32 & how\_ & & \\
+	\hline
+	36 & \_Fm$\backslash0$ & &  \\
+	\hline
+	40 & \_\_ls & & \\
+	\hline
+	44 & \_\_7o & &  \\
+	\hline
+	48 & stre & & \\
+	\hline
+	52 & amm$\backslash0$ & & \\
+	\hline
+\end{tabular}
+
+
+\subsection{show}
+
+\subsubsection{a (Text/Data-Relocation-Table, Symboltabelle und Stringtabelle für das a.out-Format)}
+
+
+
+\begin{tabular}{|c|l l l|}
+	\hline
+	0 & & & pushq	\%rbp\\
+	\hline
+	4 & & & movq	\%rsp, \%rbp\\
+	\hline
+	8 & & & subq	\$16, \%rsp\\
+	\hline
+	12 & & & movq	\%rdi, -8(\%rbp)\\
+	\hline
+	16 & & & movq	-8(\%rbp), \%rax\\
+	\hline
+	20 & & & movq	\%rax, \%rsi\\
+	\hline
+	24 & & & leaq	cout(\%rip), \%rdi\\
+	\hline
+	28 & & & call	0\\
+	\hline
+	32 & & & movl	\$32, \%esi\\
+	\hline
+	36 & & & movq	\%rax, \%rdi\\
+	\hline
+	40 & & & movq	\%rax, \%rdi\\
+	\hline
+	44 & & & call	0\\
+	\hline
+	48 & & & ret\\
+	\hline
+	& \multicolumn{3}{|c|}{(Datensegment ist leer)} \\
+	\hline
+	& 28 & 1 & \\
+	\hline
+	& 44 & 2 & \\
+	\hline
+	0 & 4 & Text & 0 \\
+	\hline
+	1 & 13 & UNDEFINED &  \\
+	\hline
+	2 & 29 & UNDEFINED &  \\
+	\hline
+	0 & \multicolumn{3}{|c|}{Länge (4 Bytes)} \\
+	\hline
+	4 &  & show &  \\
+	\hline
+	8 & & \_\_Fm & \\
+	\hline
+	12 & & \textbackslash0\_\_l & \\
+	\hline
+	16 & & s\_\_7 & \\
+	\hline
+	20 & & ostr & \\
+	\hline
+	24 & & eamm & \\
+	\hline
+	28 & & \textbackslash0\_\_l & \\
+	\hline
+	32 & & s\_\_7 & \\
+	\hline
+	36 & & ostr & \\
+	\hline
+	40 & & eamc & \\
+	\hline
+	44 & & \textbackslash & \\
+	\hline
+\end{tabular}	
+
+
+
+\subsection{fib}
+
+\subsubsection{a (Text/Data-Relocation-Table, Symboltabelle und Stringtabelle für das a.out-Format)}
+
+
+\begin{tabular}{|c|l l l|}
+	\hline
+	0 & & & pushq	\%rbp\\
+	\hline
+	4 & & & movq	\%rsp, \%rbp\\
+	\hline
+	8 & & & pushq	\%rbx\\
+	\hline
+	12 & & & subq	\$40, \%rsp\\
+	\hline
+	16 & & & movq	\%rdi, -40(\%rbp)\\
+	\hline
+	20 & & & movq	\$1, -24(\%rbp)\\
+	\hline
+	24 & & & cmpq	\$1, -40(\%rbp)\\
+	\hline
+	28 & & & jbe	+48\\
+	\hline
+	32 & & & movq	-40(\%rbp), \%rax\\
+	\hline
+	36 & & & subq	\$2, \%rax\\
+	\hline
+	40 & & & movq	\%rax, \%rdi\\
+	\hline
+	44 & & & call	-44\\
+	\hline
+	48 & & & movq	\%rax, \%rbx\\
+	\hline
+	52 & & & movq	-40(\%rbp), \%rax\\
+	\hline
+	56 & & & subq	\$1, \%rax\\
+	\hline
+	60 & & & movq	\%rax, \%rdi\\
+	\hline
+	64 & & & call	-64\\
+	\hline
+	68 & & & addq	\%rbx, \%rax\\
+	\hline
+	72 & & & movq	\%rax, -24(\%rbp) \\
+	\hline
+	76 & & & movq	-24(\%rbp), \%rax\\
+	\hline
+	80 & & & addq	\$40, \%rsp\\
+	\hline
+	84 & & & popq	\%rbx\\
+	\hline
+	88 & & & popq	\%rbp\\
+	\hline
+	92 & & & ret\\
+	\hline
+	& \multicolumn{3}{|c|}{(Datensegment ist leer)} \\
+	\hline
+	& \multicolumn{3}{|c|}{(ext/Data Rel. Tab ist leer)} \\
+	\hline
+	0 & 4 & Text & 0 \\
+	\hline
+	0 & \multicolumn{3}{|c|}{Länge (4 Bytes)} \\
+	\hline
+	4 &  & fib\_ &  \\
+	\hline
+	8 & & \_Fm\textbackslash0 & \\
+	\hline
+\end{tabular}
+
+\subsection{b}
+\begin{tabular}{|c|l l l|}
+	\hline
+	0 & & & pushq	\%rbp\\
+	\hline
+	4 & & & movq	\%rsp, \%rbp\\
+	\hline
+	8 & & & subq	\$16, \%rsp\\
+	\hline
+	12 & & & movq	\%rdi, -8(\%rbp)\\
+	\hline
+	16 & & & movq	-8(\%rbp), \%rax\\
+	\hline
+	20 & & & movq	\%rax, \%rsi\\
+	\hline
+	24 & & & leaq	cout(\%rip), \%rdi\\
+	\hline
+	28 & & & call	0\\
+	\hline
+	32 & & & movl	\$32, \%esi\\
+	\hline
+	36 & & & movq	\%rax, \%rdi\\
+	\hline
+	40 & & & movq	\%rax, \%rdi\\
+	\hline
+	44 & & & call	0\\
+	\hline
+	48 & & & ret\\
+	\hline
+	& \multicolumn{3}{|c|}{(Datensegment ist leer)} \\
+	\hline
+	& 28 & 1 & \\
+	\hline
+	& 44 & 2 & \\
+	\hline
+	0 & 4 & Text & 0 \\
+	\hline
+	1 & 13 & UNDEFINED &  \\
+	\hline
+	2 & 29 & UNDEFINED &  \\
+	\hline
+	0 & \multicolumn{3}{|c|}{Länge (4 Bytes)} \\
+	\hline
+	4 &  & show &  \\
+	\hline
+	8 & & \_\_Fm & \\
+	\hline
+	12 & & \textbackslash0\_\_l & \\
+	\hline
+	16 & & s\_\_7 & \\
+	\hline
+	20 & & ostr & \\
+	\hline
+	24 & & eamm & \\
+	\hline
+	28 & & \textbackslash0\_\_l & \\
+	\hline
+	32 & & s\_\_7 & \\
+	\hline
+	36 & & ostr & \\
+	\hline
+	40 & & eamc & \\
+	\hline
+	44 & & \textbackslash & \\
+	\hline
+\end{tabular}	
+
+\subsection{c}
+
+\section{Aufgabe 3}
+
+Da man den Wert der Variable my\_password nicht direkt auslesen kann, weil sie "optimized out" ist
+(was so viel heißt wie der Code wurde optimiert und der Wert ist nicht einfach zugänglich), 
+mussten wir einen anderen Weg wählen. 
+Zuerst haben wir nach der Funktion geschaut die unser Passwort auf Gleichheit prüft.
+Dies war die check\_password(char const*) Funktion. Anschließend haben wir sie disassembled.
+Dort haben dann nach dem vergleich geguckt und die Addresse des Befehls notiert.
+An der stelle haben wir dann ein Breakpoint gesetzt und das Programm laufen lassen.
+Als gebreakt wurde, schauten wir was im Register \$rsi nach einem String mit dem Befehl 
+x/s \$rsi. Dort befand sich dann zum Glück das Passwort "TeI2-ist\_einfach". 
+
+GDB weiß so viel weil:
+Der Maschinencode kann zurück in assembler übersetzt werden.
+Die binary Datei selbst hat einen Teil der sich das Datensegment nennt, wo alle initialisierten Daten vorhanden sind. 
+So kann gdb den Maschinencode verstehen, einen breakpoint setzen und Register des Prozessors auslesen. 
+
+\section{Weitere Aufgaben}
+
+
+
+\end{document}

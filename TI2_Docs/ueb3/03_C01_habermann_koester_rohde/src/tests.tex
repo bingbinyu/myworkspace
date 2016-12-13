@@ -1,0 +1,48 @@
+% !TeX root = ../03_C01_habermann_koester_rohde.tex
+
+\subsubsection{Standard-Aufruf}
+    Wir starten unser Programm und lassen es mittels \C{bg} im Hintergrund laufen. Dann senden wir das Signal SIGUSR1 an den Prozess:
+
+    \begin{lstlisting}[numbers=none]
+x13->./sigserver
+My PID is: 8767
+^Z
+[1]+  Stopped       ./sigserver
+
+x13->bg
+[1]+ ./sigserver &
+
+x13->kill -SIGUSR1 8767
+Received signal #10 from PID 24655, running on UID 14104
+    \end{lstlisting}
+
+\subsubsection{Aufruf mit relativer Prozess-ID}
+    Wir starten unser Programm und lassen es mittels \C{bg} im Hintergrund laufen. Dann senden wir das Signal SIGUSR1 an die relative Prozess-ID:
+
+    \begin{lstlisting}[numbers=none]
+x13->./sigserver
+My PID is: 9597
+^Z
+[1]+  Stopped       ./sigserver
+
+x13->bg
+[1]+ ./sigserver &
+
+x13->kill -SIGUSR1 %1
+Received signal #10 from PID 24655, running on UID 14104
+    \end{lstlisting}
+
+\subsubsection{Direkter Aufruf im Hintergrund}
+    Wir starten unser Programm und lassen es mittels \C{ \&} im Hintergrund laufen. Dann senden wir das Signal SIGUSR1 an die Prozess-ID:
+
+    \begin{lstlisting}[numbers=none]
+x13->./sigserver &
+[1] 9764
+x13->My PID is: 9764
+kill -SIGUSR1 9764
+Received signal #10 from PID 24655, running on UID 14104
+    \end{lstlisting}
+
+\subsubsection{Verwendung von Signal-ID 10}
+    Da \C{SIGUSR1} in der Dezimaldarstellung eine 10 ist, ist es eigendlich unnoetig - dennoch haben wir alle Tests mit dem Aufruf \C{kill -10 (PID)} wiederholt. \\
+    Da die Ergebnisse absolut gleich sind, verzichten wir hier auf eine doppelte Dokumentation.

@@ -1,0 +1,69 @@
+--- Starte Test:
+
+--- Verzeichnisse:
+mp3-rename.sh
+test_result.txt
+test.sh
+the programmer
+track1.mp3
+track2.mp3
+track3.mp3
+track4.mp3
+track5.mp3
+track6.mp3
+track7.mp3
+unknown
+--- Unterverzeichnis:
+bugs.mp3
+mt.unsafe.mp3
+recursion.mp3
+
+--- umbenennen:
+Die Dateien: track1.mp3 track2.mp3 track3.mp3 track4.mp3 track5.mp3 track6.mp3 track7.mp3 unknown werden umbenannt.
+track1.mp3 wird umbenannt...
+track1.mp3 wurde umbenannt in J._Postel_&_The_Packet_Drops-Source_Quench-Fragments_of_IP-01.mp3
+track2.mp3 wird umbenannt...
+track2.mp3 wurde umbenannt in J._Postel_&_The_Packet_Drops-Source_Quench-Traffic_Class_Assignment-02.mp3
+track3.mp3 wird umbenannt...
+track3.mp3 wurde umbenannt in J._Postel_&_The_Packet_Drops-Source_Quench-No_Route_to_Host-03.mp3
+track4.mp3 wird umbenannt...
+track4.mp3 wurde umbenannt in The_OpenSSH-Roaming_Around-Triple_7-04.mp3
+track5.mp3 wird umbenannt...
+track5.mp3 wurde umbenannt in The_OpenSSH-Roaming_Around-B.E.A.S.T.-05.mp3
+track6.mp3 wird umbenannt...
+track6.mp3 wurde umbenannt in The_OpenSSH-Roaming_Around-Heartbleed-06.mp3
+track7.mp3 wird umbenannt...
+track7.mp3 wurde umbenannt in BGP-Distance_Vectors-RIP-07.mp3
+unknown wird umbenannt...
+unknown wurde umbenannt in The_Drammer_Boys-_-_-44.mp3
+Fertig :)
+
+--- umbenennen2:
+Die Dateien: bugs.mp3 mt.unsafe.mp3 recursion.mp3 werden umbenannt.
+bugs.mp3 wird umbenannt...
+bugs.mp3 wurde umbenannt in _-Bugs_galore-Three_little_bugs-60.mp3
+mt.unsafe.mp3 wird umbenannt...
+mt.unsafe.mp3 wurde umbenannt in _-Bugs_galore-Race_Condition-27.mp3
+recursion.mp3 wird umbenannt...
+recursion.mp3 wurde umbenannt in _-Bugs_galore-Endless_Recursion-01.mp3
+Fertig :)
+
+--- Verzeichnisse danach:
+BGP-Distance_Vectors-RIP-07.mp3
+J._Postel_&_The_Packet_Drops-Source_Quench-Fragments_of_IP-01.mp3
+J._Postel_&_The_Packet_Drops-Source_Quench-No_Route_to_Host-03.mp3
+J._Postel_&_The_Packet_Drops-Source_Quench-Traffic_Class_Assignment-02.mp3
+mp3-rename.sh
+test_result.txt
+test.sh
+The_Drammer_Boys-_-_-44.mp3
+The_OpenSSH-Roaming_Around-B.E.A.S.T.-05.mp3
+The_OpenSSH-Roaming_Around-Heartbleed-06.mp3
+The_OpenSSH-Roaming_Around-Triple_7-04.mp3
+the programmer
+--- Unterverzeichnis:
+_-Bugs_galore-Endless_Recursion-01.mp3
+_-Bugs_galore-Race_Condition-27.mp3
+_-Bugs_galore-Three_little_bugs-60.mp3
+
+--- fertig

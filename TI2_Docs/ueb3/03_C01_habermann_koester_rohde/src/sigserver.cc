@@ -1,0 +1,32 @@
+#include <signal.h>
+#include <stdio.h>
+#include <unistd.h>
+
+//##--handleSignal--##
+// extract signals id, sender-pid und uid and print it to console
+static void handleSignal(int sig, siginfo_t *sigt, void *v) 
+{
+	printf("Received signal #%d from PID %ld, running on UID %ld \n",
+		sig, (long)sigt->si_pid, (long)sigt->si_uid);
+}
+//##--handleSignal_end--##
+
+//##--main--##
+// initiate sigaction-listener and wait
+int main(int argc, char *argv[])
+{
+
+	printf("My PID is: %lu \n", (unsigned long)getpid());
+
+	struct sigaction sa;
+
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = handleSignal;
+
+	sigaction(SIGUSR1, &sa, &sa); //&sa, NULL);
+
+		pause();
+
+	return 0;
+}
+//##--main_end--##

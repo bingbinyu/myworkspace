@@ -1,0 +1,1268 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+\usepackage{listings}
+\usepackage{color}
+\lstset{
+  language=C,
+  basicstyle=\small,
+  breaklines=true
+  }
+
+\definecolor{amber}{rgb}{1.0, 0.19, 0.0}
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{2}{14.11.2016}{Marc Hildebrandt}{C/06}%
+                {Niklas Koenen}{Jan Kl"uver}%
+                {Vincent Jankovic}{}%
+
+\section*{Aufgabe 1}
+In dieser Aufgabe sollten wir ein Shellscript \textbf{mp3-rename.sh} schreiben, welches MP3-Dateien übergeben bekommt und diese dann in die Form \textit{Kuenstler-Album-Titel-NN.mp3} umbenennen soll. Die notwendigen Daten können aus den letzten 128 Bytes der Datei herausgefunden werden, der ID3v1-Tag. Dazu haben wir jeweils die Bereiche mit dem Befehl \textit{tail -cx-y} herausgeschnitten, in denen nach der Definition des ID3v1-TAGs das Album, der Titel, der K"unstler oder die Tracknummer steht. Das Script fängt damit an, dass wir sagen mit welcher \textit{Shell} wir gearbeitet haben:
+\begin{listing} {0}
+#! /usr/bin/env bash
+\end{listing}
+Da das Programm nicht nur ein Element übergeben bekommen kann, startet da Programm mit einer \textit{for}-Schleife, um alle übergebenen Parameter durchzugehen.
+\begin{listing}{1}
+
+for datei in "$@";do
+\end{listing}$
+Nun finden wir zuerst die Tracknummer heraus, die sich im im 127. Byte als Oktalzahl befindet. Dazu greifen wir mit dem Befehl \emph{cat ./\$datei $|$ tail -c2} auf die letzten beiden Bytes der Datei zu. Dann bekommen wir mit \emph{cut -b1} nur den ersten Byte und formatieren diesen Wert mit dem Befehl \emph{od -d} in eine Dezimalzahl um. Nun haben wir herausgefunden, dass der relevante Teil in dem mittleren Zahlenblock liegt. Diese Zahl ist (scheinbar) immer gr"o"ser als 2560 (Da wir alle M"oglichkeiten der Operatoren des Befehls \emph{od} getestet haben und nur bei dem Dezimalenausdruck "M"ull" herauskommt, haben wir keine Erkl"arung daf"ur, dass die mittlere Zahl minus 2560 genau die Tracknummer ergibt, was wir mit einer ASCII-Tabelle und einer \emph{char} Ausgabe verglichen haben ). Zunächst wird mit einer \emph{if}-Anweisung überprüft, ob die Tracknummer existiert. Wenn sie nicht existiert, wird in der Variable \emph{number} der Nullstring \emph{""} gespeichert. Ansonsten wird geschaut ob die Tracknummer ein- zwei- oder dreistellig ist, indem in einer \emph{if}-Anweisung überprüft wird, ob die erste der drei Stellen \emph{0} ist. Wenn dies nicht der Fall ist, werden nur die letzten beiden Zahlen in der Variable \emph{number} gespeichert. Der Code dazu sieht wie folgt aus:
+\begin{listing}{4}
+# Hier wird die Tracknummer bestimmt
+    if [ $( cat ./$datei | tail -c2 | cut -b1 | od -d | cut -b10-14  ) -eq 2560 ]
+    then
+	number= ""
+    else
+		if [ $(expr $( cat ./$datei | tail -c2 | cut -b1 | od -d | 
+		cut -b10-14  ) - 2560) -lt 10 ]
+		then
+	   		number=-0$(expr $( cat ./$datei | tail -c2 | cut -b1 | 
+	   		od -d | cut -b10-14  ) - 2560)
+		else
+	    	number=-$(expr $( cat ./$datei | tail -c2 | cut -b1 | od -d | 
+	    	cut -b10-14  ) - 2560)
+		fi
+    fi
+\end{listing}$
+Als nächstes haben wir den Titel des Liedes gesucht, der sich in den Bytes 4 bis 33 des ID3v1-TAGs befindet. Dazu haben wir ähnlich wie bei der Tracknummer mit \emph{cat ./\$datei $|$ tail -c125} die letzten 125 Bytes der Datei bekommen und davon die ersten 30 mit dem Befehl \emph{cut -c1-30} herausgeschnitten. Aufgrund der Normierung dieses TAGs wissen wir, dass wir nun schon den Titel haben. Aber die Ausgabe soll ohne Leerzeichen sein, die man mit dem Befehl \emph{tr -d [:blank:]} raus löscht. Nun wird mit der \emph{if}-Anweisung und dem Operator \emph{-z} getestet, ob der Inhalt leer ist oder nicht. Denn wenn er leer ist, wird der Unterstrich \emph{"\_"}  in der Variable \emph{titel} gespeichert. Insgesamt sieht dieser Teil also wie folgt aus:
+\begin{listing}{17}
+	 # Hier wird der der Titel bestimmt
+	if [ -z "$(cat ./$datei | tail -c125 | cut -c1-30 | tr -d [:blank:])" ]
+	then
+		titel="_"
+	else
+		titel=$(cat ./$datei | tail -c125 | cut -c1-30 | tr -d [:blank:])
+	fi
+\end{listing}
+Nun wird äquivalent wie beim Titel der Künstler bestimmt. Dabei werden zunächst die letzten 95 Bytes der Datei mit \emph{tail -c95} genommen und davon die ersten 30 betrachtet (\emph{cut -c1-30}). Alle Leerzeichen werden wieder gelöscht und mithilfe einer \emph{if-else}-Anweisung die Variable \emph{kuenstler} "\_" gesetzt, falls die Ausgabe leer ist, ansonsten wird der Variable der ganze Wert zugeordnet:
+\begin{listing}{23}
+	 #Hier wird der Kuenstler bestimmt
+	if [ -z "$(cat ./$datei | tail -c95  | cut -c1-30 | tr -d [:blank:])" ]
+	then
+		kuenstler="_"
+	else
+		kuenstler=$(cat ./$datei | tail -c95  | cut -c1-30 | tr -d [:blank:])
+	fi
+\end{listing}
+Abschließend wird noch das Album herausgefiltert. Dies erfolgt analog zu den vorherigen. In einer \emph{if-else}-Anweisung wird geschaut, ob der im TAG definierte Bereich für das Album ohne Leerzeichen leer ist und dann gegebenenfalls die Variable \emph{album} gleich dem Unterstich "\_" gesetzt. Ansonsten wird der ganze Wert in der Variable gespeichert. Der Quellcode dazu sieht wie folgt aus:
+\begin{listing}{29}
+	#Hier wird das Album bestimmt
+    if [ -z $(cat ./$datei | tail -c65  | cut -c1-30 | tr -d [:blank:]) ]
+    then
+	album="_"
+    else
+	album=$(cat ./$datei | tail -c65  | cut -c1-30 | tr -d [:blank:])
+    fi
+\end{listing}
+Nun kann man aus allen berechneten Variablen die Datei den Auflagen entsprechend umbenennen. Dazu verwenden wir die Methode \emph{mv}. Der neue Name der Datei setzt sich aus den Variablen in der Reihenfolge \textit{Künstler-Album-Titel-NN} zusammen. Am Ende muss man noch den Typ der Datei hinzufügen, nämlich \textit{.mp3}. Insgesamt sehen die letzten Zeilen des Programms so aus:
+\begin{listing}{35}
+	#Nun wird die Datei der Form entsprechend umbenannt
+    mv "$datei" "$( echo "$kuenstler"-"$album"-"$titel""$number".mp3 )"
+done
+\end{listing}
+Der gesamte Quellcode sieht am Stück wie folgt aus:
+\begin{listing}{0}
+#! /usr/bin/env bash
+
+for datei in "$@";do
+    
+    # Hier wird die Tracknummer bestimmt
+    if [ $( cat ./$datei | tail -c2 | cut -b1 | od -d | cut -b10-14  ) -eq 2560 ]
+    then
+	number= ""
+    else
+		if [ $(expr $( cat ./$datei | tail -c2 | cut -b1 | od -d | 
+		cut -b10-14  ) - 2560) -lt 10 ]
+		then
+	   		number=-0$(expr $( cat ./$datei | tail -c2 | cut -b1 | 
+	   		od -d | cut -b10-14  ) - 2560)
+		else
+	    	number=-$(expr $( cat ./$datei | tail -c2 | cut -b1 | od -d | 
+	    	cut -b10-14  ) - 2560)
+		fi
+    fi
+
+    # Hier wird der der Titel bestimmt
+    if [ -z "$(cat ./$datei | tail -c125 | cut -c1-30 | tr -d [:blank:])" ]
+    then
+	titel="_"
+    else
+	titel=$(cat ./$datei | tail -c125 | cut -c1-30 | tr -d [:blank:])
+    fi
+
+    #Hier wird der Kuenstler bestimmt
+    if [ -z "$(cat ./$datei | tail -c95  | cut -c1-30 | tr -d [:blank:])" ]
+    then
+	kuenstler="_"
+    else
+	kuenstler=$(cat ./$datei | tail -c95  | cut -c1-30 | tr -d [:blank:])
+    fi
+
+    #Hier wird das Album bestimmt
+    if [ -z $(cat ./$datei | tail -c65  | cut -c1-30 | tr -d [:blank:]) ]
+    then
+	album="_"
+    else
+	album=$(cat ./$datei | tail -c65  | cut -c1-30 | tr -d [:blank:])
+    fi
+
+    #Nun wird die Datei der Form entsprechend umbenannt
+    mv "$datei" "$( echo "$kuenstler"-"$album"-"$titel""$number".mp3 )"
+done
+
+\end{listing}
+Wir haben das Programm mit allen Dateien als Parameter ausgef"uhrt. Dazu muss man zun"achst dem Programm das Recht geben, ausgef"uhrt werden zu k"onnen. Also war die Eingabe:
+\begin{listing}{0}
+./mp3-rename.sh bugs.mp3 mt.unsafe.mp3 recursion.mp3 track1.mp3 track2.mp3
+ track3.mp3 track4.mp3 track5.mp3 track6.mp3 track7.mp3 unknown
+\end{listing}
+Die Ergebnisse haben wir mit den Daten in den Eigenschaften der Dateien verglichen und stimmten "uberein. Leider konnten wir nicht testen, was passiert, wenn die Tracknummer nicht existiert, weil wir in eine MP3-Datei nicht an dem 127. Byte des ID3v1-TAGs den Oktalenwert \emph{"000"} als ein Byte schreiben k"onnen.
+\section*{Aufgabe 2}
+\subsection*{a)}
+Im folgenden sind drei \emph{a.out}-Format Tabellen f\"ur \emph{main.s}, \emph{show.s} und \emph{fib.s} angegeben. Diese wurden wie in der Vorlesung erstellt. Um zu erkennen, welche \"Anderungen wir an den Texttabellen vorgenommen haben, sind die Elemente in den geschweiften Klammern nicht mehr in der 'echten' Tabelle vorhanden. Byte-Spr\"uenge sind farbig makiert und in Klammern. Bei \emph{call} Aufrufen wird mit der orangenen Null auf die Reloactiontabelle verwiesen, die auf die Symboltabelle und diese wiederum auf die  Stringtabelle verweist. Die Texttabelle wurde \"uber den Assemblercode erstellt, jede Instruktion ist 4 Byte lang.
+
+\begin{tabular}{ | l | l | l|} \hline
+  Textsegment&  show.s &  \\ \hline
+\begin{lstlisting}
+{show__Fm:}
+\end{lstlisting} &
+\begin{lstlisting}
+pushq %rbp
+\end{lstlisting} &
+\begin{lstlisting}
+0
+\end{lstlisting} \\ \hline
+\begin{lstlisting}
+ 
+\end{lstlisting} &
+\begin{lstlisting}
+movq %rsp, %rbp
+\end{lstlisting} &
+\begin{lstlisting}
+4
+\end{lstlisting} \\ \hline
+\begin{lstlisting}
+ 
+\end{lstlisting} &
+\begin{lstlisting}
+subq $16, %rsp
+\end{lstlisting} &
+\begin{lstlisting}
+8
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+ movq    %rdi, -8(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+12
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+movq    -8(%rbp), %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+16
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+movq    %rax, %rsi
+\end{lstlisting} &
+\begin{lstlisting}
+20
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+leaq    cout(%rip), %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+24
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+ call    {__ls__7ostreamm}
+\end{lstlisting} \color{amber} 0&
+\begin{lstlisting}
+28
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+movl    $32, %esi
+\end{lstlisting} &
+\begin{lstlisting}
+32
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+ movq    %rax, %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+36
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+call    {__ls__7ostreamc}
+\end{lstlisting} \color{amber} 0 &
+\begin{lstlisting}
+40
+\end{lstlisting} \\ \hline
+
+&
+\begin{lstlisting}
+ret
+\end{lstlisting} &
+\begin{lstlisting}
+44
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Datensegment
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+Leer
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Relocation Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+28 1
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+1
+\end{lstlisting} &
+\begin{lstlisting}
+40 2
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Symbol-Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+4 Text 0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+1
+\end{lstlisting} &
+\begin{lstlisting}
+13 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+2
+\end{lstlisting} &
+\begin{lstlisting}
+29 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Stringtabelle
+\end{lstlisting} &
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+Laenge (4 Bytes)
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+4
+\end{lstlisting} &
+\begin{lstlisting}
+show
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+8
+\end{lstlisting} &
+\begin{lstlisting}
+__Fm
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+12
+\end{lstlisting} &
+\begin{lstlisting}
+/0__l
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+16
+\end{lstlisting} &
+\begin{lstlisting}
+s__7
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+20
+\end{lstlisting} &
+\begin{lstlisting}
+ostr
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+24
+\end{lstlisting} &
+\begin{lstlisting}
+eamm
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+28
+\end{lstlisting} &
+\begin{lstlisting}
+/0__l
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+32
+\end{lstlisting} &
+\begin{lstlisting}
+s__7
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+36
+\end{lstlisting} &
+\begin{lstlisting}
+ostr
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+40
+\end{lstlisting} &
+\begin{lstlisting}
+eamc
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+
+\end{tabular}
+
+
+
+\begin{tabular}{ | l | l | l|} \hline
+  &  main.s & Bytes \\ \hline
+\begin{lstlisting}
+{main:} 
+\end{lstlisting} &
+\begin{lstlisting}
+ pushq   %rbp 
+\end{lstlisting} &
+\begin{lstlisting}
+0
+\end{lstlisting} \\ \hline
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+movq    %rsp, %rbp
+\end{lstlisting} &
+\begin{lstlisting}
+4
+\end{lstlisting} \\ \hline
+&
+\begin{lstlisting}
+ subq    $32, %rsp 
+\end{lstlisting} &
+\begin{lstlisting}
+8
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rsi, -32(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+12
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+cmpl    $1, -20(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+16
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+jle     {.L2}
+\end{lstlisting} \color{blue}(+96)&
+\begin{lstlisting}
+20
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+movq    -32(%rbp), %rax
+\end{lstlisting} &
+\begin{lstlisting}
+24
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+ addq    $8, %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+28
+\end{lstlisting} \\ \hline
+
+
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    (%rax), %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+32
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movl    $10, %edx  
+\end{lstlisting} &
+\begin{lstlisting}
+36
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+  movl    $0, %esi
+\end{lstlisting} &
+\begin{lstlisting}
+40
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi 
+\end{lstlisting} &
+\begin{lstlisting}
+44
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ call    {strtol}
+\end{lstlisting} \color{amber} 0&
+\begin{lstlisting}
+48
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, -16(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+52
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+  movq    $0, -8(%rbp) 
+\end{lstlisting} &
+\begin{lstlisting}
+56
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+{.L4:}
+\end{lstlisting} &
+\begin{lstlisting}
+   movq    -8(%rbp), %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+60
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+cmpq    -16(%rbp), %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+64
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ ja      {.L3 } 
+\end{lstlisting} \color{blue} (+32) &
+\begin{lstlisting}
+68
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+movq    -8(%rbp), %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+72
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi  
+\end{lstlisting} &
+\begin{lstlisting}
+76
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+  call    {fib__Fm}
+\end{lstlisting} \color{amber} 0 &
+\begin{lstlisting}
+80
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+84
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+call    {show__Fm} 
+\end{lstlisting} \color{amber} 0&
+\begin{lstlisting}
+88
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+addq    $1, -8(%rbp) 
+\end{lstlisting} &
+\begin{lstlisting}
+92
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ jmp     {.L4} 
+\end{lstlisting} \color{red}(-36)&
+\begin{lstlisting}
+96
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+{.L3:}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    endl__F7ostream(%rip) 
+\end{lstlisting} &
+\begin{lstlisting}
+100
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rsi 
+\end{lstlisting} &
+\begin{lstlisting}
+104
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+leaq    cout(%rip), %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+108
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+call    {__ls__7ostreamm}
+\end{lstlisting} \color{amber} 0 &
+\begin{lstlisting}
+112
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+{.L2:}
+\end{lstlisting} &
+\begin{lstlisting}
+movl    $0, %eax
+\end{lstlisting} &
+\begin{lstlisting}
+116
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ret 
+\end{lstlisting} &
+\begin{lstlisting}
+120
+\end{lstlisting} \\ \hline \hline
+\end{tabular}
+
+\begin{tabular}{ | l | l | l|} \hline \hline
+\begin{lstlisting}
+Datensegment
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+Leer
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Relocation Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+48 1
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+1
+\end{lstlisting} &
+\begin{lstlisting}
+80 2
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+2
+\end{lstlisting} &
+\begin{lstlisting}
+88 3
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+3
+\end{lstlisting} &
+\begin{lstlisting}
+112 4
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Symbol-Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+4 Text 0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+
+\begin{lstlisting}
+1
+\end{lstlisting} &
+\begin{lstlisting}
+9 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+2
+\end{lstlisting} &
+\begin{lstlisting}
+16 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+3
+\end{lstlisting} &
+\begin{lstlisting}
+24 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline 
+
+\begin{lstlisting}
+4
+\end{lstlisting} &
+\begin{lstlisting}
+33 UNDEFINED
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Stringtabelle
+\end{lstlisting} &
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+Laenge (4 Bytes)
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+
+\begin{lstlisting}
+4
+\end{lstlisting} &
+\begin{lstlisting}
+main
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+8
+\end{lstlisting} &
+\begin{lstlisting}
+\0str
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+12
+\end{lstlisting} &
+\begin{lstlisting}
+tol\0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+16
+\end{lstlisting} &
+\begin{lstlisting}
+fib_
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+20
+\end{lstlisting} &
+\begin{lstlisting}
+_Fm\0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+24
+\end{lstlisting} &
+\begin{lstlisting}
+show
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+28
+\end{lstlisting} &
+\begin{lstlisting}
+__Fm
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+32
+\end{lstlisting} &
+\begin{lstlisting}
+\0__l
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+36
+\end{lstlisting} &
+\begin{lstlisting}
+s__7
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+40
+\end{lstlisting} &
+\begin{lstlisting}
+ostr
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+44
+\end{lstlisting} &
+\begin{lstlisting}
+eamm
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\end{tabular}
+
+
+
+
+\begin{tabular}{ | l | l | l|} \hline
+  &  fib.s & Bytes\\ \hline
+\begin{lstlisting}
+{fib__Fm:} 
+\end{lstlisting} &
+\begin{lstlisting}
+  pushq   %rbp 
+\end{lstlisting} &
+\begin{lstlisting}
+0
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rsp, %rbp 
+\end{lstlisting} &
+\begin{lstlisting}
+4
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+  pushq   %rbx
+\end{lstlisting} &
+\begin{lstlisting}
+8
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+subq    $40, %rsp
+\end{lstlisting} &
+\begin{lstlisting}
+12
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rdi, -40(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+16
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    $1, -24(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+20
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+cmpq    $1, -40(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+24
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ jbe     {.L2}
+\end{lstlisting} \color{blue}(+52) &
+\begin{lstlisting}
+28
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    -40(%rbp), %rax
+\end{lstlisting} &
+\begin{lstlisting}
+32
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ subq    $2, %rax
+\end{lstlisting} &
+\begin{lstlisting}
+36
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+40
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ call    {fib__Fm}
+\end{lstlisting} \color{red}(-44) &
+\begin{lstlisting}
+44
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rbx  
+\end{lstlisting} &
+\begin{lstlisting}
+48
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+movq    -40(%rbp), %rax
+\end{lstlisting} &
+\begin{lstlisting}
+52
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ subq    $1, %rax 
+\end{lstlisting} &
+\begin{lstlisting}
+56
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+60
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, %rdi
+\end{lstlisting} &
+\begin{lstlisting}
+64
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+call    {fib__Fm}
+\end{lstlisting} \color{red}(-68) &
+\begin{lstlisting}
+68
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+addq    %rbx, %rax
+\end{lstlisting} &
+\begin{lstlisting}
+72
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ movq    %rax, -24(%rbp)
+\end{lstlisting} &
+\begin{lstlisting}
+76
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+{.L2}
+\end{lstlisting} &
+\begin{lstlisting}
+movq    -24(%rbp), %rax
+\end{lstlisting} &
+\begin{lstlisting}
+80
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+  addq    $40, %rsp
+\end{lstlisting} &
+\begin{lstlisting}
+84
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ popq    %rbx 
+\end{lstlisting} &
+\begin{lstlisting}
+88
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ popq    %rbp 
+\end{lstlisting} &
+\begin{lstlisting}
+92
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+ret
+\end{lstlisting} &
+\begin{lstlisting}
+96
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Datensegment
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+Leer
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Relocation Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+Leer
+\end{lstlisting} \\ \hline  
+ \hline
+
+\begin{lstlisting}
+Symbol-Tabelle
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+4 Text 0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline \hline
+
+\begin{lstlisting}
+Stringtabelle
+\end{lstlisting} &
+\begin{lstlisting}
+
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+0
+\end{lstlisting} &
+\begin{lstlisting}
+Laenge (4 Bytes)
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+4
+\end{lstlisting} &
+\begin{lstlisting}
+fib_
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+\begin{lstlisting}
+8
+\end{lstlisting} &
+\begin{lstlisting}
+_Fm\0
+\end{lstlisting} &
+\begin{lstlisting}
+\end{lstlisting} \\ \hline
+
+
+\end{tabular}
+
+\subsection*{b)}
+Der Linker w\"urde die Tabellen in der Reihenfolge \emph{main.s}, \emph{fib.s} und \emph{show.s} 'aufeinander stapeln'. Z.B. wird die Texttabelle von \emph{fib.s} an die von \emph{main.s} gebunden, usw. Wenn \emph{main.s} dann \emph{fib.s} aufruft, l\"asst sich dies \"uber einen pc-relativen Sprung ausdr\"ucken. Es sind nur zwei Offsets zu berechen. Einmal der \emph{call} in der Zeile von Byte 80 der \emph{main.s}-Texttabelle und einmal der \emph{call} 8 Byte weiter. Die Berechnung des ersten Offsets: $120 - 80 = +40$ Bytes. Also ein Sprung von 40 Byte. Der zweite Sprung berechnet sich folgendermassen: $(120 - 88) + 96 =+128$ Byte. Wenn in \emph{main.s} also \emph{fib.s} aufgerufen wird, springt der Compiler 128 Byte im Code.
+
+\subsection*{c)}
+Die in b) berechnete Datei w\"are noch nicht ausf\'uhrbar, da die Bibliotheken f\"ur die Operatoren (siehe z.B. die Zeile von Byte 40 in der Texttabelle von \emph{show.s})fehlen. Die Adressen k\"oennen nicht aufgel\"ost werden und die entsprechenden Bibliotheken m\"ussten noch hinzugef\"ugt werden.
+
+\section*{Aufgabe 3}
+Zum Lösen der Aufgabe haben wir zuerst das Programm \emph{geheim} mit dem GDB aufgerufen (\emph{gdb geheim}). Danach haben wir das Kommando \emph{disassemble main} verwendet, da dies zunächst der einzige Anhaltspunkt war. Darauf wurde unter anderem die Funktion \emph{check\_password} aufgelistet. Da dort wohl vermutlich das eingegebene Passwort "uberpr"uft wird, haben wir \emph{disassemble check\_password} aufgerufen. Dann haben wir bei dem letzten Vergleich einen Breakpoint gesetzt mit \emph{break *0x0000000000400f79} und das Programm mit \emph{run} ausgeführt. Zuletzt haben wir uns mit \emph{info locals} die Variablen zeigen lassen. Darunter war auch: 
+\begin{center}
+pass = "TeI2-ist\_einfach" 
+\end{center}
+Dies ist das gesuchte Passwort.
+\\\\
+Das ganze ist möglich, da der GDB die Symboltabelle lesen kann. Aus dieser zieht er die R"uckschl"usse auf die Funktionsweise des Programms.
+
+\end{document}
+ 

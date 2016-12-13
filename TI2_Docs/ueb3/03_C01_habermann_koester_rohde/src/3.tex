@@ -1,0 +1,98 @@
+% !TeX root = ../02_C01_habermann_koester_rohde.tex
+
+\subsection{A)}
+    Man erkennt, dass hier jeweils immer nur abwechselnd Sheduled wird.
+    Dadurch, dass nicht geteilt wird, werden Kontostände einfach immer nur um 100 „Punkte“ erhöht.
+    Dadruch ist es natürlich logisch, dass die Prozesse immer abwechselnd laufen.
+    Dies variiert auch keineswegs.
+
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|c|c|} \hline
+            Konto A     &   akt. Wert        &   0   &   0       &   0       &   100     &   100     \\  \hline
+            Nutzung A   &   100o0           &   0   &   0       &   100     &   0       &   100     \\  \hline
+            Konto A'    &   trunc(konto+nutz/2)     &   0   &   0       &   100     &   100     &   200     \\  \hline
+            Prio A      &   basisprio+konto'     &   56  &   56      &   156     &   156     &   256     \\  \hline\hline
+            Konto B     &   akt Wert        &   0   &   0       &   100     &   100     &   200     \\  \hline
+            Nutzung     &   100o0          &   0   &   100     &   0       &   100     &   0       \\  \hline
+            Konto B'    &   trunc(konto+nutz/2)      &   0   &   100     &   100     &   200     &   200     \\  \hline
+            Prio B      &   bprio+kont'     &   10  &   110     &   110     &   210     &   210     \\  \hline
+        \end{tabular}
+    \end{center}
+
+\subsection{B)}
+    \begin{center}
+        \resizebox{\textwidth}{!}{%
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}  \hline
+                Konto A     &           &   0   &   0       &   0       &   50      &   25      &   12      &   56      &   28      &   14      &   57      &   28      &   14      &   57      &   \ldots  \\  \hline
+                Nutzung     &             &   0   &   0       &   100     &   0       &   0       &   100     &   0       &   0       &   100     &   0       &   0       &   100     &   0       &   \ldots  \\  \hline
+                Konto A'    &        &   0   &   0       &   50      &   25      &   12      &   56      &   28      &   14      &   57      &   28      &   14      &   57      &   28      &   \ldots  \\  \hline
+                Prio A      &        &   56  &   56      &   106     &   81      &   68      &   112     &   84      &   70      &   113     &   84      &   70      &   113     &   84      &   \ldots  \\  \hline
+                \multicolumn{16}{|c|}{ab hier: wiederkehrendes Muster(3f. auf 10ter Takt)}                                                                                                                                              \\  \hline
+                Konto B     &           &   0   &   0       &   50      &   25      &   62      &   81      &   40      &   70      &   85      &   42      &   71      &   85      &   42      &   \ldots  \\  \hline
+                Nutzung B   &             &   0   &   100     &   0       &   100     &   100     &   0       &   100     &   100     &   0       &   100     &   100     &   0       &   100     &   \ldots  \\  \hline
+                Konto B'    &        &   0   &   50      &   25      &   62      &   81      &   40      &   70      &   85      &   42      &   71      &   85      &   42      &   71      &   \ldots  \\  \hline
+                Prio B      &        &   10  &   60      &   35      &   72      &   91      &   50      &   80      &   95      &   52      &   82      &   95      &   52      &   82      &   \ldots  \\  \hline
+            \end{tabular}
+        } % ende der resizebox
+    \end{center}
+
+\subsection{C)}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}  \hline
+            Konto A     &   0   &   0       &   50      &   75      &   87      &93     &   96      &   98      &   99      &   99  \\  \hline
+            Nutzung A   &   0   &   100     &   100     &   100     &   100     &100    &   100     &   100     &   100     &   199 \\  \hline
+            Konto A'    &   0   &   50      &   75      &   87      &   93      &96     &   98      &   99      &   99      &   99  \\  \hline
+            Prio A      &   0   &   50      &   75      &   87      &   93      &96     &   98      &   99      &   99      &   99  \\  \hline\hline
+            Konto B     &   0   &   0       &   0       &   0       &   0       &0      &   0       &   0       &   0       &   0   \\  \hline
+            Nutzung B   &   0   &   0       &   0       &   0       &   0       &0      &   0       &   0       &   0       &   0   \\  \hline
+            Konto B'    &   0   &   0       &   0       &   0       &   0       &0      &   0       &   0       &   0       &   0   \\  \hline
+            Prio B      &   99  &   99      &   99      &   99      &   99      &99     &   99      &   99      &   99      &   99  \\  \hline
+        \end{tabular}
+    \end{center} \par\medskip
+
+    Wir kommen in eine Endlosschleife wo immer A gewählt wird, da wir immer bei 99,5 die 5 wegschneiden.
+    Wir wählen A aus, da wir alphabetisch vorgehen(Tutorium).
+    Am Ende sieht man, dass bei 99 immer wieder alles gleich aussieht es wird sich also in der Matrix nichts verändern.
+    Desweiteren wird nun 98 untersucht, Hier nehmen wir an, dass wir ein Wechsel bekommen.
+    Dadurch ist bewiesen, dass es keine niendiger Zahl mehr gibt, wo B komplett ignoriert wird. \par
+
+    Prio99: \par\medskip
+
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}    \hline
+            Konto A     &   0   &0      &   50      &   75      &   87      &   93      &   96      &   98      &   99      \\  \hline
+            Nutzung A   &   0   &100    &   100     &   100     &   100     &   100     &   100     &   100     &   0       \\  \hline
+            Konto A'    &   0   &50     &   75      &   87      &   93      &   96      &   98      &   99      &   49      \\  \hline
+            Prio A      &   0   &50     &   75      &   87      &   93      &   96      &   98      &   99      &   49      \\  \hline\hline
+            Konto B     &   0   &0      &   0       &   0       &   0       &   0       &   0       &   0       &   0       \\  \hline
+            Nutzung B   &   0   &0      &   0       &   0       &   0       &   0       &   0       &   0       &   100     \\  \hline
+            Konto B'    &   0   &0      &   0       &   0       &   0       &   0       &   0       &   0       &   50      \\  \hline
+            Prio B      &   98  &98     &   98      &   98      &   98      &   98      &   98      &   98      &   98      \\  \hline
+        \end{tabular}
+    \end{center} \par\medskip
+
+    Man erkennt, dass hier der Scheduler einen Lauf an b abgibt.
+    Deswegen stimmt es dass die Scheduling Zahl(nice-Wert[BasisPrio]) immer $<$99 sein muss in diesem Algorithmus.
+    
+    
+\subsection{D)}
+<<<<<<< HEAD
+Da wir hier nur 55 ms des Takts laufen, liegt die Nutzung bei $\frac{55}{255}$ also 0,22 was 22\% ergibt.
+=======
+Da wir hier nur 55 ms des Takts laufen, liegt die Nutzung bei $\frac{55}{250}$ also 0,22 was 2\% ergibt.
+>>>>>>> 8c33660a3c48571d9205854189a0f6ef720c82a9
+    \begin{center}
+        \resizebox{\textwidth}{!}{%
+            \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}  \hline  
+            Konto A     &               &   0   &   0       &   57       &   67      &   83      &  80       &   90      &   84     &   92      &   85      &   92      &   85      &  92      &   \ldots  \\  \hline
+                Nutzung     &            &      &   100       &   78      &   100     &   78      &   100     &   78      &   100    &   78     &   100       &   78       &   100     &   78       &   \ldots  \\  \hline
+                Konto A'    &       &   0   &   57       &   67      &   83      &   80      &   90      &   84      &   92     &   85      &   92      &   85   &   92      &   85     &   \ldots  \\  \hline
+                Prio A      &        &   15  &   72      &   82       &   98      &   95      &   105     &   99      &   107    &   100     &   107      &   100      &   107     &   100      &   \ldots  \\  \hline\hline
+
+                Konto B     &          &   0   &   0       &   0       &   11       &   5       &   13      &   6      &   14      &  7     &   14      &   7       &  14       &   7      &   \ldots  \\  \hline
+                Nutzung B   &             &   0   &   0       &   22      &  0         &   22      &   0       &   22     &   0     &   22       &   0     &   22      &   0       &   22     &   \ldots  \\  \hline
+                Konto B'    &        &   0   &   0       &   11      &   5        &   13      &   6       &   14     &   7      &   14      &   7      &   14      &   7       &   14      &   \ldots  \\  \hline
+                Prio B      &        &   0  &    0       &   11      &   5        &   13      &   6       &   14     &   7      &   14      &   7      &   14      &   7       &   14      &   \ldots  \\  \hline 
+            \end{tabular}
+        } % ende der resizebox
+    \end{center}

@@ -1,0 +1,19 @@
+% !TeX root = ../02_C01_habermann_koester_rohde.tex
+
+\begin{itemize}
+    
+    \item Bei der Eingabe des Befehls \m{ls -lR} in die Shell loest diese einen Trap aus (Systemaufruf) 
+    \begin{itemize}
+       \item Zusätzlich wird die Bash mit den Signal  SIGSTP (20) gestoppt
+\end{itemize}  
+    \item Der Befehl CTRL-Z loest einen Interrupt aus und
+        \begin{itemize}
+            \item sendet das Signal SIGSTP (20) an das Programm, um es zu pausieren
+        \end{itemize}
+    \item Der Befehl \m{bg} sendet SIGCONT (18), um das Programm fortzusetzen
+    \item Falls die maximale Dateigroesse ueberschritten wird, wird ein SIGXFSZ ausgelöst
+    
+    \item SIGTTOU (22) wird aufgerufen, um weiter im Hintergrund mittels der Shell auf der Datei \" Ausgabe\" zu schreiben.
+    \item Nachdem die Datei fertig beschrieben wurde wird der Prozess im Hintergrund mittels dem Singnal SIGSTOP(19) gestoppt.
+    
+\end{itemize}

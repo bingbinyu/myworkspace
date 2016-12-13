@@ -1,0 +1,13 @@
+UEBUNG?=4                      # Nummer des Uebungsblatts
+TUTORIUM=C                     # Tutorium { A, ... H }
+GRUPPE=1                       # Gruppennummer
+NAMEN=habermann koester rohde  # Namen der Teilnehmer/innen
+
+########################################################################
+## ab hier sollten keine Aenderungen noetig sein
+########################################################################
+
+pad = $(shell printf "%0$(2)d" $(1))
+
+dirname=$(call pad,$(UEBUNG),2)_$(strip $(TUTORIUM))$(call pad,$(GRUPPE),2)_$(shell echo $(strip $(NAMEN)) | tr ' [:upper:]' '_[:lower:]')
+

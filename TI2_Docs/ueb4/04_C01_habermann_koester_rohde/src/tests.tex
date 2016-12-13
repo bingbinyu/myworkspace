@@ -1,0 +1,136 @@
+% !TeX root = ../04_C01_habermann_koester_rohde.tex
+
+\subsubsection{Typische Eingabesyntax eines Unix-Shellkommandos}
+Wir haben verschiedene, typische Shellkommandos zum Test eingegeben.
+
+\begin{lstlisting}[numbers=none]
+ti2sh$ ls -la
+command: ls, background: nein
+total 150
+drwxr-xr-x 2 frohde stud    11 Nov 27 12:13 .
+drwxr-xr-x 4 frohde stud     9 Nov 27 10:58 ..
+-rw-r--r-- 1 frohde stud 15449 Nov 27 10:58 Aufgabe3.png
+-rw-r--r-- 1 frohde stud 43496 Nov 27 10:58 Aufgabe3.vsdx
+-rw-r--r-- 1 frohde stud   206 Nov 16 10:48 Makefile
+-rw-r--r-- 1 frohde stud   160 Nov 16 10:48 parser.h
+-rw-r--r-- 1 frohde stud  1029 Nov 16 10:48 r.l
+-rw-r--r-- 1 frohde stud 26808 Nov 24 18:20 r.o
+-rwxr-xr-x 1 frohde stud 67339 Nov 27 12:12 ti2sh
+-rw-r--r-- 1 frohde stud  2844 Nov 27 12:12 ti2sh.cc
+-rw-r--r-- 1 frohde stud 72176 Nov 27 12:12 ti2sh.o
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=none]
+ti2sh$ ls -la &
+command: ls, background: ja
+total 150
+drwxr-xr-x 2 frohde stud    11 Nov 27 12:13 .
+drwxr-xr-x 4 frohde stud     9 Nov 27 10:58 ..
+-rw-r--r-- 1 frohde stud 15449 Nov 27 10:58 Aufgabe3.png
+-rw-r--r-- 1 frohde stud 43496 Nov 27 10:58 Aufgabe3.vsdx
+-rw-r--r-- 1 frohde stud   206 Nov 16 10:48 Makefile
+-rw-r--r-- 1 frohde stud   160 Nov 16 10:48 parser.h
+-rw-r--r-- 1 frohde stud  1029 Nov 16 10:48 r.l
+-rw-r--r-- 1 frohde stud 26808 Nov 24 18:20 r.o
+-rwxr-xr-x 1 frohde stud 67339 Nov 27 12:12 ti2sh
+-rw-r--r-- 1 frohde stud  2844 Nov 27 12:12 ti2sh.cc
+-rw-r--r-- 1 frohde stud 72176 Nov 27 12:12 ti2sh.o
+ti2sh$
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=none]
+ti2sh$ whoami &
+command: whoami, background: ja
+frohde
+ti2sh$
+\end{lstlisting}
+
+\begin{lstlisting}[numbers=none]
+ti2sh$ whoami
+command: whoami, background: nein
+ti2sh$ frohde
+\end{lstlisting}
+\clearpage
+\begin{lstlisting}[numbers=none]
+ti2sh$ ping google.de
+command: ping, background: nein
+ti2sh$ PING google.de (172.217.20.3) 56(84) bytes of data.
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=1 ttl=57 time=6.08 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=2 ttl=57 time=6.07 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=3 ttl=57 time=6.02 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=4 ttl=57 time=6.08 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=5 ttl=57 time=6.04 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=6 ttl=57 time=6.07 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=7 ttl=57 time=6.07 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=8 ttl=57 time=6.07 ms
+64 bytes from ham02s13-in-f3.1e100.net (172.217.20.3): icmp_req=9 ttl=57 time=6.08 ms
+^C
+--- google.de ping statistics ---
+9 packets transmitted, 9 received, 0% packet loss, time 8010ms
+rtt min/avg/max/mdev = 6.023/6.068/6.084/0.105 ms
+\end{lstlisting}
+
+
+
+\subsubsection{``Mit dem Kopf über die Tastatur''}
+Die Eingabe beliebiger, schwachsinniger Kommandos erzeugt keine Rückgabe, bei aktivierten Debug-Mode sieht man, dass die Ausführung fehlschlägt.
+\begin{lstlisting}[numbers=none]
+ti2sh$ blafasel
+command: blafasel, background: nein
+ti2sh$ ti2sh$ bla /fasel
+command: bla, background: nein
+ti2sh$ ti2sh$
+\end{lstlisting}
+
+\subsubsection{Ein-/Ausgabeumlenkung}
+...war nicht zu implementieren:
+\begin{lstlisting}[numbers=none]
+ti2sh$ date > bullshit
+ti2sh: Ein-/Ausgabe-Umlenkung nicht implementiert!
+ti2sh$ bullshit | date
+ti2sh: Ein-/Ausgabe-Umlenkung nicht implementiert!
+\end{lstlisting}
+
+\clearpage
+
+\subsubsection{Absoluter Pfad}
+Unser \C{foldermode} funktioniert... :-)
+\begin{lstlisting}[numbers=none]
+ti2sh$ /bin/ls -la
+command: /bin/ls, background: nein
+ti2sh$ total 150
+drwxr-xr-x 2 frohde stud    11 Nov 27 12:13 .
+drwxr-xr-x 4 frohde stud     9 Nov 27 10:58 ..
+-rw-r--r-- 1 frohde stud 15449 Nov 27 10:58 Aufgabe3.png
+-rw-r--r-- 1 frohde stud 43496 Nov 27 10:58 Aufgabe3.vsdx
+-rw-r--r-- 1 frohde stud   206 Nov 16 10:48 Makefile
+-rw-r--r-- 1 frohde stud   160 Nov 16 10:48 parser.h
+-rw-r--r-- 1 frohde stud  1029 Nov 16 10:48 r.l
+-rw-r--r-- 1 frohde stud 26808 Nov 24 18:20 r.o
+-rwxr-xr-x 1 frohde stud 67339 Nov 27 12:12 ti2sh
+-rw-r--r-- 1 frohde stud  2844 Nov 27 12:12 ti2sh.cc
+-rw-r--r-- 1 frohde stud 72176 Nov 27 12:12 ti2sh.o
+
+ti2sh$
+\end{lstlisting}
+
+Da wir aber nur das 1. Element der Eingabe auf Slashes überprüfen, sollten die Parameter eines Programmes diese enthalten dürfen:
+
+\begin{lstlisting}[numbers=none]
+ti2sh$ ls /var/tmp
+command: ls, background: nein
+auto_logoff.sh  elvis13.ses  elvis18.ses  elvis22.ses  elvis27.ses  elvis31.ses  elvis6.ses        libcoap
+elvis1.ses      elvis14.ses  elvis19.ses  elvis23.ses  elvis28.ses  elvis32.ses  elvis7.ses
+elvis10.ses     elvis15.ses  elvis2.ses   elvis24.ses  elvis29.ses  elvis33.ses  elvis8.ses
+elvis11.ses     elvis16.ses  elvis20.ses  elvis25.ses  elvis3.ses   elvis4.ses   elvis9.ses
+elvis12.ses     elvis17.ses  elvis21.ses  elvis26.ses  elvis30.ses  elvis5.ses   kdecache-hen_mai
+\end{lstlisting}
+\subsubsection{Produktivität}
+Es ist problemlos möglich, einen \C{nano} zu starten und irgendeine Datei zu schreiben. Jedoch ist uns aufgefallen, dass man \m{Ctrl-X} zweimal drücken muss, um \C{nano} zu beenden.
+\begin{lstlisting}[numbers=none]
+ti2sh$ nano ti2rockt.md
+command: nano, background: nein
+                                            [GNU nano 2.2.6         File:ti2rockt.md]
+^X
+ti2sh$
+\end{lstlisting}

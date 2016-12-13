@@ -1,0 +1,15 @@
+Da man den Wert der Variable my_password nicht direkt auslesen kann, weil sie "optimized out" ist
+(was so viel heißt wie der Code wurde optimiert und der Wert ist nicht einfach zugänglich), 
+mussten wir einen anderen Weg wählen. 
+Zuerst haben wir nach der Funktion geschaut die unser Passwort auf Gleichheit prüft.
+Dies war die check_password(char const*) Funktion. Anschließend haben wir sie disassembled.
+Dort haben dann nach dem vergleich geguckt und die Addresse des Befehls notiert.
+An der stelle haben wir dann ein Breakpoint gesetzt und das Programm laufen lassen.
+Als gebreakt wurde, schauten wir was im Register $rsi nach einem String mit dem Befehl 
+x/s $rsi. Dort befand sich dann zum Glück das Passwort "TeI2-ist_einfach". 
+
+GDB weiß so viel weil:
+Der Maschinencode kann zurück in assembler übersetzt werden.
+Die binary Datei selbst hat einen Teil der sich das Datensegment nennt, wo alle initialisierten Daten vorhanden sind. 
+So kann gdb den Maschinencode verstehen, einen breakpoint setzen und Register des Prozessors auslesen. 
+

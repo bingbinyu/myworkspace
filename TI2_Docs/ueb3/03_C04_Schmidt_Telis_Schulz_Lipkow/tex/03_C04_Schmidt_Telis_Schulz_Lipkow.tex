@@ -1,0 +1,194 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+\usepackage{upquote}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+
+\begin{document}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C++,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{red},
+}
+
+\lstset{escapechar=@, numbers=left}
+
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{3}{21.11.2016}{Marc Hildebrandt/Bingbin Yu}{C04}%
+                {Michael Schmidt}{Stanislav Telis}%
+                {Dominique Schulz}{Norman Lipkow}%
+               
+\section*{Aufgabe 1}
+
+Die Shell erzeugt zunächst mit \texttt{fork()} ein Kindprozess, wodurch ein Trap ausgelöst wird, da fork() ein Systemaufruf ist und die Kontrolle während der Erzeugung an den Kern geht. Der Kindprozess führt dann mit \texttt{exec()} das Kommando \texttt{ls -1R / \textgreater ausgabe} aus (hierbei wird erneut ein Trap ausgelöst (da \texttt{exec()} ein systemcall ist) und lässt diesen im Vordergrund laufen und die Shell (Vaterprozess) geht mit \texttt{wait()} von \texttt{user running} in den \texttt{asleep}-Zustand und wartet somit auf Terminierung des Hintergrundprozesses \texttt{ls}. 
+
+Der Kindprozess \texttt{ls} läuft nun im Vordergrund. Zum Lesen der Dateien aus dem \texttt{root}-Verzeichnis und den rekursiv darunter liegenden Unterverzeichnisse wird mit \texttt{read()} ein systemcall, also ein Trap, ausgeführt und es wird in den Kern-Modus gewechselt. Das Betriebssystem liest nun die benötigten Informationen aus den Dateien. Dies passiert solange bis die Benutzerin die Tastenkombination \texttt{Strg-Z} gedrückt hat. Hier wird nun ein Interrupt ausgeführt, der Prozess \texttt{ls} wird unterbrochen und die CPU wird vom Interrupt-Handler \glqq ausgeliehen\grqq der im Kern läuft. Der Interrupt-Handler verarbeitet die Tastenkombination des Benutzers. Der Interrupt-Handler liefert nun das Signal \texttt{SIGSTOP} an den \texttt{ls}-Prozess und stoppt diesen damit. Im Anschluss liefert der \texttt{ls}-Prozess seinem Vaterprozess, der Shell, das Signal \texttt{SIGCHILD} aus und der Shell-Prozess läuft weiter. Beim Shell-Kommando \texttt{bg} erzeugt die Shell einen neuen Prozess. Der Ablauf zur Prozesserzeugung ist der gleiche Ablauf wie beim \texttt{ls}-Kommando (gleiche Aufrufe und Traps) und dieser \texttt{bg}-Prozess sendet dem \texttt{ls}-Prozess ein \texttt{SIGCONT} damit dieser im Hintergrund weiter laufen kann und damit kehrt er in den \texttt{user running} Zustand zurück. Der \texttt{bg}-Prozess ist damit beendet und dieser führt dann \texttt{exit()} aus und schickt damit ein \texttt{SIGCHILD}-Signal an seinen Vaterprozess und geht von \texttt{running} in den \texttt{zombie}-Zustand. Nach Ausführung des \texttt{ls}-Prozesses, ruft dieser ebenfalls \texttt{exit()} auf mit gleichem Ablauf wie vorhin beim \texttt{bg}-Prozess beschrieben
+
+Im Folgenden haben wir der Übersicht halber den Verlauf stichpunktartig zusammengefasst:
+\begin{enumerate}
+\item Shell erzeugt Kindprozess (mit \texttt{fork()} $\rightarrow$ Trap, da systemcall)  $\rightarrow$ Zustand von Shell-Prozess von \texttt{running} zu \texttt{asleep} (da \texttt{ls} im Vordergrund)
+	$\rightarrow$ Shell hat \texttt{wait()} aufgerufen und wartet auf Terminierung des Kindprozesses.
+
+\item Kindprozess führt \texttt{exec()} auf (Trap, da systemcall) $\rightarrow$ \texttt{ls} will Dateien lesen (\texttt{read()} $\rightarrow$ systemcall $\rightarrow$ Trap $\rightarrow$ Kernmodus)
+
+\item Interrupt von Tastaturkombination \texttt{Strg-Z} $\rightarrow$ Signal \texttt{SIGSTOP} an \texttt{ls}-Prozess $\rightarrow$ Zustand von \texttt{ls}-Prozess von \texttt{running} zu \texttt{stopped}
+
+\item Signal \texttt{SIGCHILD} von ls-Prozess an Shell-Vaterprozess $\rightarrow$ Zustand von Shell-Prozess geht zurück auf \texttt{running}
+
+\item Kindprozesserzeugung wie oben beschrieben für das \texttt{bg}-Kommando, das ein \texttt{SIGCONT}-Signal an den gestoppten \texttt{ls}-Prozess sendet der nun im Hintergrund weiterläuft. 
+
+\item Beim Schreiben der Daten in die Ausgabedatei \texttt{ausgabe} wird ein weiterer Trap(systemcall \texttt{write()} )  ausgeführt
+	$\rightarrow$ Auch hier wird in den Kern-Modus gesprungen. 
+
+\item Am Ende wird \texttt{exit()} vom \texttt{ls}-Prozess aufgerufen $\rightarrow$ Signal \texttt{SIGCHILD} an Shell-Prozess und \texttt{ls}-Prozess geht von \texttt{running}  in den \texttt{zombie}-Zustand.
+\end{enumerate}
+
+\section*{Aufgabe 2}
+
+Im Folgenden unsere Implementierung für den \texttt{sigserver}
+
+\lstinputlisting[title=sigserver.cc, style=customc]{../aufgabe2/sigserver.cc}
+
+\textbf{Tests:}
+
+Wir haben unser Programm auf dem Linux-Rechner x20 im MZH getestet
+
+Vorab lassen wir uns unsere User-ID ausgeben, damit wir diese mit unserer späteren Ausgabe vergleichen können:
+
+\begin{lstlisting}[title=bash-Prozess 1, language=bash]
+x20->id -u nlipkow 
+153599
+\end{lstlisting}
+Unsere User-ID ist also: \texttt{153599}
+
+Im folgenden kompilieren und führen wir unser Programm aus:
+
+\begin{lstlisting}[title=bash-Prozess 1, firstnumber=last]
+x20->g++ -o sigserver sigserver.cc 
+x20->./sigserver 
+Waiting for signal...
+\end{lstlisting}
+
+Wir sehen in dem Linux-Programm \textit{System Monitor} nach, welche Prozess-ID der gestartete Prozess \texttt{sigserver} hat.
+
+Wir öffnen ein zweites Terminal und terminieren den \texttt{sigserver}-Prozess mit dem \texttt{kill}-Kommando, senden ein \texttt{SIGUSR1}-Signal und lassen es im Hintergrund laufen damit wir auch die Prozess-ID wiedergegeben bekommen um die Richtigkeit unserer Ausgabe vom \texttt{sigserver} zu testen:
+
+\begin{lstlisting}[title=bash-Prozess 2, language=bash]
+x20->kill -SIGUSR1 31140 &         
+[1] 31167
+\end{lstlisting}
+
+Das heißt, der \texttt{kill}-Prozess hatte die ID: \texttt{31167}
+
+In der Shell in dem der \texttt{sigserver}-Prozess im Vordergrund lief erhalten wir folgende Ausgabe:
+
+\begin{lstlisting}[title=bash-Prozess 1, firstnumber=6]
+Signal_number: 10
+Process_ID: 31167
+User_ID: 153599
+Interrupted system call
+\end{lstlisting}
+
+Wir sehen, dass die ausgegebene Prozess-ID mit der ID unseres sendenden kill-Kommando, sowie unsere User-ID mit der Ausgabe übereinstimmt.
+
+Die Fehlermeldung am Ende wurde von der \texttt{pause()}-Methode ausgegeben, da diese mit der Terminierung ja unterbrochen wurde.
+
+\section*{Aufgabe 3}
+
+\textbf{a)}
+
+Langlebige Prozesse hätten einen großen Nachteil wenn sich deren Zeitkonto nicht mehr verringern würde, da der Wert irgendwann so groß sein würde, dass sie kaum bis gar nicht mehr dran kämen. Und neue Prozesse die wohlmöglich eine geringe Priorität haben würden irgendwann immer bevorzugt werden.
+
+\newpage
+\textbf{b)}
+
+\begin{tabular}{|p{2,5cm}|| c | c | c | c | c | c | c | c | c | c | c | c | c |}
+\hline
+Zeitscheibe &  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12  \\
+\hline
+\hline
+Konto(A)  &  0 & 0 & \cellcolor{green}0 & 50 & 25 &\cellcolor{green} 12 & 56 & 28 & \cellcolor{green}14 & 57 & 28 & \cellcolor{green}14 & 57  \\
+\hline
+Nutzung(A)  &  0 & 0 & \cellcolor{green}100 & 0 & 0 & \cellcolor{green}100 & 0 & 0 & \cellcolor{green}100 & 0 & 0 & \cellcolor{green}100 & 0  \\
+\hline
+Konto'(A)  &  0 & 0 &\cellcolor{green} 50 & 25 & 12 & \cellcolor{green}56 & 28 & 14 & \cellcolor{green}57 & 28 & 14 & \cellcolor{green}57 & 28  \\
+\hline
+Prio(A)  &  56 & 56 & \cellcolor{green}106 & 81 & 68 &\cellcolor{green} 112 & 84 & 70 & \cellcolor{green}113 & 84 & 70 & \cellcolor{green}113 & 84  \\
+\hline
+\hline
+Konto(B)  &  0 & \cellcolor{green}0 & 50 &\cellcolor{green} 25 & \cellcolor{green}62 & 81 & \cellcolor{green}40 & \cellcolor{green}70 & 85 & \cellcolor{green}42 & \cellcolor{green}71 & 85 & \cellcolor{green}42  \\
+\hline
+Nutzung(B)  &  0 & \cellcolor{green}100 & 0 & \cellcolor{green}100 & \cellcolor{green}100 & 0 & \cellcolor{green}100 & \cellcolor{green}100 & 0 & \cellcolor{green}100 & \cellcolor{green}100 & 0 & \cellcolor{green}100  \\
+\hline
+Konto'(B)  &  0 & \cellcolor{green}50 & 25 &\cellcolor{green} 62 &\cellcolor{green} 81 & 40 &\cellcolor{green} 70 &\cellcolor{green} 85 & 42 &\cellcolor{green} 71 & \cellcolor{green}85 & 42 & \cellcolor{green}71  \\
+\hline
+Prio(B)  & 10 & \cellcolor{green}60 & 35 & \cellcolor{green}72 & \cellcolor{green}91 & 50 & \cellcolor{green}80 & \cellcolor{green}95 & 52 & \cellcolor{green}81 & \cellcolor{green}95 & 52 & \cellcolor{green}81  \\
+\hline
+\end{tabular}
+
+In den grün markierten Spalten sieht man, welcher Prozess in welcher Zeitscheibe die CPU bekommen hat. 
+
+Ab dem 3. Schritt erkennt man, dass die CPU in einem 2:1 Muster verteilt ist. D.h. Prozess A erhält nur in jedem 3.Schritt die CPU, während Prozess B 2 von 3 Zeitscheiben die CPU erhält. 
+
+\textbf{c)}
+
+\begin{tabular}{|p{2,5cm}|| c | c | c | c | c | c | c | c | c | c |}
+\hline
+Zeitscheibe &  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9   \\
+\hline
+\hline
+Konto(A)  &  0 & 0 & 50 & 75 & 87 & 93 & 96 & 98 & 99 & 99  \\
+\hline
+Nutzung(A)  &  0 & 100 & 100 & 100 & 100 & 100 & 100 & 100 & 100 & 100  \\
+\hline
+Konto'(A)  &  0 & 50 & 75 & 87 & 93 & 96 & 98 & 99 & 99 & 99  \\
+\hline
+Prio(A)  &  0 & 50 & 75 & 87 & 93 &96 & 98 & 99 & 99 & 99  \\
+\hline
+\end{tabular}
+
+Nach der 7. Zeitscheibe ändert sich die Priorität von Prozess A nicht mehr und stagniert auf der Priorität 99. Da bei gleichwertigem Prioritätswert die Prozesse nach dem Alphabet bevorzugt werden, würde Prozess B ab einer Basispriorität von 99 die CPU in diesem Szenario nie erhalten.
+
+
+\textbf{d)}
+
+\begin{tabular}{|p{2,5cm}|| c | c | c | c | c | c | c | c | c | c | c | c | c |}
+\hline
+Zeitscheibe &  0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12   \\
+\hline
+\hline
+Konto(A)  &  0 & 0 & 50 & 61 & 80 & 76 & 88 & 80 & 90 & 81 & 90 & 81 & 90  \\
+\hline
+Nutzung(A)  &  0 & 100 & 73 & 100 & 73 & 100 & 73 & 100 & 73 & 100 & 73 & 100 & 73  \\
+\hline
+Konto'(A)  &  0 & 50 & 61 & 80 & 76 & 88 & 80 & 90 & 81 & 90 & 81 & 90 & 81  \\
+\hline
+Prio(A)  &  0 & 50 & 61 & 80 & 76 & 88 & 80 & 90 & 81 & 90 & 81 & 90 & 81  \\
+\hline
+\hline
+Konto(B)  &  0 & 0 & 0 & 13 & 6 & 16 & 8 & 17 & 8 & 17 & 8 & 17 & 8  \\
+\hline
+Nutzung(B)  &  0 & 0 & 27 & \cellcolor{red}0 & 27 & \cellcolor{red}0 & 27 & \cellcolor{red}0 & 27 & \cellcolor{red}0 & 27 & \cellcolor{red}0 & 27  \\
+\hline
+Konto'(B)  &  0 & 0 & 13 & 6 & 16 & 8 & 17 & 8 & 17 & 8 & 17 & 8 & 17  \\
+\hline
+Prio(B)  &  15 & 15 & 28 & 21 & 31 & 23 & 32 & 23 & 32 & 23 & 32 & 23 & 32  \\
+\hline
+\end{tabular}
+
+Hat Prozess B die höchste Priorität, so arbeitet dieser für 55 ms. In einer 200 ms Zeitscheibe sind das 27\%(da $\frac{55}{200} = 0,275$). Danach ist dieser für 250 ms blockiert, also für den Rest der aktuellen Zeitscheibe gibt er die CPU an Prozess A ab. Im Laufe der nächsten Zeitscheibe wird Prozess B zwar wieder frei, muss aber bis zum nächsten Scheduling/Zeitscheibe warten und kommt somit für die komplette Zeitscheibe nicht zum Zug (rot markierte Zellen). 
+\end{document}
+

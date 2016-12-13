@@ -1,0 +1,142 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc} 
+\usepackage{amsmath}  
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{3}{21.11.2016}{Marc Hildebrandt}{C/06}%
+                {Niklas Koenen}{Jan Klüver}%
+                {Vincent Jankovic}{}%
+
+\section*{Aufgabe 1}
+Zuerst werden Signale und Interrupts durch die Eingabe des Befehles $ls -1R / > ausgabe$ in der Shell über die Tastatur ausgelöst. Diese werden dann entsprechend vom Betriebssystem behandelt (Interrupthandler). Wird der Befehl ausgeführt (ein Interrupt wird ausgelöst und ein Signal 'erzeugt' den Prozess), startet der Prozess, um die Daten in die \emph{ausgabe}-Datei zu schreiben. Bis zu dem Zeitpunkt der Tastatureingabe von \emph{Strg-Z} können nach belieben prozessinterne Pausen  (Traps) und andere Interrupts auftreten. Dies hängt aber von dem allgemeinen Setup des Computers bzw. Betriebssystems und dem aktuellen Zustand ab (Sheduling). Wird nun \emph{Strg-Z} eingegeben, pausiert der Prozess, ausgehend von einem Interrupt der Tastatur (da der Befehl der Tastatur asynchron zum Prozess bearbeitet wird, handelt es sich um ein Interrupt). Desweiteren wird neben dem typischen Tastatur-Interrupt auch ein Signal ausgelöst, welches vom Prozess bearbeitet wird und ihn in einen blockierten Zustand setzt (später dazu mehr). Nun wartet der Prozess auf einen Input. Nach der Eingabe von \emph{bg} wird der Prozess in den Hintergrund verlagert und mit dem Vordergrundprozess (vllt. auch mehr) gesheduled. Dabei interagiert der Prozess natürlich mit dem Betriebssystem, welches über Signale ermöglicht wird. Ist der Prozess fertig, wird er terminiert (evtl. durch einen Trap). Dann wird ein Signal an den Shell-Prozess gesendet und das Betriebssystem und damit auch der Nutzer über das Ergebnis des Prozesses infomiert. \\\\
+Nun zu den Zustands\"anderungen der Prozesse. Wir beschr\"anken uns auf den Hauptprozess des Befehls in der Aufgabe (also keine Nebenprozesse). Nach der Befehleingabe ist der Prozess in einem rechnendem Zustand (Betritt den Kern bei Traps) und geht nach der Eingabe von \emph{Strg Z} in einen blockierten Zustand \"uber. Der Prozess wartet nun auf einen weiteren Befehl. Nach der Eingabe von \emph{bg} geht der Prozess wieder in einen rechenbereiten Modus \"uber und der Sheduler '\"ubernimmt' die weiteren Zustands\"anderungen. Wurde fertig gerechnet, wird der Prozess terminiert und ist in einem beendeten Zustand.
+
+
+\section*{Aufgabe 2}
+In dieser Aufgabe mussten wir einen Handler für das Signal \textbf{SIGUSR1} mittels \textbf{sigaction} schreiben. Dazu brauchten wir drei Bibliotheken, nämlich die für die Signale, die Standardausgabe und die f"ur die Methode \textbf{pause()}:
+\begin{listing}{0}
+#include <signal.h>
+#include <iostream>
+#include <unistd.h>
+\end{listing}
+Außerdem brauchten wir eine Handler-Funktion, die ausgeführt wird, wenn unser Signal vorkommt. Diese braucht per Definition drei bestimmte Parameter, damit wir später \emph{sa\_saction} diese Handler-Funktion zuweisen können, wobei die Integer die Signalnummer und \emph{siginfo\_t} alle relevanten Informationen über das Signal enthält.
+Der Handler soll die Nummer, die Prozess-ID und die User-ID ausgeben, was wir mit der Standardausgabe bewältigt haben. Insgesamt sieht die Handler-Funktion wie folgt aus:
+\begin{listing}{4}
+void handler(int sig, siginfo_t *act, void *context)
+{
+  std::cout<<"Signal gefunden!" << std::endl;
+  std::cout<<"Nummer " << sig << "  PID: " <<  act->si_pid <<  "  UID: " 
+  	<<  act->si_uid <<std::endl;
+}
+\end{listing}
+In der \emph{main}-Methode wird zunächst die Struktur \emph{sigaction} erstellt und anschließend die zuvor beschriebene Handler-Funktion an \emph{sigaction} weitergegeben, damit diese Funktion bei einem Auftreten eines Signals auch ausgeführt wird. Außerdem wird \emph{sa\_flags} auf \emph{SA\_SIGINFO} gesetzt. Nun wird mit einer \emph{if}-Anweisung geschaut, ob der Handler \emph{sigaction} für das Signal \textbf{SIGUSR1} erstellt werden kann, ansonsten wird ein Fehler ausgegeben. Wenn alles erstellt werden kann, wird eine Endlosschleife mit \emph{while(pause)} gestartet, die immer ausgeführt wird, wenn ein Signal eingeht. Insgesamt sieht die \emph{main} also so aus:
+\begin{listing}{10}
+int main (void)
+{
+  struct sigaction sa;
+  sa.sa_sigaction= &handler;
+  sa.sa_flags = SA_SIGINFO;
+  if(sigaction(SIGUSR1, &sa, NULL) != 0)
+    {
+      std::cout<< "Error!"<<std::endl;
+      return -1;
+    }
+  while(pause())
+    {
+    }
+    return 0;
+}
+\end{listing}
+Der gesamte Quellcode sieht also wie folgt aus:
+\begin{listing}{0}
+#include <signal.h>
+#include <iostream>
+#include <unistd.h>
+
+void handler(int sig, siginfo_t *act, void *context)
+{
+  std::cout<<"Signal gefunden!" << std::endl;
+  std::cout<<"Nummer " << sig << "  PID: " <<  act->si_pid <<  "  UID: " <<  act->si_uid <<std::endl;
+}
+
+int main (void)
+{
+  struct sigaction sa;
+  sa.sa_sigaction= &handler;
+  sa.sa_flags = SA_SIGINFO;
+  if(sigaction(SIGUSR1, &sa, NULL) != 0)
+    {
+      std::cout<< "Error!"<<std::endl;
+      return -1;
+    }
+  while(pause())
+    {
+    }
+    return 0;
+}
+\end{listing}
+Anschlie"send haben wir das Programm getestet. Dabei haben wir in einem Terminal das Programm kompiliert und ausgef"uhrt. Dann haben wir in einem anderen Terminal mit \textbf{ps -e} alle Prozesse ausgegeben und das zu unserem Programm herausgesucht. Nun konnten wir mit \textbf{kill -usr1 [PID]} das Signal \textbf{SIGUSR1} senden. Unser Programm hat darauf das folgende ausgegeben:
+\begin{listing}{0}
+Signal gefunden!
+Nummer 10  PID: 8724  UID: 43042
+\end{listing}
+\section*{Aufgabe 3}
+\begin{itemize}
+\item[a)]
+Wenn der Kontostand nicht halbiert würde, bekämen Prozesse, die schon lange laufen (also einen hohen Kontostand haben), sehr lange nicht die CPU, wenn ein neuer Prozess gestartet wird. Dieser hätte nämlich zuerst den Kontostand 0 und würde die CPU wohl für viele Zeitscheiben hintereinander bekommen und die ggf. noch aktiven Langzeitprozesse wären außen vor. Da immer  mal wieder neue Prozesse starten könnten, würden die älteren unter Umständen gar nicht mehr an die Reihe kommen.
+\item[b)]
+Basisprioritäten: A=56 , B=10
+\begin{table}[h]
+\begin{tabular}{r|ccccccccccccc}
+Zeitscheiben & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12\\
+\hline
+Konto A      & 0 & 0 & 0  & 50 & 25  & 12  & 56  & 28  & 14  & 57  & 28   & 14   & 57   \\
+Nutzung A    & 0 & 0 & 100 & 0 &  0 &  100 & 0  &  0 &  100 & 0  &  0  & 100   & 0   \\
+Konto' A     & 0 & 0 & 50 & 25 & 12  & 56  &  28 & 14  &  57 & 28  &  14  & 57   & 28   \\
+Prio A       & 56 & 56  &106 & 81 & 68  &112   & 84  & 70  &113   & 84  &  70  & 113   & 84   \\
+\hline
+Konto B 	 & 0 & 0 & 50 & 25 &  62 & 81  &  40 & 70  &  85 &  42 & 71  & 85   & 42   \\
+Nutzung B    & 0 & 100 &0  & 100 &  100 & 0  & 100  & 100  & 0  & 100  &  100  & 0   &  100  \\
+Konto' B     & 0 &  50 &25  &62 & 81  & 40  & 70  & 85  &  42 &  71 &  85  &  42  & 71   \\
+Prio B       & 10 &  60 & 35 &72  & 91  & 50  & 80  & 95  & 52  & 81  &  95  & 52   & 81   
+
+\end{tabular}
+
+\end{table}
+
+Man sieht, dass Prozess B stets zweimal hintereinander die CPU bekommt, woraufhin A diese dann nur für eine Zeitscheibe kriegt. Die Werte für Konto, etc scheinen sich auch bis auf kleine Abweichungen in diesem Dreierzyklus zu wiederholen (erkennbar ab Spalte 4).
+\item[c)] Sei $(a_n)_{n\in\mathbb{N}}\subset \mathbb{R}$ definiert durch $a_{n+1}:=\frac{a_n+100}{2}$ und $a_0=0$ die Folge, deren Glieder den Kontostand von $A$ repräsentieren (zunächst ohne Abrunden). Konvergenz ist klar, da monoton wachsend und nach oben z.B. durch 100 beschränkt. Für den Grenzwert gilt:
+\begin{align}
+&a*=\frac{a*+100}{2} \notag\\
+\Leftrightarrow~&a*=100\notag
+\end{align}
+Da $a_n<100$ für alle $n\in\mathbb{N}$ , gilt: $\exists N_0\in\mathbb{N}\forall n\geq N_0: \lfloor a_n\rfloor = 99 $
+\\
+Also hat A irgendwann stets den Kontostand 99. Somit würde B die CPU niemals erhalten, wenn es eine Basispriorität von 99 oder höher hätte, da bei Gleichstand alphabetisch vorgegangen wird.
+\item[d)]
+Basisprioritäten: A=0 , B=15
+\begin{table}[h]
+\begin{tabular}{r|ccccccccccccc}
+Zeitscheiben & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12\\
+\hline
+Konto A      &0&0&50&61&80&76&88&80&90&95&97&84&92\\
+Nutzung A    &0&100&72,5&100&72,5&100&72,5&100&72,5&100&72,5&100&72,5\\
+Konto' A     &0&50&61&80&76&88&80&90&95&97&84&92&82\\
+Prio A       &0&50&61&80&76&88&80&90&95&97&84&92&82\\
+\hline
+Konto B 	 &0&0&0&13&21&24&12&19&9&18&9&18&9\\
+Nutzung B    &0&0&27,5&0&27,5&0&27,5&0&27,5&0&27,5&0&27,5\\
+Konto' B     &0&0&13&6&24&12&19&9&18&9&18&9&18  \\
+Prio B       &15&15&28&21&39&27&34&24&33&24&33&24&33   \\
+lauffähig?	 &J&J&N&J&N&J&N&J&N&J&N&J&N
+
+\end{tabular}
+\end{table}
+
+\end{itemize}
+
+\end{document}

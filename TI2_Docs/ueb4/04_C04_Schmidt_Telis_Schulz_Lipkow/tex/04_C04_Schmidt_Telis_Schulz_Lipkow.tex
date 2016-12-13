@@ -1,0 +1,373 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+\usepackage{upquote}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage[table]{xcolor}
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{4}{28.11.2016}{Marc Hildebrandt/ Bingbin Yu}{C04}%
+                {Michael Schmidt}{Stanislav Telis}%
+                {Dominique Schulz}{Norman Lipkow}%
+                  
+
+\section*{Aufgabe 1}
+Wir haben das vorgegebene Gerüst an den vorgesehenen Stellen um die geforderten Funktionen erweitert. Dabei haben wir eine Funktion mit dem Namen \texttt{process()} imlementiert, die die \texttt{PATH} Variable mittels \texttt{strtok()} in einzelne Pfade zerteilt, in denen dann nach dem auszuführenden Kommando gesucht wird. Das Suchen funktioniert mit der Systembibliotheksfunktionen \texttt{opendir()} für das Öffnen eines Verzeichnisses und \texttt{readdir()} für das Auslesen der einzelnen Dateien (bzw. die Programme die in der Environment Umgebung liegen). Wenn eine ausgelesene Datei mit dem Kommando übereinstimmt wird \texttt{excev()} aufgerufen und das Kommando ausgeführt. Darüber hinaus haben wir auch das \texttt{cd} Kommando mit der Bibliotheksfunktion \texttt{chdir()} realisiert.
+
+Außerdem haben wir eine Funktion \texttt{check\_child\_status} implementiert, die mit Hilfe der Systembibliotheksfunktion \texttt{waitpid()} und der Option \texttt{WNOHANG} alle Kinder einsammelt und diese nicht nach der Termination in den Zombie-Zustand bleiben lässt.
+
+Die \texttt{main()}-Funktion haben wir dahingehen erweitert, dass mit \texttt{fork()} ein Kindprozess des aktuellen Prozesses erstellt wird und in einer if Anweisung dem Kindprozess die Ausführung der Funktion \texttt{process()} überlassen wird. Der Vaterprozess wartet je nachdem, ob der Benutzer ein \texttt{\&} Zeichen in die Kommando-Zeile eingetippt hat mittels \texttt{wait()} auf sein Kindprozess oder er wartet nicht.
+
+Im Folgenden nochmal unser Code eingebunden:
+
+\begin{listing}{1}
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <iostream>
+#include <dirent.h>
+
+#include "parser.h"
+
+using namespace std;
+
+/**
+ * In dieser Funktion wird die Umgebungsvariable PATH mittels strtok()
+ * in Token aufgeteilt um anschließend in den einzelnen Verzeichnissen 
+ * nach dem auszuführenden Kommando zu suchen.
+ * Wenn das Kommando gefunden wurde wird es mittels der Bibliotheksfunktion 
+ * excev() ausgeführt. 
+ *
+ */
+void process(struct command c) {
+          struct command cmd = c;
+	  if (strcmp(cmd.argv[0], "cd") == 0) {//kommando cd -> Bibliotheksfunktion
+	                                       //chdir() um Arbeitsverzeichnis zu wechseln 
+	    if ( chdir(cmd.argv[1] ? cmd.argv[1] : "") == 0) {
+	    return;
+	  } else {
+	    perror("cd failed");
+	    return;
+	  }
+	}
+          DIR *directory;
+	  struct dirent *file;
+	  char *env = getenv("PATH");
+	  if (env == NULL) {
+	    perror("getenv() failed");
+	    exit(1);
+	  }
+	  char delim = ':';
+	  char *paths = strtok(env, &delim);
+	  bool executed = false;
+	  while ( paths != NULL ) {
+	    directory = opendir(paths);
+
+	    while ( (file = readdir(directory)) != NULL) {
+	      if (strcmp(file->d_name, cmd.argv[0]) == 0) {
+		char slash = '/';
+		strncat(paths, &slash, 1);
+		strcat(paths, cmd.argv[0]);
+		if ( execv(paths, cmd.argv) == -1) {// Kommando ausführen
+		  perror("excev() failed");
+		  exit(1);
+		}
+		executed = true;
+		break;
+	      }
+
+	    }
+	    if (executed) {
+	      if ( closedir(directory) == -1) {
+		perror("closedir() failed");
+		exit(1);
+	      }
+	      break;
+	    }
+	    paths = strtok(NULL, &delim);
+	  }
+}
+
+/**
+ * Diese Funktion prüft den Zustand der Kindprozesse und sammelt diese ein, wenn sie
+ * terminiert sind. Dies geschieht mittels der Systembibliotheksfunktion waitpid() und 
+ * der Option WNOHANG (sammle irgendeinen Kindprozess ein).
+ */
+void check_child_status() {
+  while (true) {
+    pid_t pid = 0;
+
+    pid = waitpid(-1, 0, WNOHANG);
+
+    if (pid <= 0) {
+      break;
+    }
+  }
+
+}
+
+int main(){
+    for (;;){
+	struct command cmd = read_command_line();
+
+	if (strcmp(cmd.argv[0], "exit") == 0) {//Wenn exit eingetippt wird,
+	                                      //beende das Programm
+	  exit(0);
+	}
+		
+	cout << "command: " << cmd.argv[0]
+		  << ", background: " << (cmd.background ? "ja" : "nein") << endl;
+       
+	check_child_status(); //sammle Kindprozesse ein
+	
+	pid_t pid = fork(); //Kindprozess erzeugen
+	
+	if (pid == 0) { //Kindprozess
+	 
+	  process(cmd);
+	    
+	  
+	} else if (pid > 0) { //Vaterprozess
+
+	  if (cmd.background) { //Wenn Kommando in Vordergrund -> Warte auf
+	                       //den Kindprozess (Shell blockieren), sonst
+	                      //warte nicht (Shell wird nicht blockiert)
+	    continue;
+	  } else {
+	    wait(0);
+	  }
+	 
+	  
+	} else { //Fehlerbehandlung
+	  perror("fork() Failed");
+	  exit(1);
+	}
+    }
+       return 0;
+ }
+
+\end{listing}
+\textbf{Tests}
+
+Wir haben das Programm auf dem x11 Rechner im Rechnerpool des MZH mittels \texttt{make} übersetzt. Dabei wurden uns keine Fehler angezeigt.
+
+\begin{listing}{1}
+x11->make
+g++ -g -Wall -Wextra -std=c++0x   -c -o ti2sh.o ti2sh.cc
+lex  -t r.l > r.c
+gcc    -c -o r.o r.c
+g++ -g -Wall -Wextra -std=c++0x    ti2sh.o r.o parser.h   -o ti2sh
+rm r.c
+\end{listing}
+
+Anschließend haben wir unser Programm mittels ssh Verbindung auf dem x11 Rechner getestet. Dabei haben wir verschiedene Eingaben vorgenommen. Unteranderem das Starten eines Prozesses im Hintergrund, das Aufrufen eines Kommandos mit absolutem und relativem Pfad oder aber das Wechseln eines Verzeichnisses mit \texttt{cd}.
+
+\begin{listing}{1}
+do_sc@x11 /home/do_sc/TI_2/uebung04/aufgabe1
+->./ti2sh
+ti2sh$ ls
+command: ls, background: nein
+Makefile  parser.h  r.l  r.o  ti2sh  ti2sh.cc  ti2sh.cc~  ti2sh.o
+ti2sh$ ls /home/do_sc
+command: ls, background: nein
+Desktop    Downloads  Linux  Pictures  TI_2	  Videos    ausgabe  test
+Documents  Library    Music  Public    Templates  aufgabe2  git      workspace
+ti2sh$ cd ..
+command: cd, background: nein
+ti2sh$ ps
+command: ps, background: nein
+  PID TTY          TIME CMD
+11373 pts/3    00:00:00 bash
+24059 pts/3    00:00:00 ti2sh
+24112 pts/3    00:00:00 ti2sh
+24114 pts/3    00:00:00 ps
+ti2sh$ sleep 10 &
+command: sleep, background: ja
+ti2sh$ ps
+command: ps, background: nein
+  PID TTY          TIME CMD
+11373 pts/3    00:00:00 bash
+24059 pts/3    00:00:00 ti2sh
+24112 pts/3    00:00:00 ti2sh
+24196 pts/3    00:00:00 ps
+ti2sh$ sleep 10 &
+command: sleep, background: ja
+ti2sh$ ps
+command: ps, background: nein
+  PID TTY          TIME CMD
+11373 pts/3    00:00:00 bash
+24059 pts/3    00:00:00 ti2sh
+24112 pts/3    00:00:00 ti2sh
+24213 pts/3    00:00:00 sleep
+24216 pts/3    00:00:00 ps
+ti2sh$ kill 24213
+command: kill, background: nein
+ti2sh$ ps
+command: ps, background: nein
+  PID TTY          TIME CMD
+11373 pts/3    00:00:00 bash
+24059 pts/3    00:00:00 ti2sh
+24112 pts/3    00:00:00 ti2sh
+24244 pts/3    00:00:00 ps
+ti2sh$ echo Hallo World
+command: echo, background: nein
+Hallo World
+ti2sh$ ping -c 3 www.rocketbeans.tv
+command: ping, background: nein
+PING www.rocketbeans.tv (104.25.75.102) 56(84) bytes of data.
+64 bytes from 104.25.75.102: icmp_req=1 ttl=59 time=7.46 ms
+64 bytes from 104.25.75.102: icmp_req=2 ttl=59 time=7.43 ms
+64 bytes from 104.25.75.102: icmp_req=3 ttl=59 time=7.45 ms
+
+--- www.rocketbeans.tv ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 7.437/7.454/7.468/0.071 ms
+ti2sh$ cat /home/do_sc/test/child1/u2/Makefile
+command: cat, background: nein
+CC=g++
+CXXFLAGS=-g -Wall -Wextra
+CXXFLAGS+=-std=c++11
+
+myfind:: filter.o myfind.o
+all:	 myfind
+
+clean:
+	-rm -f myfind *.o core
+ti2sh$ cd /home/do_sc/test/child1/u2
+command: cd, background: nein
+ti2sh$ cat Makefile
+command: cat, background: nein
+CC=g++
+CXXFLAGS=-g -Wall -Wextra
+CXXFLAGS+=-std=c++11
+
+myfind:: filter.o myfind.o
+all:	 myfind
+
+clean:
+	-rm -f myfind *.o core
+ti2sh$ ls -l
+command: ls, background: nein
+total 374
+-rw-r--r-- 1 do_sc do_sc    127 Oct 25 18:01 Makefile
+-rw-r--r-- 1 do_sc do_sc   3361 Nov  6 11:46 filter.cc
+-rw-r--r-- 1 do_sc do_sc   1365 Oct 25 18:05 filter.hh
+-rw-r--r-- 1 do_sc do_sc 488568 Nov  7 10:12 filter.o
+-rwxr-xr-x 1 do_sc do_sc 277467 Nov  7 10:38 myfind
+-rw-r--r-- 1 do_sc do_sc   2417 Nov  7 10:38 myfind.cc
+-rw-r--r-- 1 do_sc do_sc   2370 Nov  6 10:24 myfind.cc~
+-rw-r--r-- 1 do_sc do_sc  94072 Nov  7 10:38 myfind.o
+ti2sh$ ls -l /home
+command: ls, background: nein
+total 31
+drwx------ 30 chr_paw  chr_paw   41 Nov 28 17:29 chr_paw
+drwx--x--x 60 claras   stud     285 Nov 28 13:53 claras
+drwx------ 48 do_sc    do_sc     66 Nov 28 11:52 do_sc
+drwx------ 44 janmohr  janmohr   61 Oct 12 12:44 janmohr
+drwx------ 44 mehrfard mehrfard  73 Nov 28 15:44 mehrfard
+ti2sh$ sleep 30 &
+command: sleep, background: ja
+ti2sh$ ps
+command: ps, background: nein
+  PID TTY          TIME CMD
+11373 pts/3    00:00:00 bash
+24059 pts/3    00:00:00 ti2sh
+24112 pts/3    00:00:00 ti2sh
+24428 pts/3    00:00:00 ti2sh
+24583 pts/3    00:00:00 sleep
+24589 pts/3    00:00:00 ps
+ti2sh$ bla/fasel
+command: bla/fasel, background: nein
+ti2sh$ adkd
+command: adkd, background: nein
+ti2sh$ ls
+command: ls, background: nein
+Makefile   filter.hh  myfind	 myfind.cc~
+filter.cc  filter.o   myfind.cc  myfind.o
+ti2sh$ ls -l       
+command: ls, background: nein
+total 374
+-rw-r--r-- 1 do_sc do_sc    127 Oct 25 18:01 Makefile
+-rw-r--r-- 1 do_sc do_sc   3361 Nov  6 11:46 filter.cc
+-rw-r--r-- 1 do_sc do_sc   1365 Oct 25 18:05 filter.hh
+-rw-r--r-- 1 do_sc do_sc 488568 Nov  7 10:12 filter.o
+-rwxr-xr-x 1 do_sc do_sc 277467 Nov  7 10:38 myfind
+-rw-r--r-- 1 do_sc do_sc   2417 Nov  7 10:38 myfind.cc
+-rw-r--r-- 1 do_sc do_sc   2370 Nov  6 10:24 myfind.cc~
+-rw-r--r-- 1 do_sc do_sc  94072 Nov  7 10:38 myfind.o
+ti2sh$ touch Makefile
+command: touch, background: nein
+ti2sh$ ls -l
+command: ls, background: nein
+total 374
+-rw-r--r-- 1 do_sc do_sc    127 Nov 28 17:52 Makefile
+-rw-r--r-- 1 do_sc do_sc   3361 Nov  6 11:46 filter.cc
+-rw-r--r-- 1 do_sc do_sc   1365 Oct 25 18:05 filter.hh
+-rw-r--r-- 1 do_sc do_sc 488568 Nov  7 10:12 filter.o
+-rwxr-xr-x 1 do_sc do_sc 277467 Nov  7 10:38 myfind
+-rw-r--r-- 1 do_sc do_sc   2417 Nov  7 10:38 myfind.cc
+-rw-r--r-- 1 do_sc do_sc   2370 Nov  6 10:24 myfind.cc~
+-rw-r--r-- 1 do_sc do_sc  94072 Nov  7 10:38 myfind.o
+ti2sh$ touch filter.o &
+command: touch, background: ja
+ti2sh$ ls -l
+command: ls, background: nein
+total 374
+-rw-r--r-- 1 do_sc do_sc    127 Nov 28 17:52 Makefile
+-rw-r--r-- 1 do_sc do_sc   3361 Nov  6 11:46 filter.cc
+-rw-r--r-- 1 do_sc do_sc   1365 Oct 25 18:05 filter.hh
+-rw-r--r-- 1 do_sc do_sc 488568 Nov 28 17:53 filter.o
+-rwxr-xr-x 1 do_sc do_sc 277467 Nov  7 10:38 myfind
+-rw-r--r-- 1 do_sc do_sc   2417 Nov  7 10:38 myfind.cc
+-rw-r--r-- 1 do_sc do_sc   2370 Nov  6 10:24 myfind.cc~
+-rw-r--r-- 1 do_sc do_sc  94072 Nov  7 10:38 myfind.o
+ti2sh$ ^C
+do_sc@x11 /home/do_sc/TI_2/uebung04/aufgabe1
+->./ti2sh
+ti2sh$ cd ajddjn
+command: cd, background: nein
+cd failed: No such file or directory
+ti2sh$ sdjkekcj
+command: sdjkekcj, background: nein
+ti2sh$ exit
+do_sc@x11 /home/do_sc/TI_2/uebung04/aufgabe1
+->
+\end{listing}
+
+\section*{Aufgabe 2}
+
+Die Zahlen in den Speicherblöcken sind alle in KiB. Genauso wie die Adressen außen angegeben.
+
+Die Zahlen mit einem Stern versehen sind blockiert und erscheinen nicht in der Freispeicherliste. Die gestreiften Felder wurden durch die entsprechenden Anforderungen belegt.
+
+Die Freispeicherliste zu Beginn : 1x  64 KiB \\
+nach Schritt 2: 1x 16 KiB, 1x 32 KiB \\
+nach Schritt 3: 1x 32 KiB \\
+nach Schritt 4: 1x 4 KiB, 1x 8 KiB, 1x 16 KiB\\
+nach Schritt 5: 1x 4 KiB, 1x 8 KiB\\
+nach Schritt 6: 1x 8 KiB\\
+nach Schritt 7: 1x 8 KiB\\
+nach Schritt 8: 1x 4 KiB
+
+nach dem in Aufgabe 2 b) freigewordenen Speicher: 1x 4 KiB, 1x 8 KiB, 1x 16 KiB
+
+Eine Anforderung von 21 KiB kann daher nicht bearbeitet werden, da nicht so viel Speicher in der Freispeicherliste enthalten ist.
+
+\includegraphics[width=16cm]{aufg2.JPG}
+
+\newpage
+
+\section*{Aufgabe 3}
+Da nicht in der Aufgabenstellung ersichtlich das hier wait() aufgerufen wird von den Terminals gehen die Prozesse also alle, nachdem sie das Signal SIGCHLD an ihren Vaterprozess gesendet haben, zunächst in den Zombiezustand.
+
+Der in Schritt 2 gestartet Prozess \texttt{xterm} gehört am Ende dem Initialprozess \texttt{init()}, nach dem der Vaterprozess von \texttt{xterm} (\texttt{bash}) beendet wurde.
+
+\includegraphics[width=18cm]{aufg3.JPG}
+\end{document}

@@ -1,0 +1,241 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{ucs}
+\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyvrb}
+\usepackage{wrapfig,lipsum,booktabs}
+\usepackage{adjustbox}
+\usepackage{lmodern}
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}%
+{fontsize=\footnotesize,
+ %
+ frame=lines,  % top and bottom rule only
+ framesep=2em, % separation between frame and text
+ rulecolor=\color{Gray},
+ %
+ label=\fbox{\color{Black}test.txt},
+ labelposition=topline,
+ %
+ commandchars=\|\(\), % escape character and argument delimiters for
+                      % commands within the verbatim
+ commentchar=*        % comment character
+}
+\lstset{ 
+language=C++,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,           % adds a frame around the code
+tabsize=2,          % sets default tabsize to 2 spaces
+captionpos=b,           % sets the caption-position to bottom
+breaklines=true,        % sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)},          % if you want to add a comment within your code
+inputencoding = latin1,
+literate={ö}{{\"o}}1
+           {ä}{{\"a}}1
+           {ü}{{\"u}}1
+}
+
+\usepackage{xcolor}
+  \definecolor{sx-yellow}{RGB}{249,245,233}
+  \definecolor{sx-orange}{RGB}{224,215,188}
+\usepackage[most]{tcolorbox}
+
+\makeatletter
+\renewenvironment{quote}{%
+  \vskip 10\p@
+  \parindent\z@
+  \tcolorbox[
+    breakable, sharp corners,
+    boxrule=\z@, boxsep=\z@,
+    left=\z@, right=\z@,
+    top=\z@, bottom=\z@,
+    colback=sx-yellow
+  ]
+  {\color{sx-orange}\d@ublerule}
+  \vskip 5\p@
+  \list{}{\rightmargin\leftmargin}%
+  \item\relax
+}{%
+  \endlist
+  {\color{sx-orange}\d@ublerule}
+  \endtcolorbox
+  \vskip 5\p@
+}
+\def\d@ublerule{\hrule\@width\hsize\kern 1.5\p@\hrule\@width\hsize}
+\makeatother
+
+\setlength{\parindent}{0pt}
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{3}{21.11.2016}{Marc/Bingbin}{C02}%
+                {Rene Engel}{Dennis Jacob}%
+                {Jan Schoneberg}%
+                
+
+
+\section*{Aufgabe 1}
+\begin{quote}
+	Beschreibt kurz an welchen Stellen Traps, Interrupts und Signale ausgelöst werden. Welche Zustandsänderungen werden dadurch für die hier beteiligten Prozesse bewirkt?
+\end{quote}
+Mit dem genannten Befehl werden alle nicht versteckten Dateien und Verzeichnisse des gesamten Systems in Langform an die Datei \texttt{ausgabe} gesendet. Mit der Option \texttt{-l} werden die Informationen in Langform angegeben. Mit der Option \texttt{-R} werden auch die Inhalte aller Unterverzeichnisse ausgegeben. Mit \texttt{>} wird die Ausgabe an die Datei \texttt{ausgabe} weitergeleitet. Falls diese noch nicht existiert wird diese durch \textit{STDOUT} erstellt.\\ \\
+\textbf{Traps} werden durch Prozesse selbst ausgelöst und sorgen dafür, dass die normale Abarbeitung des Prozesses für die Bearbeitung eines anderen Prozesses aussetzt. Dabei wird temporär der Programmablauf verlassen. Auch bei \textbf{Interrupts} wird die Bearbeitung von Prozessen kurzfristig ausgesetzt, allerdings erfolgen Interrupts ausgehend von der Prozessbehandlung des Kernels, der die CPU je nach Bedarf den nötigen Prozessen zum weiteren Ablauf zuteilt.\\ \\
+Im wesentlich ergeben sich durch das genannte Szenario drei Hauptprozesse die in allen Szenarioschritten beachtet werden müssen: Der \textbf{Init}-Prozess, der \textbf{SHELL}-Prozess und davon erzeugte Kindprozess \textbf{ls}. Es werden nun im zeitlichen Verlauf die wesentlichen Schritte behandelt, die für den Ablauf des Szenarios wichtig sind.
+\begin{enumerate}
+	\item \textbf{Befehlseingabe \texttt{ls -lR / >ausgabe}}\\
+		Durch die Befehlseingabe mittels Tastatur erfolgen schon erste \textbf{Interrupts} anderer nebenläufiger Prozesse. Dies hat auf den \textbf{SHELL}- und \textbf{Init}-prozess keinen Einfluss. Der Shell Prozess befindet sich im Zustand \textit{user running}. Die Bearbeitung der Tastatureingaben erfolgt über die Standardeingabe \textit{STDIN}
+	\item \textbf{\textit{ENTER} bzw. \texttt{\textbackslash n}}\\
+		Durch das Drücken der \textit{ENTER}-Taste und der damit verbundenem Eingabe \texttt{\textbackslash n} führt die \textbf{SHELL} den Befehl aus und der \textbf{SHELL}-Prozess erzeugt so ein \textbf{ls}-Kindprozess (Zustand: zunächst \textit{kernel running}, da Kopie; später \textit{user running})mittels dem Systemaufruf \texttt{fork()}. Der Shell Prozess wechselt in den Zustand \textit{kernel running}. Da der Prozess im Vordergrund gestartet wird handelt es sich um ein \textbf{Trap} durch den der \textbf{SHELL}-Prozess aussetzt und der Benutzer keine gewöhnlich Eingabe mehr an die \textbf{SHELL} direkt geben kann. Der \textit{User-Mode} wird verlassen und der \textit{Kernel-Mode} wird betreten. Dabei wird der User-Stack-pointer und das dazugehörige Register auf den Kernel-Stack gerettet. Der \textbf{SHELL}-Prozess wird mittels der Funktion \texttt{sleep()} angehalten und kommt in die Sleep-Queue. Ab diesem Zeitpunkt wartet der \textbf{SHELL}-Prozess auf die Terminierung des Kindprozesses \textbf{ls}. Der Shell Prozess hat den Zustand \textit{asleep}
+	\item \textbf{Ablauf des \textbf{ls}-Prozesses im Vordergrund}\\
+	Während des Programmablaufs bei dem es sich um ein \textbf{Trap} handelt gibt es wieder permanent (z.B. clock) vom Benutzer nicht bemerkbare \textbf{Interrupts} innerhalb des Kernels.
+	\item \textbf{Strg-Z}\\
+	Durch das Drücken dieser Tastenkombination wird vom Interrupthandler ein \textit{SIGSTOP}-\textbf{Signal} ausgelöst. Der Interrupthandler sorgt mittels der Funktion \texttt{psignal()} dafür, dass der Prozess \textbf{ls} das Signal behandelt, welches einen Ausnahmezustand des Prozesses darstellt. Der \textbf{ls} Prozess wechselt nicht in den Zustand \textit{stopped}. Durch das \textbf{Signal} erfolgt ein \textbf{Trap} durch welches der \textbf{ls}-Prozess gestoppt wird (\textbf{ls} ist \textit{kernel running}). Durch \texttt{sleep()} wird der Prozess angehalten (Zustand \textit{asleep}) und durch \texttt{qswitch()} an die Sleep-Queue gegeben. Dahingegen wird der \textbf{SHELL}-Prozess mittels \texttt{wakeup()} wieder aufgeweckt (Zustand jetzt \textit{ready to run}) und ist wieder Aktiv. Er wechselt mittels \texttt{qswitch()} wieder in die Run-Queue. (Zustand danach \textit{kernel running/user running})
+	\item \textbf{Eingabe und \textit{ENTER} des Befehls \texttt{bg}}\\
+	Durch die Eingabe des Befehls erfolgen \textbf{Interrupts} anderer Prozesse. Durch das Drücken der \textit{ENTER}-Taste und der damit verbundenem Eingabe \texttt{\textbackslash n} führt die \textbf{SHELL} den Befehl aus und der Kindprozess \textbf{ls} wird im Hintergrund fortgesetzt. (Zustand \textit{user runnig}) Es erfolgt hier wieder im Kerner des Wechsel in die Run-Queue.
+	\item Ablauf des \textbf{ls}-Prozesses im Hintergrund
+	Während des Ablaufs im Hintergrund erfolgen permanent \textbf{Interrupts} des \textbf{ls}- und des \textbf{SHELL}-Prozesses.
+	\item Terminierung des \textbf{ls}-Prozesses im Hintergrund\\
+	Durch die Terminierung des \textbf{ls}-Prozesses wird ein \textit{SIGCHLD}-Signal an den \textbf{INIT}-Prozess gesendet. Der \textbf{INIT}-Prozess gibt die proc-Struktur des \textbf{ls}-Prozesses frei. Der \textbf{ls}-Prozess existiert nicht mehr.
+\end{enumerate}
+
+\newpage
+\section*{Aufgabe 2}
+Bei der Lösung der Aufgabe 2 wurde sich grob an dem Beispiel aus dem \textit{Linux Programming Blog}\footnote{https://www.linuxprogrammingblog.com/code-examples/sigaction} gehalten.
+\lstinputlisting{Loesung/03/aufgabe02/main.cc}
+In der \textit{main()}-Methode wird zuerst der \textit{struct} \textbf{sigaction} initiirt und mit nullen gefüllt. Danach wird die \textit{Callback}-Funktion und der Typ in dem \textit{struct} gesetzt. Danach wird das Signal \textit{SIGUSR1} an das \textit{struct} gebunden. Sollte dies Fehlschlagen wird eine Fehlermeldung mit dem Fehler ausgegeben. Danach geht das Programm in eine Dauerschleife, in der es auf ein Signal wartet. In der \textit{Callback}-Funktion \textbf{sig\_handler} wird die Nummer des empfangenen Signals, die Process ID des Prozesses, der das Signal ausgelöst hat, sowie die User ID des Auslöser-Process-Besitzers.
+\section*{Aufgabe 3}
+\subsection*{Aufgabe 3a)}
+Es könnte zu Effekt des Alterns kommen. Das bedeutet, dass Prozesse die schon lange in Ausführung waren einen immer höheren CPU Kontostand bekommen. Dadurch kann es vorkommen, das diese Prozesse nur sehr selten eine Zeitscheibe erhalten, wenn oft neue Prozesse gestartet werden (was i.d.R. der Fall ist). Dieser Effekt kann auch auftreten, obwohl der Prozess ggf. eine Hohe Priorität (geringer \textit{nice}-Wert) hat. 
+\subsection*{Aufgabe 3b)}
+Zu Beginn wird Prozess B ausgewählt. Dafür wird die Berechnung exemplarisch durchgeführt. Für die weiteren Zeitscheiben ist die Berechnung äquivalent.
+\begin{center}
+$Summe_0A = Konto_0A + Priorit\ddot{a}t_A = 0 + 56 = 56$\\
+$Summe_0B = Konto_0B + Priorit\ddot{a}t_B = 0 + 10 = 10$\\
+\end{center}
+Prozess B wird ausgewählt und für die Zeitscheibe ausgeführt. Der neue Kontostand berechnet sich wie folgt: 
+\begin{center}
+$Konto_1A = \frac{Konto_0A}{2} = \frac{0}{2} = 0$\\ 
+$Konto_1B = \frac{Konto_0B+100}{2} = \frac{100}{2} = 50$\\
+\end{center}
+Nachdem Prozess B beginnt stellt sich, wie auf folgender Tabelle ersichtlich, das Muster \textbf{ABB} ein. Somit hat B für lange Laufzeit (fast) doppelt so lange die CPU wie A (die angegeben Prozesse haben jeweils 100\% CPU Zeit). Zur Berechnung der gelten folgende \textit{EXCEL} bzw. \textit{LibreOffice} Formeln (Beispiel für Spalte C, Prozess A):
+\begin{center}
+KONTO(C) = ABRUNDEN(WENN(B11 = \glqq A \grqq; (B3+100)/2; B3/2)) \\
+SUMME(C) = ABRUNDEN(SUMME(C3;C4))\\
+PROZESS(C) = WENN(C5 $<$= C9; \glqq A\grqq;\glqq B\grqq)
+\end{center}
+\begin{table}[htbp]
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|l|r|r|r|r|r|r|r|r|r|r|r|r|}
+\hline
+Scheibe  & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Konto A & 0 & 0 & 50 & 25 & 12 & 56 & 28 & 14 & 57 & 28 & 14 & 57 \\ \hline
+Priorität A & 56 & 56 & 56 & 56 & 56 & 56 & 56 & 56 & 56 & 56 & 56 & 56 \\ \hline
+Summe A & 56 & 56 & 106 & 81 & 68 & 112 & 84 & 70 & 113 & 84 & 70 & 113 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Konto B & 0 & 50 & 25 & 62 & 81 & 40 & 70 & 85 & 42 & 71 & 85 & 42 \\ \hline
+Priorität B & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 \\ \hline
+Summe B & 10 & 60 & 35 & 72 & 91 & 50 & 80 & 95 & 52 & 81 & 95 & 52 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Prozess & B & A & B & B & A & B & B & A & B & B & A & B \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+\subsection*{Aufgabe 3c)}
+Für den folgenden Aufgabenteil gilt folgende Notation: \\
+$P_{Prozess}$ := Basispriorität; $S(n)_{Prozess}$ := Summe eines Prozesses zum Zeitpunkt n; n := Index/Zeitpunkt der Zeitscheibe, beginnt bei 0 \\
+Die Tabelle aus Aufgabenteil b lässt sich auch hier anwenden. Allerdings haben sich die Basisprioritäten geändert: 
+\begin{table}[htbp]
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|l|r|r|r|r|r|r|r|r|r|r|r|r|}
+\hline
+Scheibe  & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Konto A & 0 & 50 & 75 & 87 & 93 & 96 & 98 & 99 & 99 & 99 & 99 & 99 \\ \hline
+Priorität A & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+Summe A & 0 & 50 & 75 & 87 & 93 & 96 & 98 & 99 & 99 & 99 & 99 & 99 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Konto B & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+Priorität B & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 \\ \hline
+Summe B & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 \\ \hline
+ & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+Prozess & A & A & A & A & A & A & A & A & A & A & A & A \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+\\Es lässt sich erkennen, dass B in den ersten 12 Zeitschreiben nie CPU erhält, obwohl $P_B = 99$. Weiterhin lässt sich erkennen, dass $Summe_A$ gegen 99 strebt, solange nur A die CPU bekommt. Dies lässt sich mithilfe folgender Berechnung beweisen: \\ \\ 
+Unter der Annahme, dass die Summen nicht abgerundet werden, lässt sich folgende Beobachtung für die Summe von A machen: 
+\begin{center}
+$S(n)_A= \frac{100+S_A(n-1)}{2} $ 
+\end{center}
+Also ergibt sich folgende Folge (mit $S(0)_A = 0)$: 
+\begin{center}
+$0; 50; 75; 87,5 ....$ 
+\end{center}
+Diese Folge lässt sich durch die Summe 
+\begin{center}
+$S(n)_A = 0+\frac{50}{1} + \frac{50}{2} + \frac{50}{4} + ...$\\
+\[S(n)_A = \sum_{i=0}^n \frac{50}{2^i} = 50 \cdot \sum_{i=0}^n \frac{1}{2^i}   = 50 \cdot \sum_{i=0}^n (\frac{1}{2})^i = 50\] 
+\end{center}
+ausdrücken. Diese Summe kann mit der geometrischen Reihe ausgerechnet werden:
+\begin{center}
+\[ a_0 \cdot \sum_{i=0}^{k} q^i = a_0 \cdot \frac{1-q^{k+1}}{1-q}\] 
+\[S(n)_A = 50 \cdot \sum_{i=0}^{n} (\frac{1}{2})^i = 50\cdot  \frac{1-\frac{1}{2}^{n+1}}{1-\frac{1}{2}}\] 
+\end{center}
+Für sehr große n strebt $S(n)_A$ gegen 100. Da die Nachkommastellen aber abgeschnitten werden erreicht $S(n)_A$ den Wert 99. 
+Somit muss $P_B \geq 99$ damit $S(n)_A \leq S(n)_B\  \forall n$ und Prozess B niemals die CPU bekommt. Es reicht jedoch wenn $P_B = 99$, da dann für große n beide Prozesse die gleiche Summe haben und dann laut Konvention Prozess A die CPU bekommt. 
+\subsection*{Aufgabe 3d)}
+Aufgabe 3d ist wesentlich komplexer als die bisherigen. Da Prozess B sich für 250ms blokiert kann es passieren, dass Prozess A die CPU bekommt, obwohl A den höheren \textit{nice} Wert hat bzw. die niedrigere Priorität. Dies kann auch während einer Zeitscheibe passieren da B die Run-Queue verlässt. Weiterhin kann es passieren, dass B sich nach ablauf der 250ms wieder in die Run-Queue einreiht und aufgrund einer höheren Priorität sofort die CPU bekommt. \\
+ In den ersten beiden Tabellen sind die ersten 6 Zeitscheiben detailliert aufgelistet.\\
+(Bemerkung: 145ms A und 55ms B = 72,5\% A und 27,5\% B) 
+\begin{table}[htbp]
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+Scheibe  & 0 & 1 & 2 & 3 & 4 & 5 \\ \hline
+ &  &  &  &  &  &  \\ \hline
+Konto A & 0 & 50 & (72,5+50)/2=61 & (72,5+61)/2 = 66 & (100+66)/2 = 83 & (72,5+83)/2= 77 \\ \hline
+Priorität A & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+Summe A & 0 & 50 & 61 & 66 & 83 & 77 \\ \hline
+ &  &  &  &  &  &  \\ \hline
+Konto B & 0 & 0 & (27,5+0)/2 = 13 & (27,5+13)/2=20 & (0+20)/2 =10 & (27,5+10)/2 = 18 \\ \hline
+Priorität B & 15 & 15 & 15 & 15 & 15 & 15 \\ \hline
+Summe B & 15 & 15 & 28 & 35 & 35 & 33 \\ \hline
+ &  &  &  &  &  &  \\ \hline
+Prozess & 200ms A & 145ms A & 105ms A & 200ms A & 10ms A & 115ms A \\ \hline
+ &  & 55ms B & 55ms B &  & 55ms B & 55ms B \\ \hline
+ &  &  & 40ms A &  & 135ms A & 30ms A \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+Es lässt sich erkennen, dass Prozess B für die ersten 12 Scheiben wahrscheinlich eine bessere Priorität haben wird als A. Dies ist auch logisch, da B immer nur maximal 55ms CPU Zeit hat und A die übrigen 145ms. Deshalb verzichten wir auf die detaillierte Berechnung der Summen/Prioritäten (die nur Fleißarbeit wäre) und stellen im folgenden das Sheduling für die restlichen 6 Scheiben dar (unter der Voraussetzung, dass B immer die höhere Priorität hat) 
+\begin{table}[htbp]
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{1}{|l|}{Scheibe } & Prozess \\ \hline
+\multicolumn{1}{|l|}{} &  \\ \hline
+6 & 200ms A \\ \hline
+7 & 20ms A, 55ms B, 125ms A \\ \hline
+8 & 145ms A, 55ms B, 20ms A \\ \hline
+9 & 200ms A \\ \hline
+10 & 30ms A, 55ms B, 115ms A \\ \hline
+11 & 125ms A, 55ms B, 20ms A \\ \hline
+\end{tabular}
+\end{table}
+
+
+\end{document}

@@ -1,0 +1,99 @@
+% !TeX root = ../04_C01_habermann_koester_rohde.tex
+
+\definecolor{blkclr}{rgb}{0.85,0.85,0.85}
+
+\begin{center}
+    \begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=2cm,semithick,align=left,scale=0.24, every node/.style={scale=0.24}]
+        \tikzstyle{every state}=[fill=white,draw=black,text=black,initial text=,accepting/.style=accepting by arrow]
+
+        % der rahmen
+        \draw[very thick]                       (0,0)   rectangle                                                               (64,2);
+
+        % jede einzelne speicherzelle 1-8
+        \draw[blkclr,ultra thin,fill=yellow]    (0,0)   rectangle                                                               (1,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (1,0)   rectangle                                                               (2,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (2,0)   rectangle                                                               (3,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (3,0)   rectangle                                                               (4,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (4,0)   rectangle                                                               (5,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (5,0)   rectangle                                                               (6,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (6,0)   rectangle                                                               (7,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (7,0)   rectangle                                                               (8,2);
+
+        % jede einzelne speicherzelle 9-16
+        \draw[blkclr,ultra thin,fill=yellow]    (8,0)   rectangle                                                               (9,2);
+        \draw[blkclr,ultra thin,fill=yellow]    (9,0)   rectangle                                                               (10,2);
+        \draw[blkclr,ultra thin,fill=white]     (10,0)  rectangle                                                               (11,2);
+        \draw[blkclr,ultra thin,fill=white]     (11,0)  rectangle                                                               (12,2);
+        \draw[blkclr,ultra thin,fill=white]     (12,0)  rectangle                                                               (13,2);
+        \draw[blkclr,ultra thin,fill=white]     (13,0)  rectangle                                                               (14,2);
+        \draw[blkclr,ultra thin,fill=white]     (14,0)  rectangle                                                               (15,2);
+        \draw[blkclr,ultra thin,fill=white]     (15,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 16}}}       (16,2);
+
+        % jede einzelne speicherzelle 17-24
+        \draw[blkclr,ultra thin,fill=red]       (16,0)  rectangle                                                               (17,2);
+        \draw[blkclr,ultra thin,fill=red]       (17,0)  rectangle                                                               (18,2);
+        \draw[blkclr,ultra thin,fill=red]       (18,0)  rectangle                                                               (19,2);
+        \draw[blkclr,ultra thin,fill=red]       (19,0)  rectangle                                                               (20,2);
+        \draw[blkclr,ultra thin,fill=red]       (20,0)  rectangle                                                               (21,2);
+        \draw[blkclr,ultra thin,fill=red]       (21,0)  rectangle                                                               (22,2);
+        \draw[blkclr,ultra thin,fill=red]       (22,0)  rectangle                                                               (23,2);
+        \draw[blkclr,ultra thin,fill=red]       (23,0)  rectangle                                                               (24,2);
+
+        % jede einzelne speicherzelle 25-32
+        \draw[blkclr,ultra thin,fill=red]       (24,0)  rectangle                                                               (25,2);
+        \draw[blkclr,ultra thin,fill=red]       (25,0)  rectangle                                                               (26,2);
+        \draw[blkclr,ultra thin,fill=red]       (26,0)  rectangle                                                               (27,2);
+        \draw[blkclr,ultra thin,fill=red]       (27,0)  rectangle                                                               (28,2);
+        \draw[blkclr,ultra thin,fill=white]     (28,0)  rectangle                                                               (29,2);
+        \draw[blkclr,ultra thin,fill=white]     (29,0)  rectangle                                                               (30,2);
+        \draw[blkclr,ultra thin,fill=white]     (30,0)  rectangle                                                               (31,2);
+        \draw[blkclr,ultra thin,fill=white]     (31,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 32}}}       (32,2);
+
+        % jede einzelne speicherzelle 33-40
+        \draw[blkclr,ultra thin,fill=orange]    (32,0)  rectangle                                                               (33,2);
+        \draw[blkclr,ultra thin,fill=orange]    (33,0)  rectangle                                                               (34,2);
+        \draw[blkclr,ultra thin,fill=orange]    (34,0)  rectangle                                                               (35,2);
+        \draw[blkclr,ultra thin,fill=white]     (35,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 36}}}       (36,2);
+        \draw[blkclr,ultra thin,fill=white]     (36,0)  rectangle                                                               (37,2);
+        \draw[blkclr,ultra thin,fill=white]     (37,0)  rectangle                                                               (38,2);
+        \draw[blkclr,ultra thin,fill=white]     (38,0)  rectangle                                                               (39,2);
+        \draw[blkclr,ultra thin,fill=white]     (39,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 40}}}       (40,2);
+
+        % jede einzelne speicherzelle 41-48
+        \draw[blkclr,ultra thin,fill=white]     (40,0)  rectangle                                                               (41,2);
+        \draw[blkclr,ultra thin,fill=white]     (41,0)  rectangle                                                               (42,2);
+        \draw[blkclr,ultra thin,fill=white]     (42,0)  rectangle                                                               (43,2);
+        \draw[blkclr,ultra thin,fill=white]     (43,0)  rectangle                                                               (44,2);
+        \draw[blkclr,ultra thin,fill=white]     (44,0)  rectangle                                                               (45,2);
+        \draw[blkclr,ultra thin,fill=white]     (45,0)  rectangle                                                               (46,2);
+        \draw[blkclr,ultra thin,fill=white]     (46,0)  rectangle                                                               (47,2);
+        \draw[blkclr,ultra thin,fill=white]     (47,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 48}}}       (48,2);
+
+        % jede einzelne speicherzelle 49-56
+        \draw[blkclr,ultra thin,fill=purple]    (48,0)  rectangle                                                               (49,2);
+        \draw[blkclr,ultra thin,fill=purple]    (49,0)  rectangle                                                               (50,2);
+        \draw[blkclr,ultra thin,fill=purple]    (50,0)  rectangle                                                               (51,2);
+        \draw[blkclr,ultra thin,fill=purple]    (51,0)  rectangle                                                               (52,2);
+        \draw[blkclr,ultra thin,fill=purple]    (52,0)  rectangle                                                               (53,2);
+        \draw[blkclr,ultra thin,fill=purple]    (53,0)  rectangle                                                               (54,2);
+        \draw[blkclr,ultra thin,fill=purple]    (54,0)  rectangle                                                               (55,2);
+        \draw[blkclr,ultra thin,fill=purple]    (55,0)  rectangle                                                               (56,2);
+
+        % jede einzelne speicherzelle 57-64
+        \draw[blkclr,ultra thin,fill=purple]    (56,0)  rectangle                                                               (57,2);
+        \draw[blkclr,ultra thin,fill=purple]    (57,0)  rectangle                                                               (58,2);
+        \draw[blkclr,ultra thin,fill=purple]    (58,0)  rectangle                                                               (59,2);
+        \draw[blkclr,ultra thin,fill=purple]    (59,0)  rectangle                                                               (60,2);
+        \draw[blkclr,ultra thin,fill=purple]    (60,0)  rectangle                                                               (61,2);
+        \draw[blkclr,ultra thin,fill=purple]    (61,0)  rectangle                                                               (62,2);
+        \draw[blkclr,ultra thin,fill=purple]    (62,0)  rectangle                                                               (63,2);
+        \draw[blkclr,ultra thin,fill=purple]    (63,0)  rectangle   node[at end, above]{\color{black}{\textbf{\Huge 64}}}       (64,2);
+
+        % die trennlinien zwischen den bloecken
+        \draw[ultra thick]                      (16,0)  --                                                                      (16,2.2);
+        \draw[ultra thick]                      (32,0)  --                                                                      (32,2.2);
+        \draw[ultra thick]                      (36,0)  --                                                                      (36,2.2);
+        \draw[ultra thick]                      (40,0)  --                                                                      (40,2.2);
+        \draw[ultra thick]                      (48,0)  --                                                                      (48,2.2);
+    \end{tikzpicture}
+\end{center}

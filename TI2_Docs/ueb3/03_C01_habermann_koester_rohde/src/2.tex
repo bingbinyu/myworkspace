@@ -1,0 +1,13 @@
+% !TeX root = ../02_C01_habermann_koester_rohde.tex
+
+\subsection{Signalhandler}
+    \codeSh{handleSignal}{sigserver.cc}{src/sigserver.cc}
+
+    Wir haben einen Signalhandler gebaut, der als Parameter die drei Rueckgaben vom \C{sigaction} bekommt und daraus eine triviale Konsolenausgabe gemaess Aufgabenstellung baut.
+
+\subsection{main}
+    \codeSh{main}{sigserver.cc}{src/sigserver.cc}
+
+    Unsere \m{main}-Methode liefert zuerst die eigene PID zurueck, damit wir direkt den \C{kill}-Befehl darauf absetzen koennen.
+    Dann initialisieren wir unser \C{sigaction}, setzen die Flags und den Namen der Methode, die ein Signal verarbeiten soll und registrieren zuletzt den "Listener" fuer das Signal \m{SIGUSR1}.
+    Die Methode \m{pause()} laesst das Programm so lange warten, bis ein Signal gesendet wird. Danach beendet es sich mit dem Exit-Code 0.
