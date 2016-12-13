@@ -1,0 +1,119 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc} 
+\usepackage{listings}
+\usepackage{amsmath}
+
+\newcommand{\mm}{\emph}  
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{5}{05.12.2016}{Marc Hildebrandt}{C/06}%
+                {Niklas Koenen}{Jan Klüver}%
+                {Vincent Jankovic}{}%
+
+\section*{Aufgabe 1} 
+\subsection*{a)}
+Mit dem gdb kann man "uber die Aufrufe \emph{disassemble main} bzw. \emph{disassemble factorial} die virtuellen Adressr"aume ermitteln. Diese gehen von 0x000000000040057d bis 0x00000000004005e5 (main) bzw. von 0x000000000040054c bis 0x000000000040057c (factorial). 
+\\
+Dies ergibt insgesamt den Bereich 0x000000000040054c - 0x00000000004005e5.
+\subsection*{b)}
+Es wird zun"achst schonmal auf die Adresse des Stackpointers selber zugegriffen, also 0x7fffffffdf60. In den n"achsten Zeilen wird noch auf folgende Adresse zugegriffen:
+\\ 
+0x7fffffffdf42 (mov \%rdi,-0x18(\%rbp))
+\\
+0x7fffffffdf52 (\$0x1,-0x8(\%rbp))
+\subsection*{c)}
+Die virtuelle Adresse des "ubergebenen Strings ist 0x400410. Hierzu kommt noch die L"ange des Strings hinzu. Diese betr"agt nach unserer Z"ahlung 18 Bytes (17 + Nullbyte). Somit wird auf den Adressraum zwischen 0x400410 und 0x400428 zugegriffen. 
+\subsection*{d)}
+Offset Page-Frame 0: 0x1000000
+\\
+Page-Gr"o"se: 4 KiB = 0x1000 B
+\begin{itemize}
+\item Virtuelle Adresse: 0x40054c 
+\\
+Page(0x40054c)=floor(0x40054c/0x1000)=0x400=1024
+\\
+PF(1024)=17363=0x43d3
+\\
+Offset(0x40054c)=0x40054c mod 0x1000=0x54c
+\\
+Physische Adresse: 0x43d3 * 0x1000 + 0x1000000 + 0x54c=0x53d354c
+\item Virtuelle Adresse: 0x4005e5 
+\\
+Page(0x4005e5)=floor(0x4005e5/0x1000)=0x400=1024
+\\
+PF(1024)=17363=0x43d3
+\\
+Offset(0x4005e5)=0x4005e5 mod 0x1000=0x5e5
+\\
+Physische Adresse: 0x43d3 * 0x1000 + 0x1000000 + 0x5e5=0x53d35e5
+\end{itemize}
+Also physischer Adressbereich von a): 0x53d354c - 0x53d35e5
+\begin{itemize}
+\item Virtuelle Adresse: 0x7fffffffdf60 
+\\
+Page(0x7fffffffdf60)=floor(0x7fffffffdf60/0x1000)=0x7fffffffd=34359738365
+\\
+PF(34359738365):=2001=0x7d1 (hier gesetzt, da Page-Fault)
+\\
+Offset(0x7fffffffdf60)=0x7fffffffdf60 mod 0x1000=0xf60
+\\
+Physische Adresse: 0x7d1 * 0x1000 + 0x1000000 + 0xf60=0x17d1f60
+\item Virtuelle Adresse: 0x7fffffffdf42 
+\\
+Page(0x7fffffffdf42)=floor(0x7fffffffdf42/0x1000)=0x7fffffffd=34359738365
+\\
+PF(34359738365)=2001=0x7d1 
+\\
+Offset(0x7fffffffdf42)=0x7fffffffdf42 mod 0x1000=0xf42
+\\
+Physische Adresse: 0x7d1 * 0x1000 + 0x1000000 + 0xf42=0x17d1f42
+\item Virtuelle Adresse: 0x7fffffffdf52 
+\\
+Page(0x7fffffffdf52)=floor(0x7fffffffdf52/0x1000)=0x7fffffffd=34359738365
+\\
+PF(34359738365)=2001=0x7d1 
+\\
+Offset(0x7fffffffdf52)=0x7fffffffdf52 mod 0x1000=0xf52
+\\
+Physische Adresse: 0x7d1 * 0x1000 + 0x1000000 + 0xf42=0x17d1f42
+
+\item Virtuelle Adresse: 0x400410 
+\\
+Page(0x400410)=floor(0x400410/0x1000)=0x400=1024
+\\
+PF(1024)=17363=0x43d3
+\\
+Offset(0x400410)=0x400410 mod 0x1000=0x410
+\\
+Physische Adresse: 0x43d3 * 0x1000 + 0x1000000 + 0x410=0x53d3410
+\item Virtuelle Adresse: 0x400428
+\\
+Page(0x400428)=floor(0x400428/0x1000)=0x400=1024
+\\
+PF(1024)=17363=0x43d3
+\\
+Offset(0x400428)=0x400428 mod 0x1000=0x428
+\\
+Physische Adresse: 0x43d3 * 0x1000 + 0x1000000 + 0x428=0x53d3428
+\end{itemize}
+Also ist der physische Adressbereich von c): 0x53d3410 - 0x53d3428
+\section*{Aufgabe 2}
+In dieser Aufgabe sollten wir berechnen, wie viele Bl"ocke man mindestens ben"otigt, um eine Datei der gr"o"se 33.696.325 B auf der Platte zu speichern. Dabei ist jeder Datenblock 512 B und die Inode 128 B gro"s. Au"serdem hat die Inode zehn direkt Eintr"age, einen Indirektblock, einen Zweifach-Indirektblock und einen Dreifach-Indirektblock. Zus"atylich ist der Pointer auf den Speicherblock bzw. auf den Indirektblock 4 B gro"s.\\
+Da jeder Indirektblock 512 B gro"s ist, k"onnen $\frac{512 B}{4 B}=128$ indirekte Eintr"age auf einem Indirektblock gespeichert werden. Au"serdem braucht man mindestens $\frac{33.696.325 B}{512 B}=65.813,13$ d.h. 65.814 Bl"ocke, um allein die Datei zu speichern.\\
+Da $10+128+128^2=16.522 < 65.814$ gilt, sind alle Datenbl"ocke im Indirektblock und im Zweifach-Indirektblock belegt. Also wird der Drefach-Indirektblock ebenfalls ben"otigt. \\
+Es m"uessen somit $65.814-16.522=49.292$ Bl"ocke noch belegt werden. Nun ist die maximale Anzahl der Dreifach-Indirektbl"ocke $128^3$, was deutlich zu viele Bl"ocke sind. Also gehen wir erstmal von der minimalen Anzahl aus, d.h jeder Dreifach-Indirektblock ist ein normaler Datenblock. Nun tauschen wir $x$ dieser Datenbl"ocke gegen einen Indirektblock aus, der dann jeweils 128 neue Datenbl"ocke  liefert. Damit gilt:
+\begin{align*}
+& 128^2-x+128x=49.292 \\
+\Leftrightarrow\ & x*(-1+128)=49.292-128^2 \\
+\Leftrightarrow\ & x=\frac{49.292-128^2}{127}=259,118
+\end{align*}
+Das bedeutet, es gibt 260 Dreifach-Indirektbl"ocke. \\
+Insgesamt folgt also, dass es insgesamt $3+2 \cdot{} 128+260=519$ indirekte Bl"ocke und $65.814$ Speicherbl"ocke geben muss. Da die Inode auch Speicherplatz verbraucht, werden insgesamt mindestens $65.814 + 519 + 1=66.334$ Speicherbl"ocke auf der Platte der Gr"o"se 512 B ben"otigt, um die ganze Datei speichern zu k"onnen.
+
+\section*{Aufgabe 3}
+Zuerst werden mit dem Systemaufruf \mm{open(...)} jeweils die gegebenen Dateien (Pfade) ge"offnet und in $g$ bzw. $f$ gspeichert, wobei wir annhemen k"onnen, dass in beiden F"allen kein Fehler auftritt (es wird also keine $-1$ zur"uck gegeben). Der Dateideskriptor wird nun jeweils auf den entsprechenden Byte gesetzt, damit sp"ater gelesen werden kann. Dem Pfad der \mm{nikolaus.avi} hat als 'access' Parameter read-only und die \mm{meta} read and write. Die Inode von \mm{/} wurde vom Bootsystem bereits ermittlet und wird als erstes, wenn nicht schon im Hauptspeicher (dies sollte eigentlich der Fall sein, beim booten), geladen. Danach wird die Inode von \mm{home} geladen. Zusammen wurden also bisher Block 2 und Block 9 vom externen Speichermedium in den Hauptspeicher geladen. Ebenso werden die Inodes von \mm{ti2, archive und nikolaus.avi} geladen (die Datenbl"ocke erst sp"ater) und der Deskriptor gesetzt. Diese besitzen neben den Metadaten der Dateien auch verweise auf die Datenbl"ocke, die evtl. wieder auf die n"achste Inode in der Inodentabelle verweisen. Der Systemaufruf wird u"ber die Deskriptortabelle 'weitergeleitet', n"ahmlich an eine Filetabelle, die wiederum auf die Inodetabelle verweist bzw. auf die entsprechende Indode. Diese sollten also auch geladen werden. Dies geschiet auch (f"ur jeden Prozess) fu"r die Systemaufrufe \mm{lseek(...), read() und write()}. Sollten die Datenbl"ocke f"ur diese Systemaufrufe noch nicht geladen worden sein, so passiert dies jetzt. F"ur \mm{lseek()} wird Block Nr. 50 geladen, wobei dies auch ein anderer Datenblock  sein kann. Wichtig ist, dass der Datenblock, der die letzten Bytes minus dem Offset von $-10000$ der Datei enth"alt ($Pos + $Offset$ = fdPos \Leftrightarrow 12 1048576 - 10000 = 121038576$), geladen wird (evtl. werden auch mehr Datenbl"oke geladen, um das Ende zu ermitteln). Dies wird von \mm{SEEKEND} impliziert. Den Block kann man analog zu Aufgabe 2 ermitteln. Die Nr. k"onnen wir aber nicht angeben. Hier wird nun der Filedeskriptor gesetzt. Mit \mm{read} werden nun 4096 Bytes gelesen. Dazu m"ussen $\frac{4096}{512}=8$ Bl"ocke geladen werden. Je nach dem wie die Datenbl"ocke sortiert sind, k"onnen es aber auch nur 7 sein. Die Daten der Datenbl"ocke werden nun in \mm{count} gespeichert. Mit  \mm{write} wird nun der Inhalt von \mm{count} in die von \mm{g} induzierten Bl"ocke geschrieben. Um den Buffer m"ussen wir uns in dieser Aufgabe nicht k"ummern, der Filedescriptor ist durch \mm{g} gegeben. Da die Meta leer ist, werden zwar 7-8 'Meta' -  Bl"ocke geladen und beschrieben, aber der erste Block in \mm{meta} hat die Nr. 8521.
+\end{document}

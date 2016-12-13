@@ -1,0 +1,15 @@
+% !TeX root = ../05_C01_habermann_koester_rohde.tex
+
+Für die Darstellung von 33.696.325 B brauchen wir mindestens 65.814 Blöcke à 512 B; \\\newline
+Allerdings müssen wir ja auch die Blocknummern speichern, wodurch je Block 4 B wegfallen. \\\newline
+Bei der Datenmenge benötigen wir also 518 weitere Blöcke, da nur je 508 B Nutzdaten zu Verfügung stehen. \\\newline
+Da ein weiterer Block für die Inode verbraucht wird, insgesamt also dann mindestens \textbf{66.333 Blöcke}.\\ \newline
+\newline
+% Dies teilt sich auf in: \\
+%
+%\textit{\textbf{!!!!!! Folgende Aufzählung ist definitiv so nicht richtig!!!!!}}
+%
+%10 Blöcke als direkter Verweis ( = 5120 B); \\
+%256 Blöcke als indirekter Verweis ( = 131.072 B); 	 $| 256$ Blöcke $\cdot$ 512 B \\
+%65.536 Blöcke als zweifacher Verweis ( = 33.554.432 B);  $| 256^{2}$ Blöcke $\cdot$ 512 B \\
+%530 Blöcke aus dreifachem Verweis (= 373.248 B $>$ B). 	$|$ 9 Einträge,  3  Blöcke $\cdot$ 512 B \\

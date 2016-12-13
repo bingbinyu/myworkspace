@@ -1,0 +1,241 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{ucs}
+\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{wrapfig,lipsum,booktabs}
+\usepackage{adjustbox}
+\usepackage{lmodern}
+\usepackage{enumitem}
+\setlist[enumerate,1]{start=0} % only outer nesting level
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}%
+{fontsize=\footnotesize,
+ %
+ frame=lines,  % top and bottom rule only
+ framesep=2em, % separation between frame and text
+ rulecolor=\color{Gray},
+ %
+ label=\fbox{\color{Black}test.txt},
+ labelposition=topline,
+ %
+ commandchars=\|\(\), % escape character and argument delimiters for
+                      % commands within the verbatim
+ commentchar=*        % comment character
+}
+\lstset{ 
+language=C++,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,           % adds a frame around the code
+tabsize=2,          % sets default tabsize to 2 spaces
+captionpos=b,           % sets the caption-position to bottom
+breaklines=true,        % sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)},          % if you want to add a comment within your code
+inputencoding = latin1,
+literate={ö}{{\"o}}1
+           {ä}{{\"a}}1
+           {ü}{{\"u}}1
+}
+
+\usepackage{xcolor}
+  \definecolor{sx-yellow}{RGB}{249,245,233}
+  \definecolor{sx-orange}{RGB}{224,215,188}
+\usepackage[most]{tcolorbox}
+
+\makeatletter
+\renewenvironment{quote}{%
+  \vskip 10\p@
+  \parindent\z@
+  \tcolorbox[
+    breakable, sharp corners,
+    boxrule=\z@, boxsep=\z@,
+    left=\z@, right=\z@,
+    top=\z@, bottom=\z@,
+    colback=sx-yellow
+  ]
+  {\color{sx-orange}\d@ublerule}
+  \vskip 5\p@
+  \list{}{\rightmargin\leftmargin}%
+  \item\relax
+}{%
+  \endlist
+  {\color{sx-orange}\d@ublerule}
+  \endtcolorbox
+  \vskip 5\p@
+}
+\def\d@ublerule{\hrule\@width\hsize\kern 1.5\p@\hrule\@width\hsize}
+\makeatother
+
+\setlength{\parindent}{0pt}
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{5}{05.12.2016}{Marc/Bingbin}{C02}%
+                {Rene Engel}{Dennis Jacob}%
+                {Jan Schoneberg}%
+                
+
+
+\section*{Aufgabe 1}
+Die Aufgabe wurde auf dem x21-Rechner am  02.12.2016 bearbeitet. 
+\subsection*{Aufgabe 1a)}
+Zunächst haben wir mit \textit{gdb} den virtuellen Adressraum ermittelt, die die Funktionen \textit{main} und \textit{factorial} einnehmen. Dazu wurde nachdem gdb mit \texttt{gdb factorial} gestartet wurde die Befehle \texttt{disassemble main} und \texttt{disassemble factorial} ausgeführt. Anhand des Assembler Codes und den entsprechenden Adressen im virt. Adressraum lassen sich folgende Bereiche erkennen:\\
+\begin{center}
+\begin{tabular}{c|c|c}
+Funktion & Startadresse & Endadresse \\
+\hline 
+factorial & \textbf{0x40054c} & \textbf{0x40057c} \\
+main & \textbf{0x40057d} & \textbf{0x4005e5} \\
+gesamt & \textbf{0x40054c} & \textbf{0x5005e5}\\
+\end{tabular}
+\end{center}
+Die gleichen Startadressen werden auch durch den Befehl \texttt{info functions} angezeigt.
+\subsection*{Aufgabe 1b)}
+In Aufgabe 1b haben wir die virtuellen Adressen im Stacksegment untersucht, auf die in der Funktion \textit{factorial} zugegriffen wird. Dazu haben wir zunächst ermittelt, auf welche Adressen zugegriffen wird, wenn der User Stackpointer nicht beachtet wird. Das Vorgehen ist wie folgt: \\ \\
+\texttt{break *0x40054c}: Breakpoint 1 am Beginn der Funktion \textit{factorial}\\
+\texttt{run 5}: ausführen des Programms; hält bei 0x40054c an \\
+\texttt{display/a \$ rsp} und \texttt{display/a \$ sp}: Zeigt in jedem der folgenden Schritte den Inhalt der Register \textit{sp} und \textit{rsp} an (diese stimmen überein) \\
+mehrfach \texttt{nexti}: ausführen der einzelnen Befehle bis zum Ende der Funktion \textit{factorial}  \\ \\
+Der User Stackpointer enthält während aller Aufrufe nur die Adressen 0x7fffffffe738 und 0x7fffffffe730. 0x7fffffffe738 ist dabei auch die oberste Adresse des Stackframes (der Stack wächst nach unten), was durch die Befehle \texttt{info stack, frame 0, info frame} ersichtlich wird. Somit wird in \textit{factorial} nur auf 2 Adressen des Stacks zugegriffen. Dieses Ergebnis tritt auch auf, wenn das Programm mit anderen Werten für n, z.B. \texttt{run 10}, gestartet wird.  \\ \\
+Wenn der User-Stackpointer beim Eintritt die Funktion den Wert 0x7fffffffdf60 hat, dann muss davon also noch $4_{dez}$ bzw. $0x4_{hex}$ subtrahiert werden um die zweite Adresse zu erhalten (der Stack wächst nach unten)(an jeder Adresse steht ein Byte, die restlichen 3 Bytes stehen an den folgenden Adressen) \\
+$0x7fffffffdf60 - 0x4 = 0x7fffffffdf5c$\\ 
+Da immer auf ein 32 Bit Datenwort zugegriffen wird, wird indirekt auch auf die 3 folgenden Adressen zugegriffen. (An jeder Stelle steht 1 Byte. 4 Bytes = 32 Bit) 
+\\
+$0x7fffffffdf5c - 0x3 = 0x7fffffffdf59$ \\ \\
+Es wird also in der Funktion \textit{factorial} auf die virtuellen Adressen \textbf{0x7fffffffdf60 bis 0x7fffffffdf59} im Stacksegment zugegriffen. 
+\subsection*{Aufgabe 1c)}
+Nun haben wir die Funktion \textit{printf} in der Methode \textit{main} untersucht. Dazu haben wir \textit{gdb} zunächst neu gestartet (Befehl \texttt{quit}) um sicher zu gehen, dass alle bisherigen Änderungen unwirksam gemacht werden. Zunächst müssen wir analysieren, wie die Methode \textit{printf} arbeitet, um festzustellen wo auf die Zeichenkette im Datensegment zugegriffen wird. Dazu gehen wir wie folgt vor:  \\ \\
+\texttt{gdb factorial}: \textit{gdb} starten \\
+\texttt{disassemble main}: Assembler Code von \textit{main} anzeigen \\
+\texttt{break *0x4005da}: Breakpoint 1 an der virt. Adresse von \textit{printf} \\
+\texttt{run 5}: \textit{factorial} ausführen; hält bei 0x4005da an\\
+\texttt{disassemble printf}: Assembler Code von \textit{printf} anzeigen \\ 
+\texttt{break *0x7ffff7a9e190}: Breakpoint 2 am Beginn von \textit{printf} (Alternativ \texttt{break *\_ \_ printf} \\
+\texttt{until 2}: fortfahren bis zum Breakpoint 2 (0x7ffff7a9e190)  \\
+\texttt{info registers} \\ \\
+Es lässt sich erkennen, dass nicht alle Register belegt sind. Wenn man sich alle belegten Register mit: \\
+\texttt{print/s \$REGSITER} \\
+anzeigen lässt, stellt man fest, dass im Register \textit{rdi} an Adresse 0x40069c der String \glqq factorial(\%lu) = \%lu$\setminus$n\grqq steht. Allerdings muss auch wieder die Länge ($21_{Dez} = 15_{hex}$ chars bzw. Bytes) des String berücksichtigt werden (das Datensegment wächst nach oben!). Es wird also auch auf die folgenden $20_{Dez} = 14_{Hex}$ Adressen zugegriffen:\\
+$\mathbf{0x40069c + 0x14 =  0x4006b0}$ 
+%Es lässt sich erkennen, dass die \textit{movaps} Befehle für den Zugriff auf den String zuständig sind, da dieser mehrere Bytes groß ist und nur durch die 128 Bit breiten \textit{SSE} (\textit{xmm0} bis \textit{xmm7}) Register (Floating Point Register) realisiert werden können. Diese greifen mit einem negativen Offset (0xf bis 0x7f)auf die Adresse des Registers \textit{rdx} zu.  Ziel ist also nun den Wert des Registers \textit{rdx} bei Ausführung der \textit{movaps} Befehle zu ermitteln. Dazu gehen wir wie folgt vor: \\ \\
+
+%\texttt{display/a \$rip}: Anzeigen der Adresse der nächsten Instruktion (Wert des Instruction Pointers) um festzustellen wo im Programmablauf wir uns befinden. \\
+%\texttt{display/a \$rdx}: Anzeigen des Wertes des Registers \textit{rdx} nach jedem ausgeführten Befehl\\
+%\texttt{nexti} bis alle \textit{movaps} Instruktionen ausgeführt wurden (printf +98)  \\ \\
+%Es lässt sich erkennen, dass \textit{rdx} an dieser Stelle den Wert \textbf{0x7fffffffe72f} hat. Also wird auf folgende Adressen zugegriffen: \\ 
+%\begin{center}
+%$0x7fffffffe72f - 0xf = \mathbf{0x7fffffffe720} $\\
+%$0x7fffffffe72f - 0x1f = \mathbf{0x7fffffffe710} $\\
+%$0x7fffffffe72f - 0x2f = \mathbf{0x7fffffffe700} $\\
+%$0x7fffffffe72f - 0x3f = \mathbf{0x7fffffffe6f0} $\\
+%$0x7fffffffe72f - 0x4f = \mathbf{0x7fffffffe6e0} $\\
+%$0x7fffffffe72f - 0x5f = \mathbf{0x7fffffffe6d0} $\\
+%$0x7fffffffe72f - 0x6f = \mathbf{0x7fffffffe6c0} $\\
+%\end{center}
+\newpage
+\subsection*{Aufgabe 1d)}
+Der Adressbereich der physischen Adressen lässt sich wie folgt errechnen:
+\begin{center}
+	$PA=PF\left(\left\lfloor\frac{VA}{PS}\right\rfloor\right)\cdot PS + PO_0+PO$
+\end{center}
+Wobei:\\
+$PA\Rightarrow$ physische Adresse\\
+$VA\Rightarrow$ virtuelle Adresse\\
+$PS\Rightarrow$ Page-Size (4096 B = 0x1000)\\
+$PO_0\Rightarrow$ Offset des Page-Frame 0(0x1000000)\\
+$PO\Rightarrow$ Offset der Page
+\subsubsection*{physische Adressbereich der Aufgabe 1a)}
+\begin{tabular}{c|c|c|c|c|c}
+virtuelle Adresse 	& Page 	& Offset& Page Nummer	& Pageframe & physische Adresse 	\\ \hline
+0x40054c			& 0x400	& 0x54c	& 1024 & 0x43d3 & 0x53d354c			\\ 
+0x40057c			& 0x400	& 0x57c & 1024 & 0x43d3	& 0x53d357c			\\ 
+0x40057d			& 0x400 & 0x57d	& 1024 & 0x43d3 & 0x53d357d			\\ 
+0x4005e5			& 0x400 & 0x5e5	& 1024 & 0x43d3	& 0x53d35e5			\\ 
+\end{tabular}
+\subsubsection*{physische Adressbereich der Aufgabe 1b)}\begin{tabular}{c|c|c|c|c|c}
+virtuelle Adresse 	& Page 			& Offset & Page-Nummer	& Pageframe & physische Adresse 	\\ \hline
+0x7fffffffdf60		& 0x7fffffffd 	& 0xf6 		& 34359738365& ?		& ? \\
+0x7fffffffdf59		& 0x7fffffffd 	& 0xf53		& 34359738365& ?			& ? \\
+\end{tabular}\\ \\
+Da diese Page-Nummer nicht im Hauptspeicher geladen ist, vermuten wir einen Fehler in Aufgabe 1b. Die Berechnung ergibt Sinn, wenn ich der virtuellen Adresse die erste 7 weg gelassen wird. \\ \\ 
+\begin{tabular}{c|c|c|c|c|c}
+virtuelle Adresse 	& Page 			& Offset & Page-Nummer	& Pageframe & physische Adresse 	\\ \hline
+0xfffffffdf60		& 0xfffffffd 	& 0xf60		& 4294967293& 0x7d1		& 0x17d1f60 \\
+0xfffffffdf59		& 0xfffffffd 	& 0xf59		& 4294967293& 0x7d1		& 0x17d1f59 \\
+\end{tabular}
+\subsubsection*{physische Adressbereich der Aufgabe 1c)}\begin{tabular}{c|c|c|c|c|c}
+virtuelle Adresse 	& Page 			& Offset& Page-Nummer	& Pageframe & physische Adresse 	\\ \hline
+0x4006b0			& 0x400			& 0x6b	& 	1024 & 0x43d3	& 0x53d306b			\\
+\end{tabular}
+\newpage
+\section*{Aufgabe 2}
+\begin{quote}
+	Wieviele Blöcke werden mindestens benötigt, um eine Datei der Größe 33696325~B auf der Platte
+	zu speichern?
+\end{quote}
+Die Anzahl der Blöcke, die benötigt werden, um nur die Datei zu speichern betragt $\frac{33696325~B}{512~B}=65814$. Hierbei ist zu beachten, dass immer aufgerundet werden muss, da ein Block belegt ist, auch wenn nur ein Bit wirklich Nutzdaten enthält.\\\\
+% Besser erklären
+\begin{tabular}{c|c|c|c}
+Verbleibene Datenblöcke & Name 						& Fassungsvermögen 	& Overhead 		\\ \hline
+65814					& Inode						& 10				& 1				\\ \hline
+65804					& einfach Indirektblock		& 128				& 1				\\ \hline
+65676					& zweifach Indirekblock 	& $128^2$			& 1 + 128		\\ \hline\hline
+49292					& dreifach Indirektblock 	& $128^3$			& 1 + $128^2$
+\end{tabular}
+Für die restlichen 49292 Datenblöcke muss nicht der gesamte dreifach Indirektblock verwendet werden. Daher hier eine kleine Nebenrechnung:\\
+$\left\lceil\frac{49292}{128}\right\rceil=386 \Rightarrow$ Anzahl der einfach Indirektblöcken "{}unterhalb" des dreifach Indirektblocks\\
+$\left\lceil\frac{386}{128}\right\rceil=4 \Rightarrow$ Anzahl der zweifach Indirektblöcken "{}unterhalb" des dreifach Indirektblocks\\
+Somit ergibt sich für den Overhead:\\
+$1+1+1+128+1+4+386=522$\\
+Und somit für die Gesamtblockanzahl:\\
+\underline{\underline{$522+65814=66336$}}
+\section*{Aufgabe 3}
+	\begin{quote}
+		Verfolgt die Abarbeitung der Systemaufrufe und beschreibt, welche Inodes und Datenblöcke von
+		der Festplatte in den Hauptspeicher geladen werden müssen.
+	\end{quote}
+	\begin{enumerate}
+		\renewcommand{\labelenumii}{\theenumii}
+		\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+		\setcounter{enumi}{0}
+		\item \texttt{int f = open("/home/ti2/archive/nikolaus.avi", O\_RDONLY);}\\
+		Mit diesem Befehl wird die Datei \textit{nikolaus.avi} mit \textit{Read-Only}-Berechtgung (nur lesen) geöffnet. Dabei ergibt sich folgende Aufrufkette der \textbf{Inodes} und \textbf{Datenblöcke}:
+		\begin{enumerate}
+			\item Der \textit{Inode} des \textit{root}-Verzeichnisses \texttt{/} wird beim Booten ermittelt. Von diesem aus wird der Datenblock 2 des \textit{root}-Verzeichnisses geladen. In diesem ist die Pfadkomponente \texttt{home} zu finden die auf den \textit{Inode} 36 verweist. Der Datenblock 9 wird geladen.
+			\item Im Datenblock 9 verweist die Pfadkomponente \texttt{ti2} auf den \textit{Inode} 99. Datenblock 2000 wird geladen.
+			\item Im Datenblock 2000 verweist die Pfadkomponente \texttt{archive} auf den \textit{Inode} 206. Datenblock 3101 wird geladen.
+			\item Im Datenblock 3101 verweist der Dateiname \texttt{nikolaus.avi} auf der \textit{Inode} 12783. Der Datenblock 50 wird geladen.
+			\item Im Datenblock 50 wird auf den Datenblock der Datei \texttt{nikolaus.avi} verwiesen.
+			\item Der Datenblock der \texttt{nikolaus.avi} wird geladen.
+			\item \texttt{open()} gibt einen \texttt{File Descriptor} für die \texttt{nikolaus.avi} zurück.
+		\end{enumerate}
+		\item \texttt{int g = open("/home/ti2/meta", O\_RDWR);}\\
+		Mit diesem Befehl wird das Verzeichnis \texttt{meta} geöffnet. Die Schritte 1 und 2 des 1. Befehlsaufrufs wiederholen sich.
+		\begin{enumerate}
+			\setcounter{enumii}{2}
+			\item Im Datenblock 2000 verweist die Pfadkomponente \texttt{meta} auf den \textit{Inode} 112. Datenblock 8521 wird geladen.
+			\item \texttt{open()} gibt einen \texttt{File Descriptor} für das Verzeichnis \texttt{meta} zurück.
+		\end{enumerate}
+		\item \texttt{lseek(f, -10000, SEEK\_END);}\\
+		Mit diesem Befehl wird die aktuelle Position im Datenblock der Datei \texttt{nikolaus.avi} auf die mittels \texttt{File Descriptor}-Wert \texttt{f} verwiesen wird um -10000 vom Dateiende ausgehend verschoben (Ab dieser Position folgen dann 10000 Bytes bis zum Dateiende).
+		\item \texttt{count = read(f, buf, 4096);}\\
+		Mit diesem Befehl werden 4096 Bytes aus dem Datenblock der Datei \texttt{nikolaus.avi} auf die mittels \texttt{File Descriptor}-Wert \texttt{f} verwiesen wird in den Buffer \texttt{buf} geladen. Es gilt hierbei zu beachten, dass das Lesen erst bei den letzten 10000 Bytes des Datenblockes beginnt (Nach dem letzten gelesenen Byte folgen noch 5904 Bytes bis zum Datenblockende).
+		\item \texttt{write(g, buf, count);}\\
+		Mit diesem Befehl werden die Daten des Buffers \texttt{buf} in das Verzeichnis \texttt{meta} auf das mittels \texttt{File Descriptor}-Wert \texttt{g} verwiesen wird geschrieben. Dabei ist zu beachten, dass \texttt{count} die tatsächliche Anzahl der in den Buffer gelesenen Dateien angibt. Diese Variable wird hier verwendet um anzugeben, wie viele Bytes geschrieben werden sollen. Durch die Ausführung des Befehls wird dann ein freier Datenblock mit den zu schreibenden Bytes belegt. Es erfolgt ein neuer Eintrag in der \textit{Inode}-Tabelle der auf diesen Datenblock verweist.
+	\end{enumerate}
+		
+\end{document}

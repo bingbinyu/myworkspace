@@ -1,0 +1,36 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+
+\usepackage[utf8]{inputenc}
+\usepackage{colortbl}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+
+\Abgabeblatt{4}{28.11.2016}{Marc/Bingbin}{C-01}%
+                {Habermann, Paul}{K\"{o}ster, Joschka}%
+                {Rohde, Florian}{}%
+
+
+\section{}
+    \input{src/1}       % Aufgabe 1 ausgelagert
+
+%\clearpage
+%\subsection{Tests}
+   % \input{src/tests}   % Tests
+
+%\clearpage
+\section{}
+    \input{src/2}       % Aufgabe 2 ausgelagert
+
+\clearpage
+\section{}
+    \input{src/3}       % Aufgabe 3 ausgelagert
+
+\end{document}

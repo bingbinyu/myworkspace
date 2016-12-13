@@ -1,0 +1,66 @@
+****************************
+///Anfang Main ///
+
+Breakpoint 1, 0x000000000040057d in main ()
+
+(gdb) info frame
+Stack level 0, frame at 0x7fffffffe6f0:
+ rip = 0x40057d in main; saved rip 0x7ffff7a6eead
+ Arglist at 0x7fffffffe6e0, args:
+ Locals at 0x7fffffffe6e0, Previous frame's sp is 0x7fffffffe6f0
+ Saved registers:
+  rip at 0x7fffffffe6e8
+(gdb) info stack
+#0  0x000000000040057d in main ()
+
+
+----------------------------
+/// Anfang factorial ///
+
+Breakpoint 3, 0x000000000040054c in factorial ()
+(gdb) info frame
+Stack level 0, frame at 0x7fffffffe6c0:
+ rip = 0x40054c in factorial; saved rip 0x4005c6
+ called by frame at 0x7fffffffe6f0
+ Arglist at 0x7fffffffe6b0, args:
+ Locals at 0x7fffffffe6b0, Previous frame's sp is 0x7fffffffe6c0
+ Saved registers:
+  rip at 0x7fffffffe6b8
+(gdb) info stack
+#0  0x000000000040054c in factorial ()
+#1  0x00000000004005c6 in main ()
+
+-------------------------------------
+
+/// Ende factorial ///
+
+Breakpoint 4, 0x000000000040057c in factorial ()
+(gdb) info frame
+Stack level 0, frame at 0x7fffffffe6b8:
+ rip = 0x40057c in factorial; saved rip 0x4005c6
+ called by frame at 0x7fffffffe6f0
+ Arglist at 0x7fffffffe6e0, args:
+ Locals at 0x7fffffffe6e0, Previous frame's sp is 0x7fffffffe6c0
+ Saved registers:
+  rip at 0x7fffffffe6b8
+(gdb) info stack
+#0  0x000000000040057c in factorial ()
+#1  0x00000000004005c6 in main ()
+
+
+
+****************************
+Ende Main ///
+
+Breakpoint 5, 0x00000000004005e4 in main ()
+(gdb) info frame
+Stack level 0, frame at 0x7fffffffe6f0:
+ rip = 0x4005e4 in main; saved rip 0x7ffff7a6eead
+ Arglist at 0x7fffffffe6e0, args:
+ Locals at 0x7fffffffe6e0, Previous frame's sp is 0x7fffffffe6f0
+ Saved registers:
+  rbp at 0x7fffffffe6e0, rip at 0x7fffffffe6e8
+(gdb) info stack
+#0  0x00000000004005e4 in main ()
+(gdb)
+

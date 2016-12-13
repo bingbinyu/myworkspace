@@ -1,0 +1,59 @@
+% !TeX root = ../05_C01_habermann_koester_rohde.tex
+
+
+\begin{lstlisting}[numbers=none]
+int f = open(``/home/ti2/archive/nikolaus.avi'', O_RDONLY);
+\end{lstlisting}
+
+\m{open} stellt die Verbindung zwischen der Datei \C{nikolaus.avi} und dem ``file descriptor'' \C{f} her. \\
+Es ist also nach unserem Verständnis quasi ein Pointer auf die Datei.\\ Deshalb wird die Datei geöffnet, aber nicht geladen.
+
+\begin{itemize}
+\item Die Inode 0 (aus Block 2);
+\item der Datenblock der Verzeichnisdatei ``/'', dessen Nummer in Inode 0 steht;
+\item Inode 36 aus Datenblock 9;
+\item Datenblock der Verzeichnisdatei ``home'', extrahiert aus Inode 36;
+\item Inode 99 aus Datenblock 2000;
+\item Datenblock der Verzeichnisdatei ``ti2'', extrahiert aus Inode 99;
+\item Inote 206 aus Datenblock 3101;
+\item Datenblock der Verzeichnisdatei ``archive'', extrahiert aus Inode 206;
+\item Inode 12783 aus Datenblock 50.
+%\item 24.576 Datenblöcke der Datei ``nikolaus.avi'', extrahiert aus Inode 12783.
+\end{itemize}
+
+
+\begin{lstlisting}[numbers=none]
+int f = open(``/home/ti2/meta'', O_RDWR);
+\end{lstlisting}
+
+Es wird geladen:
+
+\begin{itemize}
+\item Die Inode 0 (aus Block 2);
+\item der Datenblock der Verzeichnisdatei ``/'', dessen Nummer in Inode 0 steht;
+\item Inode 36 aus Datenblock 9;
+\item Datenblock der Verzeichnisdatei ``home'', extrahiert aus Inode 36;
+\item Inode 99 aus Datenblock 2000.
+%\item Datenblock der Datei ``meta'', extrahiert aus Inode 99.
+
+\end{itemize}
+
+
+\begin{lstlisting}[numbers=none]
+lseek(f,-10000, SEEK_END);
+\end{lstlisting}
+
+\C{lseek} setzt den Pointer in \C{f} 10.000 Zeichen vor das Dateiende.
+
+\begin{lstlisting}[numbers=none]
+count = read(f, buf, 4096);
+\end{lstlisting}
+\C{count} liest 4096 B ab der, durch \C{lseek} gesetzten, Position und speichert diese in \m{buf}.\\ Dies sind die letzten $9$ Blöcke ($\frac{4096}{508}=8.06$, da 4B je Block durch die Blocknummer belegt sind) der Datei ``nikolaus.avi'', deren Adressen wir aus (einem der Indirektblöcke) der Inode 12783 (im Datenblock 50) auslesen müssen.\\
+
+\begin{lstlisting}[numbers=none]
+write(g, buf, count);
+\end{lstlisting}
+
+Schließlich schreiben wir die gelesenen 4096 B aus \m{buf} in \m{g} (also in die Datei \m{meta}). \\
+Die Inode 99 aus Datenblock 2000 enthält die Informationen über den Datenblock der Datei ``meta'', welcher leer ist (abgesehen von der Datenblocknummer, die die ersten 4B belegt).\\
+Wir schreiben hier in 9 Blöcke, die in den Direktblock der o.a. Inode passen.

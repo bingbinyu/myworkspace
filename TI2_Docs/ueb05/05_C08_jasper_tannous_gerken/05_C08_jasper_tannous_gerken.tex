@@ -1,0 +1,206 @@
+\documentclass{ti2}
+
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{ulem}
+\usepackage{tikz-timing}[2009/05/15]
+\usepackage{graphicx}
+\usepackage{courier}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+
+
+\usetikzlibrary{matrix,arrows.meta}
+\tikzset{
+	box/.style = { font=\sffamily, fill=black!20, centered },
+	arrow/.style = { very thick, color=black, ->, >=Triangle},
+}
+
+\begin{document}
+
+%damit der Code nicht abgeschnitten wird, falls er zu lang ist.
+\lstset{linewidth=\linewidth,breaklines=true}
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{5}{05.11.2016}{Marc Hildebrandt}{C08}%
+                {Timo Jasper (Inf, 3.FS.)}{Thomas Tannous (Inf, 3.FS.)}%
+                {Moritz Gerken (Inf, 3.FS.)}%
+
+\section*{Aufgabe 1}
+\underline{Mithilfe gdb ermittelter Bereich:} \\
+factorial: $0x000000000040054c$ bis $0x000000000040057c$-\\
+main: $0x000000000040057d$ bis $0x00000000004005e5$.\\
+Zusammen: $0x000000000040054c$ bis $0x00000000004005e5$. \\
+\subsection*{1 b)}
+%Dump of assembler code for function factorial:
+%0x000000000040054c <+0>:	push   %rbp
+%0x000000000040054d <+1>:	mov    %rsp,%rbp
+%0x0000000000400550 <+4>:	mov    %rdi,-0x18(%rbp)
+%0x0000000000400554 <+8>:	movq   $0x1,-0x8(%rbp)
+%0x000000000040055c <+16>:	jmp    0x400570 <factorial+36>
+%0x000000000040055e <+18>:	mov    -0x8(%rbp),%rax
+%0x0000000000400562 <+22>:	imul   -0x18(%rbp),%rax
+%0x0000000000400567 <+27>:	mov    %rax,-0x8(%rbp)
+%0x000000000040056b <+31>:	subq   $0x1,-0x18(%rbp)
+%0x0000000000400570 <+36>:	cmpq   $0x0,-0x18(%rbp)
+%0x0000000000400575 <+41>:	jne    0x40055e <factorial+18>
+%0x0000000000400577 <+43>:	mov    -0x8(%rbp),%rax
+%0x000000000040057b <+47>:	pop    %rbp
+%0x000000000040057c <+48>:	retq   
+%End of assembler dump.
+
+$-0x18(\%rbp) = 0x7fffffffdf42$\\
+\textcolor{gray}{auf $-0x18(\%rbp)$ wird vier mal zugegriffen}\\
+$-0x8(\%rbp) = 0x7fffffffdf52$\\
+\textcolor{gray}{auf $-0x8(\%rbp)$ wird vier mal zugegriffen}\\
+
+Auf andere Adressen wird nicht zugegriffen, oder sie haben nichts mit dem stack zu tun z.B.: $0x1$\\
+Wir sind von der Funktion factorial selber ausgegeangen und gehen davon aus, dass keine von main generierten Daten im Stack liegen.\\
+
+\subsection*{1 c)}
+%Auf x21 ausgeführt !
+%Dump of assembler code for function printf@plt:
+%0x0000000000400410 <+0>:	jmpq   *0x2005b2(%rip)        # 0x6009c8 <printf@got.plt>
+%0x0000000000400416 <+6>:	pushq  $0x0
+%0x000000000040041b <+11>:	jmpq   0x400400
+%End of assembler dump.
+
+$Paramter (RDI): "factorial(\%lu) = \%lu{\backslash n}"$
+
+0x40069c = 'f'\\
+0x40069d = 'a'\\
+0x40069e = 'c'\\
+0x40069f = 't'\\
+0x4006a0 = 'o'\\
+0x4006a1 = 'r'\\
+0x4006a2 = 'i'\\
+0x4006a3 = 'a'\\
+0x4006a4 = 'l'\\
+0x4006a5 = '('\\
+0x4006a6 = '\%'\\
+0x4006a7 = 'l'\\
+0x4006a8 = 'u'\\
+0x4006a9 = ')'\\
+0x4006aa = ' '\\
+0x4006ab = '=')\\
+0x4006ac = ' ')\\
+0x4006ad = '\%'\\
+0x4006ae = 'l'\\
+0x4006af = 'u'\\
+0x4006b0 = $\backslash$n\\
+
+\subsection*{1 d)}
+
+Pagenummer = virtuelle Adresse/Pagegröße (auf ganze Zahl abrunden)\\
+
+4 KiB = 4096 Byte\\
+
+\underline{für 1a):}\\ 
+0x000000000040054c = 4195660\\
+4195660 / 4096 = 1024,33\\
+Pagenumber = 1024\\
+
+0x00000000004005e5 = 4195813\\
+4195813 / 4096 = 1024,36\\
+Pagenumber = 1024\\
+
+\underline{für 1b):}\\ 
+0x7fffffffdf42 = 140737488346946\\
+140737488346946 / 4096 = 34359738365,95\\
+Pagenumber = 34359738365\\
+
+0x7fffffffdf52 = 140737488346962\\
+140737488346962 / 4096 = 34359738365,95\\
+Pagenumber = 34359738365\\
+
+\underline{für 1c):}\\
+0x40069c = 4195996 \\
+4195996 / 4096 = 1024,41\\
+Pagenumber = 1024\\
+
+0x4006b0 = 4196016\\
+4196016 / 4096 = 1024,41\\
+Pagenumber = 1024\\ \\
+
+Die Adressen aus 1a) \& 1c) kommen zusammen in Pagenumber 1024.\\
+Die zwei Adressen aus 1b) kommen in Pagenumber 34359738365.\\
+
+Die Aufgabenstellung gibt keine Strategie vor, welche Frames ausgewählt werden, wir wählen daher für PageNr. 1024 den Frame 0 und für PageNr. 34359738365 den Frame 1, da diese nach der Pagetabelle für den aktiven Prozess, nicht belegt sind.\\
+
+a) physische Adressen:\\
+Frame 0: 0x1000000 bis 0x1000fff\\
+0x1000000 mit 54c = 0x100054c\\
+0x1000000 mit 54c = 0x10005e5\\
+
+Der Adressraum aus Aufgabe 1a) entspricht dem physischen Adressraum 0x100054c bis 0x10005e5.\\
+
+b) physische Adressen:\\
+Frame 1 : 0x1001000 bis 0x1001fff\\
+0x1001000 mit f42 = \underline{0x1001f42}\\
+0x1001000 mit f52 = \underline{0x0001f52}\\
+
+\begin{tabular}{l l}
+	vituelle Adresse & physische Adresse\\
+	\hline
+	0x7fffffffdf42 & 0x1001f42\\
+	0x7fffffffdf52 & 0x1001f52\\
+\end{tabular}
+
+
+c) physische Adressen:\\
+Frame 0: 0x1000000 bis 0x1000fff\\
+0x1000000 mit 69c = 0x100069c\\
+0x1000000 mit 6b0 = 0x10006b0\\
+
+Der Adressraum aus Aufgabe 1c) entspricht dem physischen Adressraum 0x1001f42 bis 0x1001f52.\\
+
+\section*{Aufgabe 2}
+Um die benötigte Anzahl der Blöcke für die Daten der Datei an sich zu berechnen, rechnen wir:
+\begin{eqnarray*}
+    33696325 B \div 512 \approx 65814
+\end{eqnarray*}
+Das Inode selbst ist 128 Byte groß, braucht also noch selbst einen Block. (+1 Block).\\
+Nun ist noch die Anzahl der Verweise eines Indirektblocks unbekannt. 
+Um sie auszurechnen muss man die größe eines Blocks durch Anzahl der Bytes für eine Blocknummer teilen, so weiß man wie viel Verweise ein Indirektblock hat. 
+\begin{eqnarray*}
+    512 B \div 4 B = 128 Verweise
+\end{eqnarray*}
+Nun schauen wir, wie viele Indirektblöcke benutzt werden, indem von unseren errechneten Blöcken immer jene abziehen, welche durch direkte bzw. Indirekteblöcke dargestellt werden können und die benötigten Indirektblöcke mitzählen.
+\begin{align*} 
+    65814 - 10 &= 65804 && \text{kein extra Block} \\
+    65804 - 128 &= 65676 && \text{+1 Block für Indir.} \\
+    65676 - (128*128) &=  49292 && \text{+129 (1 2x-Indir., 128 1x-Indir.)} \\
+    49292 - (128*128*3) &= 140 && \text{+388 (1 3x-indir. 3 2x-Indir. 128 1x-Indir.)}\\
+    140 - (128*2) &= -116 && \text{+3 (1 2x-Indir. 2 1x-Indir)}
+\end{align*}
+Also lautet die gesamte Rechnung für alle benötigten Blöcke. 
+\begin{equation*}
+    521Indirektbloecke + 1 BlockInode + 65814Bloecke Daten = 66336 Bloecke
+\end{equation*}
+
+\section*{Aufgabe 3}
+
+\texttt{int f = open("/home/ti2/archive/nikolaus.avi", O\_RDONLY);}\\
+Der Dateiname / hat den Inode 0 und der zugehörige Block 2 ist bereits im Buffer-Cache.\\
+Der Dateiname home hat den Inode 36 und lädt Block 9 in den HS.\\
+Der Dateiname ti2 hat den Inode 99 und lädt Block 2000 in den HS.\\
+Der Dateiname archive hat den Inode 206 und lädt Block 3101 in den HS.\\
+Der Dateiname nikolaus.avi hat den Inode 12783 und lädt Block 50 in den HS.\\
+\texttt{ O\_RDONLY} ist ein oflag, welcher für Open for reading and writing steht, die Datei wird also nicht verändert sondern nur gelesen.\\
+
+\texttt{int g = open("/home/ti2/meta", O\_RDWR);}\\
+Der Dateiname / hat den Inode 0 und der zugehörige Block 2 ist bereits im Buffer-Cache.\\
+Der Dateiname home hat den Inode 36 und lädt Block 9 in den HS.\\
+Der Dateiname ti2 hat den Inode 99 und lädt Block 2000 in den HS.\\
+Der Dateiname meta hat den Inode 99 und lädt Block 8521 in den HS.\\
+\texttt{ O\_RDW} ist ein oflag, welcher für Open for reading only steht, die Datei kann also gelesen und verändert werden.\\
+
+\texttt{lseek(f, -10000, SEEK\_END);} ändert das offset in der file descriptor Tabelle für nikloas.avi zu 10000 Byte vor dem Ende der Datei, also: $12.582.912 - 10.000 = 12.572.912$ Bytes.\
+
+\texttt{count = read(f, buf, 4096);} ließt die Datei f, also nikolaus.avi, ab dem Byte in der file descriptor Tabelle die nächsten 4096 Bytes in buf ein und gibt, wenn dies erfolgreich war, die Anzahl der eingelesenen Bytes in count zurück.\\
+
+\texttt{write(g, buf, count);} schreibt die ersten 4096 Bytes von buf in die leere Datei meta ein.
+
+
+\end{document}

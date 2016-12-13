@@ -1,0 +1,321 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+\usepackage{upquote}
+\usepackage{hyperref}
+\usepackage{ulem}
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{5}{05.12.2016}{Marc Hildebrandt/ Bingbin Yu}{C04}%
+                {Michael Schmidt}{Stanislav Telis}%
+                {Dominique Schulz}{Norman Lipkow}%
+                  
+
+\section*{Aufgabe 1}
+Wir haben das Programm \texttt{factorial} mittels \texttt{gdb} gestartet.
+
+\begin{listing}{1}
+do_sc@x14 /home/ti2/ueb/05
+->ls 
+Makefile  factorial  factorial.c
+do_sc@x14 /home/ti2/ueb/05
+->gdb factorial
+GNU gdb (GDB) 7.4.1-debian
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /home/ti2/ueb/05/factorial...(no debugging symbols found)...done.
+(gdb) 
+\end{listing}\par
+
+\textbf{a)}\par
+Anschließend führen wir in \texttt{gdb} den Befehl \texttt{disassemble main} aus um uns den virtuellen Adressraum anzeigen zu lassen, welche die Funktion \texttt{main} des Programms \texttt{factorial} einnimmt.
+
+\begin{listing}{16}
+(gdb) disassemble main
+Dump of assembler code for function main:
+   0x000000000040057d <+0>:	push   %rbp
+   0x000000000040057e <+1>:	mov    %rsp,%rbp
+   0x0000000000400581 <+4>:	sub    $0x20,%rsp
+   0x0000000000400585 <+8>:	mov    %edi,-0x14(%rbp)
+   0x0000000000400588 <+11>:	mov    %rsi,-0x20(%rbp)
+   0x000000000040058c <+15>:	cmpl   $0x1,-0x14(%rbp)
+   0x0000000000400590 <+19>:	jle    0x4005b1 <main+52>
+   0x0000000000400592 <+21>:	mov    -0x20(%rbp),%rax
+   0x0000000000400596 <+25>:	add    $0x8,%rax
+   0x000000000040059a <+29>:	mov    (%rax),%rax
+   0x000000000040059d <+32>:	mov    $0xa,%edx
+   0x00000000004005a2 <+37>:	mov    $0x0,%esi
+   0x00000000004005a7 <+42>:	mov    %rax,%rdi
+   0x00000000004005aa <+45>:	callq  0x400430 <strtol@plt>
+   0x00000000004005af <+50>:	jmp    0x4005b6 <main+57>
+   0x00000000004005b1 <+52>:	mov    $0x0,%eax
+   0x00000000004005b6 <+57>:	mov    %rax,-0x8(%rbp)
+   0x00000000004005ba <+61>:	mov    -0x8(%rbp),%rax
+   0x00000000004005be <+65>:	mov    %rax,%rdi
+   0x00000000004005c1 <+68>:	callq  0x40054c <factorial>
+   0x00000000004005c6 <+73>:	mov    %rax,%rdx
+   0x00000000004005c9 <+76>:	mov    -0x8(%rbp),%rax
+---Type <return> to continue, or q <return> to quit---
+   0x00000000004005cd <+80>:	mov    %rax,%rsi
+   0x00000000004005d0 <+83>:	mov    $0x40069c,%edi
+   0x00000000004005d5 <+88>:	mov    $0x0,%eax
+   0x00000000004005da <+93>:	callq  0x400410 <printf@plt>
+   0x00000000004005df <+98>:	mov    $0x0,%eax
+   0x00000000004005e4 <+103>:	leaveq 
+   0x00000000004005e5 <+104>:	retq   
+End of assembler dump.
+(gdb)
+\end{listing}
+
+Wir sehen nun das die Funktion \texttt{main} den virtuellen Adressraum von \texttt{0x000000000040057d} (Zeile 18) bis \texttt{0x00000000004005e5} (Zeile 47) belegt.
+
+Mittels \texttt{disassemble factorial} wollen wir auch noch den virtuellen Adressraum der Funktion \texttt{factorial} in Erfahrung bringen.
+
+\begin{listing}{49}
+(gdb) disassemble factorial
+Dump of assembler code for function factorial:
+   0x000000000040054c <+0>:	push   %rbp
+   0x000000000040054d <+1>:	mov    %rsp,%rbp
+   0x0000000000400550 <+4>:	mov    %rdi,-0x18(%rbp)
+   0x0000000000400554 <+8>:	movq   $0x1,-0x8(%rbp)
+   0x000000000040055c <+16>:	jmp    0x400570 <factorial+36>
+   0x000000000040055e <+18>:	mov    -0x8(%rbp),%rax
+   0x0000000000400562 <+22>:	imul   -0x18(%rbp),%rax
+   0x0000000000400567 <+27>:	mov    %rax,-0x8(%rbp)
+   0x000000000040056b <+31>:	subq   $0x1,-0x18(%rbp)
+   0x0000000000400570 <+36>:	cmpq   $0x0,-0x18(%rbp)
+   0x0000000000400575 <+41>:	jne    0x40055e <factorial+18>
+   0x0000000000400577 <+43>:	mov    -0x8(%rbp),%rax
+   0x000000000040057b <+47>:	pop    %rbp
+   0x000000000040057c <+48>:	retq   
+End of assembler dump.
+(gdb) 
+\end{listing}
+
+Hier sehen wir nun, dass sich die Funktion \texttt{factorial} von der virtuellen Adresse \texttt{0x000000000040054c} (Zeile 51) bis zur virtuellen Adresse \texttt{0x000000000040057c} (Zeile 64) erstreckt.\par
+
+\textbf{b)}\par
+
+Wenn der User-Stackpointer \texttt{\%rsp} bei Eintritt der Funktion \texttt{factorial} den Wert \texttt{0x7fffffffdf60} hat, dann wird auf die virtuellen Adressen \texttt{0x7fffffffdf48} und \texttt{0x7fffffffdf58} zugriffen. \\
+Es wird auf die virtuelle Adresse \texttt{0x7fffffffdf48} zugegriffen, weil der Wert von \texttt{\%rbp} auf den Wert des User-Stackpointer (also \texttt{0x7fffffffdf60}) gesetzt wird und dort dann um \texttt{-0x18} Bytes verschoben wird. Demnach ist $\texttt{0x7fffffffdf60} - \texttt{0x18} = \texttt{0x7fffffffdf48}$.\\
+Analog dazu wird auf die virtuelle Adresse \texttt{0x7fffffffdf58} zugegriffen, weil der \texttt{\%rbp} weiterhin auf \texttt{0x7fffffffdf60} zeigt und dann um \texttt{-0x8} Bytes verschoben wird. Daraus folgt $\texttt{0x7fffffffdf60} - \texttt{0x8} = \texttt{0x7fffffffdf58}$.\par
+
+\textbf{c)}\par
+
+Wir nutzen das Kommando \texttt{disassemble printf}, um die virtuellen Adressen der Zeichenketten zu erfahren. Uns wird folgendes auf der Konsole angezeigt:
+
+\begin{listing}{66}
+(gdb) disassemble printf
+Dump of assembler code for function __printf:
+   0x00007ffff7a9e190 <+0>:	sub    $0xd8,%rsp
+   0x00007ffff7a9e197 <+7>:	movzbl %al,%eax
+   0x00007ffff7a9e19a <+10>:	mov    %rdx,0x30(%rsp)
+   0x00007ffff7a9e19f <+15>:	lea    0x0(,%rax,4),%rdx
+   0x00007ffff7a9e1a7 <+23>:	lea    0x44(%rip),%rax   # 0x7ffff7a9e1f2 <__printf+98>
+   0x00007ffff7a9e1ae <+30>:	mov    %rsi,0x28(%rsp)
+   0x00007ffff7a9e1b3 <+35>:	mov    %rcx,0x38(%rsp)
+   0x00007ffff7a9e1b8 <+40>:	mov    %rdi,%rsi
+   0x00007ffff7a9e1bb <+43>:	sub    %rdx,%rax
+   0x00007ffff7a9e1be <+46>:	lea    0xcf(%rsp),%rdx
+   0x00007ffff7a9e1c6 <+54>:	mov    %r8,0x40(%rsp)
+   0x00007ffff7a9e1cb <+59>:	mov    %r9,0x48(%rsp)
+   0x00007ffff7a9e1d0 <+64>:	jmpq   *%rax
+   0x00007ffff7a9e1d2 <+66>:	movaps %xmm7,-0xf(%rdx)
+   0x00007ffff7a9e1d6 <+70>:	movaps %xmm6,-0x1f(%rdx)
+   0x00007ffff7a9e1da <+74>:	movaps %xmm5,-0x2f(%rdx)
+   0x00007ffff7a9e1de <+78>:	movaps %xmm4,-0x3f(%rdx)
+   0x00007ffff7a9e1e2 <+82>:	movaps %xmm3,-0x4f(%rdx)
+   0x00007ffff7a9e1e6 <+86>:	movaps %xmm2,-0x5f(%rdx)
+   0x00007ffff7a9e1ea <+90>:	movaps %xmm1,-0x6f(%rdx)
+   0x00007ffff7a9e1ee <+94>:	movaps %xmm0,-0x7f(%rdx)
+---Type <return> to continue, or q <return> to quit---
+   0x00007ffff7a9e1f2 <+98>:	lea    0xe0(%rsp),%rax
+   0x00007ffff7a9e1fa <+106>:	mov    %rsp,%rdx
+   0x00007ffff7a9e1fd <+109>:	movl   $0x8,(%rsp)
+   0x00007ffff7a9e204 <+116>:	movl   $0x30,0x4(%rsp)
+   0x00007ffff7a9e20c <+124>:	mov    %rax,0x8(%rsp)
+   0x00007ffff7a9e211 <+129>:	lea    0x20(%rsp),%rax
+   0x00007ffff7a9e216 <+134>:	mov    %rax,0x10(%rsp)
+   0x00007ffff7a9e21b <+139>:	mov    0x338cee(%rip),%rax        # 0x7ffff7dd6f10
+   0x00007ffff7a9e222 <+146>:	mov    (%rax),%rdi
+   0x00007ffff7a9e225 <+149>:	callq  0x7ffff7a93330 <_IO_vfprintf_internal>
+   0x00007ffff7a9e22a <+154>:	add    $0xd8,%rsp
+   0x00007ffff7a9e231 <+161>:	retq   
+End of assembler dump.
+\end{listing}
+
+Hier sehen wir, dass beim Lesen der Zeichenkette auf die virtuellen Adressen \texttt{0x7ffff7a9e1f2} und \texttt{0x7ffff7dd6f10} zugegriffen wird.\\
+\\
+
+\textbf{d)}\par
+
+In der Aufgabestellung wurden einige Informationen vorgegeben unter anderem die Page-Tabelle und folgendes:
+
+Page-Größe ist 4 KiB = 4096 B = 0x1000 B\\
+Offset von Page-Frame 0 ist \texttt{0x1000000}\\
+
+\textbf{1. Physische Adressen zu den virtuellen Adressen von der Funktion \texttt{main()}:}
+\bigskip
+\\
+Virtuelle Adresse ist \texttt{0x40057d}\\
+
+Page(\texttt{0x40057d}) = $floor(\texttt{0x40057d} / \texttt{0x1000}) = \texttt{0x400} = 1024_{10}$\\
+Offset(\texttt{0x40057d}) = \texttt{0x40057d} mod \texttt{0x1000} = \texttt{0x57d}\\
+
+Nachschauen in der Page-Tabelle Page 1024 $\rightarrow$ Page-Frame 17363 = \texttt{0x43d3}\\
+
+Physische Adresse: $\texttt{0x43d3} * \texttt{0x1000} + \texttt{0x57d} + \texttt{0x1000000} = \uuline{\texttt{0x53d357d}}$\\
+\\
+\\
+
+Virtuelle Adresse ist \texttt{0x4005e5}\\
+
+Page(\texttt{0x4005e5}) = floor(\texttt{0x4005e5} / \texttt{0x1000}) = \texttt{0x400} = $1024_{10}$\\
+Offset(\texttt{0x4005e5}) = \texttt{0x4005e5} mod \texttt{0x1000} = \texttt{0x5e5}\\
+
+Nachschauen in der Page-Tabelle Page 1024 $\rightarrow$ Page-Frame 17363 = \texttt{0x43d3}\\
+
+Physische Adresse: $\texttt{0x43d3} * \texttt{0x1000} + \texttt{0x5e5} + \texttt{0x1000000} = \uuline{\texttt{0x53d35e5}}$\\
+\\
+\\
+
+\textbf{2. Physische Adressen zu den virtuellen Adressen der Funktion \texttt{factorial()}:}
+
+Virtuelle Adresse ist \texttt{0x40054c}\\
+
+Page(\texttt{0x40054c}) = floor(\texttt{0x40054c} / \texttt{0x1000}) = \texttt{0x400} = $1024_{10}$\\
+Offset(\texttt{0x40054c}) = \texttt{0x40054c} mod \texttt{0x1000} = \texttt{0x54c}\\
+
+Nachschauen in der Page-Tabelle Page 1024 $\rightarrow$ Page-Frame 17363 = \texttt{0x43d3}\\
+
+Physische Adresse: $\texttt{0x43d3} * \texttt{0x1000} + \texttt{0x54c} + \texttt{0x1000000} = \uuline{\texttt{0x53d354c}}$\\
+\\
+\\
+
+Virtuelle Adresse ist \texttt{0x40057c}\\
+
+Page(\texttt{0x40057c}) = floor(\texttt{0x40057c} / \texttt{0x1000}) = \texttt{0x400} = $1024_{10}$\\
+Offset(\texttt{0x40057c}) = \texttt{0x40057c} mod \texttt{0x1000} = \texttt{0x57c}\\
+
+Nachschauen in der Page-Tabelle Page 1024 $\rightarrow$ Page-Frame 17363 = \texttt{0x43d3}\\
+
+Physische Adresse: $\texttt{0x43d3} * \texttt{0x1000} + \texttt{0x57c} + \texttt{0x1000000} = \uuline{\texttt{0x53d357c}}$\\
+
+\textbf{3. Physische Adressen zu den virtuellen Adressen von Aufgabeteil b):}
+
+Virtuelle Adresse ist \texttt{0x7fffffffdf48}\\
+
+Page(\texttt{0x7fffffffdf48}) = floor(\texttt{0x7fffffffdf48} / \texttt{0x1000}) = \texttt{0x7fffffffd} = $34359738365_{10}$\\
+Offset(\texttt{0x7fffffffdf48}) = \texttt{0x7fffffffdf48} mod \texttt{0x1000} = \texttt{0xf48}\\
+
+Nachschauen in der Page-Tabelle Page 34359738365 $\rightarrow$ \textbf{Page-Fault} $\rightarrow$ wir wählen freies Page-Frame 8080 = \texttt{0x1f90}\\
+
+Physische Adresse: $\texttt{0x1f90} * \texttt{0x1000} + \texttt{0xf48} + \texttt{0x1000000} = \uuline{\texttt{0x2f90f48}}$\\
+\\
+\\
+
+Virtuelle Adresse ist \texttt{0x7fffffffdf58}\\
+
+Page(\texttt{0x7fffffffdf58}) = floor(\texttt{0x7fffffffdf58} / \texttt{0x1000}) = \texttt{0x7fffffffd} = $34359738365_{10}$\\
+Offset(\texttt{0x7fffffffdf58}) = \texttt{0x7fffffffdf58} mod \texttt{0x1000} = \texttt{0xf58}\\
+
+Nachschauen in der Page-Tabelle Page 34359738365 $\rightarrow$ \textbf{Page-Fault} $\rightarrow$ wir wählen freies Page-Frame 8900 = \texttt{0x22c4}\\
+
+Physische Adresse: $\texttt{0x22c4} * \texttt{0x1000} + \texttt{0xf58} + \texttt{0x1000000} = \uuline{\texttt{0x32c4f58}}$\\
+\\
+\\
+
+\textbf{4. Physische Adressen zu den virtuellen Adressen von Aufgabenteil c):}
+
+Virtuelle Adresse ist \texttt{0x7ffff7a9e1f2}\\
+
+Page(\texttt{0x7ffff7a9e1f2}) = floor(\texttt{0x7ffff7a9e1f2}) / \texttt{0x1000}) = \texttt{0x7ffff7a9e} = $34359704222_{10}$\\
+Offset(\texttt{0x7ffff7a9e1f2}) = \texttt{0x7ffff7a9e1f2} mod \texttt{0x1000} = \texttt{0x1f2}\\
+
+Nachschauen in der Page-Tabelle Page 34359704222 $\rightarrow$ \textbf{Page-Fault} $\rightarrow$ wir wählen freies Page-Frame 13599 = \texttt{0x351f}\\
+
+Physische Adresse: $\texttt{0x351f} * \texttt{0x1000} + \texttt{0x1f2} + \texttt{0x1000000} = \uuline{\texttt{0x451f1f2}}$\\
+\\
+\\
+
+Virtuelle Adresse ist \texttt{0x7ffff7dd6f10}\\
+
+Page(\texttt{0x7ffff7dd6f10}) = floor(\texttt{0x7ffff7dd6f10}) / \texttt{0x1000}) = \texttt{0x7ffff7dd6} = $34359705046_{10}$\\
+Offset(\texttt{0x7ffff7dd6f10}) = \texttt{0x7ffff7dd6f10} mod \texttt{0x1000} = \texttt{0xf10}\\
+
+Nachschauen in der Page-Tabelle Page 34359705046 $\rightarrow$ \textbf{Page-Fault} $\rightarrow$ wir wählen freies Page-Frame 15777 = \texttt{0x3da1}\\
+
+Physische Adresse: $\texttt{0x3da1} * \texttt{0x1000} + \texttt{0xf10} + \texttt{0x1000000} = \uuline{\texttt{0x4da1f10}}$\\
+
+
+\section*{Aufgabe 2}
+
+\textit{Wieviele Indirekt-Einträge passen in einen Indirekt Block?}\\
+Ein indirekter Verweis kann 128 Einträge/Adressen speichern. Da: 512 Byte (ein Datenblock) / 4 Byte (Adresse auf direkten oder indirekten Datenblock = 128\\
+
+\textit{Wieviele Datenblöcke werden benötigt?}\\
+33.696.325 B / 512 B = 65813,1349 $\rightarrow$ 65814 Datenblöcke + 1 (für den Inode-Block) = 65815 Datenblöcke (+ die indirekten Blöcke, s. unten)\\
+
+\textit{Wieviele Indirekt-Blöcke werden benötigt?}\\
+Auf 10 Datenblöcke wird direkt verwiesen. Also 10 * 512 B = 5120 B
+Ein indirekter Block kann auf 128 * 512 B (65.536 B) Daten verweisen.
+1 doppelt indirekter Verweis kann auf $128^{2}$ * 512 B (8.388.608 B) Daten verweisen
+1 dreifach indirekter Verweis kann auf $128^{3}$ * 512 B (1.073.741.824 B)
+
+33.696.325 - 8.388.608 - 65.536 - 5120 = 25.237.061 bleiben übrig wenn wir den einfachen und doppelten Indirekt-Blöcke auslasten.
+Wir wissen, dass wir mit 1 doppelten Verweis 8.388.608 B ansprechen. Wir brauchen noch ca. 25.237.061. Also:
+
+25.237.061 B / 8.388.608 B = 3,00849211.  D.h. wir brauchen 4 Verweise auf doppelt indirekte Verweise. Jedoch müssen wir die Verweise nicht komplett auslasten. Wir können mit 3 Verweisen auf doppelt indirekte Verweise 25.165.824 B Daten ansprechen. Uns fehlt nun also 25.237.061 - 25.165.824 = 71.237 B
+
+Mit einem indirekten Verweis können wir auf 65.536 B Daten verweisen. 71.237 - 65.536 = 5701 B
+
+In einer weiteren indirekten Verweis brauchen wir nun 5701 / 512 Verweise = 11,13 $\rightarrow$ 12 direkte Verweise
+
+Wir haben nun einen indirekten Block komplett ausgelastet. $\rightarrow$ 1
+Wir haben einen doppelt indirekten Verweis komplett ausgelastet $\rightarrow$ 128 + 1 = 129
+Wir haben 3 weitere doppelt indirekte Verweise aus der dreifach indirekten Verweis $\rightarrow$ 129 * 3 = 387 + 1
+Und wir haben 1 kompletten weiteren indirekten Datenblock und einen nicht komplett gefüllten $\rightarrow$ 3
+
+Also: 1+129+388+3 = 521 indirekte Datenblöcke 
+$\rightarrow$ 521 * 512 B = 270.920 B = 270 MB
+
+Das heißt wir bräuchten mindestens 65.815 + 521 = 66.336 Datenblöcke auf der Platte.
+Das wären 66.336 * 512 B = 33.964.032 B Speicher der auf der Platte benötigt werden würde.
+
+\section*{Aufgabe 3}
+
+Zu \texttt{open(``/home/ti2/archive/nikolaus.avi'', O\_RDONLY)}:\\
+
+Da der Inode für / sich bereits im Inode-Tabelle befindet 
+wird danach der Datenblock für / in den Cache geladen. Von Block 2
+aus wird dann der Inode für das Verzeichnis home geladen. Dem 
+entsprechend wird Block 9 in den Buffer-Cache geladen. Der Block 9 
+verweist auf das Inode für das Verzeichnis ti2, deshalb wird der
+Block 2000 in den Buffer-Cache geladen. Nun wird der Inode von 
+archive gelesen und der Block 3101 in den Buffer-Cache geladen,
+hier ist dann ein Verweis auf die Datei nikolaus.avi mit dem Inode
+12783, dann wird der Datenblock 50 gelesen und ein Verweis auf den
+Inode der Datei nikolaus.avi in den Hauptspeicher abgelegt.\\
+
+Zu \texttt{open(``/home/ti2/meta'', O\_RDWR)}:\\
+
+Inode für / bereits in Inode-Tabelle und Block 2 im Buffer-Cache.
+Dann wird das Inode für das Verzeichnis home geladen. Also wieder 
+Block 9 in den Buffer-Cache. Der Datenblock verweist auf das Verzeichnis
+home mit dem Inode 36, hier wird also Block 9 in den Buffer-Cache 
+geladen. Dann wird der Inode (112) der Datei meta ausgelesen und 
+folglich der Datenblock 8521 in den Buffer-Cache. Nun wird
+ein Verweis zum Inode der Datei meta in den Hautspeicher gelegt.\\
+
+Mit dem \texttt{lseek()} Systemaufruf wird zunächst der Pointer der Datei nikolaus.avi auf 2783 gesetzt. Beim \texttt{read()} Systemaufruf müssen 4096 Bytes, also die Länge von 8 Datenblöcken, gelesen werden. Um die Datei lesen zu können, müssen entsprechende Datenblöcke in den Hauptspeicher gelesen werden. Geht man von von 512 Bytes pro Datenblock aus geht bei der Stelle 2561 ein neuer Datenblock der Datei nikolaus.avi los (da 4* 512 B = 2560 Bytes). Um die Datei von Byte 2783-6879 nun lesen zu können, muss der Datenblock von 2561-3072, so wie 4 weitere Datenblöcke (also insgesamt von 2561-7168) in den Hauptspeicher geladen werden. Beim \texttt{write()} Befehl muss nichts mehr von der Platte geladen werden. Hier findet ein "reclaim" statt und das zuvor gelesene wird in die Datei meta geschrieben und auf der Platte gespeichert.
+
+\end{document}
