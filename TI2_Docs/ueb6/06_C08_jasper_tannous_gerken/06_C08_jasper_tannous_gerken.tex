@@ -1,0 +1,253 @@
+\documentclass{ti2}
+
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{ulem}
+\usepackage{tikz-timing}[2009/05/15]
+\usepackage{graphicx}
+\usepackage{courier}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}   
+
+
+\usetikzlibrary{matrix,arrows.meta}
+\tikzset{
+	box/.style = { font=\sffamily, fill=black!20, centered },
+	arrow/.style = { very thick, color=black, ->, >=Triangle},
+}
+
+\begin{document}
+
+%damit der Code nicht abgeschnitten wird, falls er zu lang ist.
+\lstset{linewidth=\linewidth,breaklines=true}
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{6}{12.12.2016}{Marc Hildebrandt}{C08}%
+                {Timo Jasper (Inf, 3.FS.)}{Thomas Tannous (Inf, 3.FS.)}%
+                {Moritz Gerken (Inf, 3.FS.)}%
+
+\section*{Aufgabe 1}
+Unser Programm mycp funktioniert vollständig.
+Zunächst mussten wir die Datei auf Größe der zu kopierenden Datei vergrößern, 
+damit das Mapping einwandfrei funktioniert. Die größe kriegen wir mit stat raus und
+die kopierte Datei haben wir mit ftruncate auf die entsprechende Größe gebracht.
+Um nun Block für Block zu kopieren brauchen wir eine Schleife. Davor müssen wir aber noch
+wissen wir groß ein Block sein muss. Der Block muss so groß wie eine Page sein, so haben wir 
+die sysconf mit dem entsprechenden Parameter benutzt um die Pagesize zu kriegen.
+Nun gehen wir mit der While-Schleife Block für Block durch und mappen dementsprechend mit mmap
+die in und out Datei für den Addressbereich der sich von staddr bis staddr+pagesize erstreckt.
+Eine Ausnahme trifft auf, wenn die Startaddresse schon soweit hinten im Addressraum ist, dass eine Pagesize, die Größe der Datei überschreitet. So muss man für diesen fall noch die Startaddresse von der Gesamtgröße abziehen um die Größe zu kriegen, die genau die Datei abdeckt.
+Mit memcpy kopieren wir die bytes aus der source Datei die in den Arbeitsspeicher gemapped sind, dann zur Zieldatei. Anschließend benutzen wir munmap, um das Mapping zum Speicher wieder aufzulösen. 
+\lstinputlisting{src/mycp.cc}
+\section*{Aufgabe 2}
+
+%Die Datei nikolaus.avi ist 139586400 B groß. Sie ist auf einer Festplatte mit den folgenden
+%technischen Parametern gespeichert:
+
+%7200 Umdrehungen in der Minute,
+%acht Oberflächen zur Datenspeicherung,
+%100000 Spuren pro Oberfläche,
+%1200 Sektoren pro Spur (sei vereinfachend für alle Spuren gleich),
+%512 Bytes pro Plattenblock (Sektor),
+%2.4 ms Kopfumschaltung beim Wechsel der Oberfläche (in einem Zylinder) und
+%Unter Linux z. B. mittels sudo sh -c 'printf 1 >/proc/sys/vm/drop_caches".
+%ein beliebiger Spurwechsel dauert (stark vereinfacht) insgesamt 4 ms (dies beinhaltet eine
+%möglicherweise erforderliche Kopfumschaltung).
+%Wir gehen für Eure Berechnungen davon aus, dass keine weitere Abbildung stattfindet, es sich
+%also um die tatsächliche Geometrie der Festplatte handelt.
+
+%a) Wie lange würde es bei bestmöglichen Bedingungen dauern, die genannte Datei von
+%der beschriebenen Festplatte zu lesen und welche durchschnittliche Lesegeschwindigkeit
+%(Datenrate) würde dabei erreicht?
+
+%b) Wie lange würde es bei der schlechtestmöglichen Verteilung der Datenblöcke auf der
+%Festplatte dauern, bis die genannte Datei von der beschriebenen Festplatte gelesen wurde
+%und welche durchschnittliche Lesegeschwindigkeit (Datenrate) würde dabei erreicht?
+
+%c) Wie ändert sich das Ergebnis für b), wenn jeweils acht hintereinanderliegende Plattenblöcke
+%zu einem logischen Block der Größe 4 KiB zusammengefasst werden (ein logischer Block
+%wird immer komplett genutzt, selbst wenn nicht alle Plattenblöcke darin benötigt würden,
+%um die Datei zu speichern).
+%Hinweis: Ihr könnt in eurer Rechnung von den Verwaltungsinformationen der Datei bzw. des
+%Dateisystems abstrahieren. Externe Faktoren wie Stromausfall usw. sollen in der Betrachtung
+%natürlich nicht berücksichtigt werden, ebenso sollen mögliche Optimierungen durch den Festplat-
+%tencontroller oder das Betriebssystem, wie z. B. vorausschauendes Lesen, nicht in die Betrachtung
+%einbezogen werden.
+%Achtet bei euren Berechnungen darauf, erst bei der Bestimmung des Endergebnisses zu runden.
+%Das Rechnen mit gerundeten Zwischenergebnissen führt zu Punktabzug. Rundet die Datenrate
+%auf KiB/s bzw. MiB/s (beachtet die IEC-Einheiten für Datendurchsatz!)
+
+
+
+\subsection*{a)}
+Im besten Fall haben alle Byte der Datei in Sektoren entsprechend ihrer Auslesereihenfolge auf einer Spur einer Platte zu liegen und der Lesekopf direkt davor. Somit wird nach dem auffinden des ersten Sektors keine zusätzliche Zeit benötigt um den nächsten auszulesenden Sektor zu finden, da er direkt der nächste ist. Sollten mehr Sektoren benötigt werden um die datei zu Speichern als auf einer Spur enthalten sind, müssen nach und nach die selben Spuren der anderen Platten belegt sein, da Kopfumschaltdauer kleiner Spurwechseldauer.Beim Umschalten von Kopf oder Spur gehen wir als best-case davon aus, dass die Sektoren so gelegt sind, dass der Kopf genau vor der ersten Sektoren Position startet und damit 0 Zeit vergeht bis der richtige Sektor gefunden ist. Da es um den best-case geht gehen wir zusätzlich davon aus, dass zu beginn des Auslesens, die korrekte Spur gewählt ist und der Korrekte Kopf gewält ist und somit zu Beginn 0 Zeit vergeht das bis lesen auf der ersten korrekten Spur, am ersten Sektor beginnt.\\
+
+$139586400 B / 512 B= 272629,6875 Plattenbloecke$\\
+\textcolor{gray}{wie viel Plattenblöcke sind betroffen ?}\\
+\textcolor{gray}{Dateigröße / Sektorgröße}\\
+\textcolor{gray}{Runden ist erst beim Endergebnisvorgesehn, obwohl im Massenspeicher nur ganze Blöcke belegt werden.}\\
+
+%$7200 / 60 / 1000 / 2 = 0,06 ms$\\
+%\textcolor{gray}{Durschnittliche Dauer bis zum erreichen eines %bestimmten Sektors \\
+%auf einer Spur (1/2 Umdrehung) =}\\
+%\textcolor{gray}{Umdrehungen pro min / 60 / 1000 / 2}\\
+
+%$7200 / 60 / 1000 / 1200 = 0,0001 ms$\\
+%\textcolor{gray}{Dauer zum auslesen eines Plattenblock =}\\
+%\textcolor{gray}{Umdrehungen pro min / 60 / 1000 / 1200(Sektoren pro Spur)}\\
+
+%$0,0001 * 1200 = 0,12 ms$\\
+%\textcolor{gray}{Dauer zum auslesen von 1200 Plattenblöcken auf einer Spur.}\\
+
+%$0,0001 * 1200 + 0,06 = 0,18 ms$\\
+%\textcolor{gray}{Dauer zum auffinden des ersten und auslesen von 1200 Plattenblöcken auf einer Spur.}\\
+
+%Lesedauer bestcase:\\
+%$(272629,6875Bloecke/1200Bloecke)*(0,18ms + 2,4ms) + (272629,6875Bloecke/9600Bloecke)*(4ms) - 4ms -2,4ms \underline{=693,34953125ms \approx 693ms}$\\
+%\textcolor{gray}{(Dauer für pures auslesen aller Blöcke + Umschalten des LeseKopfes) + (Dauer für schwenk auf neue Spur) -(Dauer für Umschalten auf ersten Lesekopf) -(Dauer für Schwenk auf erste Spur) }\\
+
+%durchschnittliche Lesegeschwindigkeit(Datenrate):\\
+%$139586400 B / 693,34953125ms = 201321,835104363 B/ms$\\
+%$201321,835104363 B/ms * 1000ms / 1024B = 196603,354594104 KiB/s = 191,995463471 MiB/s\\ \underline{\approx 196603 KiB/s \approx 192 MiB/s}$\\
+
+Lesedauer für eine komplette Spur auf einer Platte:\\
+$(1/7200)*60*1000 = 8,333333333ms$\\
+
+Lesedauer für einen Sektor:\\
+$(1/7200)*60*1000/1200 = 0,006944444ms$\\
+
+Lesedauer für alle Sektoren:\\
+$0,006944444ms*272629,6875Sektoren = 1893,261597581ms$\\
+
+Häufigkeit Lesekopfwechsel:\\
+$(((272629,6875/1200)/8)*7) = 198,792480469 \approx 199$ $\backslash  \backslash$ muss logischerweise bereits jetzt aufgerundet werden, da auch für unvollständig belegte Spuren der entsprechende leseKopf komplett gewechselt sein muss.\\
+
+Wechseldauer für alle Lesekopfwechsel:\\
+$2,4ms*199wechsel = 477,6ms$\\
+
+Häufigkeit Spurwechsel:\\
+$(272629,6875/(1200*8)) = 28,398925781 \approx 29$ $\backslash  \backslash$ muss logischerweise bereits jetzt aufgerundet werden, da auch für unvollständig belegte Spuren der leseKopf komplett auf der Spur befindlich sein muss.\\
+
+Wechseldauer für alle Spurwechsel:\\
+$4ms*29wechsel = 116ms$\\
+
+Gesammtdauer:\\
+$1893,261597581ms + 477,6ms + 116ms = 2486,861597581ms = \underline{2,486861598s}  $\\
+
+durchschnittliche Lesegeschwindigkeit(Datenrate):\\
+$139586400 B / 2,486861598s = 56129540,989437885 B/s$\\
+$56129540,989437885 B/s / 1024B = 54814,004872498 KiB/s = 53,529301633 MiB/s\\ \underline{\approx 54814 KiB/s \approx 54 MiB/s}$\\
+
+\subsection*{b)}
+
+beim worst-case befindet sich jeweils der nächste auszulesende Block niemals auf der Spur einer der Leseköpfe, es muss daher für jeden einzelnen Block ein spurwechsel stattfinden. Außerdem sind die Sektoren auf den spuren genau so verteilt, dass der Lesekopf immer direkt Hinter dem Start des gesuchten Sektors steht wenn er aktiviert wird und den großteil der Platte erst vorbeifahren lassen muss bevor er den Sektor von vorne lesen kann.\\
+
+Blockwechsel:\\ worst-case(Blockwechsel*(Spurwechseldauer+rotationsdauer+Lesedauer))\\
+$272630*(4ms+8,33331977ms+0,006944444ms)\underline{=3364326,23266282ms}$\\
+
+
+
+%Dauer zum richtigen Sektor zu rotieren als worst-case:\\
+%$((1/7200)*60*1000)-((1/7200)*60*1000/(1200*512)) = 8,33331977ms$\\
+
+%Gesammtdauer zu allen richtigen Sektoren zu rotieren:\\
+%$8,33331977ms * 272630 = 2271912,9688951ms$\\
+
+%Lesedauer worstcase:\\
+%$1893,261597581ms$
+%$\backslash \backslash$ Lesedauer für alle Sektoren\\
+
+%$+2271912,9688951ms$\\
+%$\backslash \backslash$ zu allen Sektoren rotieren\\
+
+%$+4ms*272630Sektoren = 1090520ms$
+%$\backslash \backslash$ Wechseldauer für alle Spurwechsel\\
+
+%\underline{= 3364326,230492681ms}\\
+
+
+durchschnittliche Lesegeschwindigkeit(Datenrate):\\
+$139586400 B / 3364326,23266282ms = 41,490149987 B/ms$\\
+$41,490149987 B/ms * 1000ms / 1024B = 40,517724597 KiB/s = 0,03956809 MiB/s\\ \underline{\approx 41 KiB/s \approx 0.04 MiB/s}$\\
+
+\subsection*{c)}
+Wir gehen davon aus, dass die logischen Blöcke weitgehend ausgefüllt sind und nicht nur als vergrößerung der bisherigen blöcke zu 7/8 leer sind.\\
+Wenn immer 8 Blöcke zusammengefasst werden wird die Formel aus b) nur 1/8 mal so oft ausgeführt und sieht damit wie folgt aus :\\
+
+Lesedauer für einen Logischen Block:\\
+$(1/7200)*60*1000/(1200/8) = 0,055555556ms$\\
+
+Logischer Blockwechsel:\\ worst-case(Blockwechsel*(Spurwechseldauer+rotationsdauer+Lesedauer))\\
+$\lceil(272630/8)\rceil*(4ms+8,33331977ms+0,055555556ms)\underline{=422200,482234754}$\\
+
+%Gesammtdauer zu allen richtigen Sektoren zu rotieren:\\
+%$8,33331977ms * (272630/8) = 283989,121111887ms$\\
+
+%Lesedauer worstcase:\\
+%$1893,261597581ms$
+%$\backslash \backslash$ Lesedauer für alle Sektoren, bleibt gleich\\
+
+%$+283989,121111887ms$\\
+%$\backslash \backslash$ zu allen logischen Blöcken rotieren\\
+
+%$+4ms*(272630Sektoren/8) = 136315ms$
+%$\backslash \backslash$ Wechseldauer für alle Spurwechsel\\
+
+%\underline{= 422197,382709468ms}\\
+
+durchschnittliche Lesegeschwindigkeit(Datenrate):\\
+$139586400 B / 422200,482234754ms = 330,616391675 B/ms$\\
+$330,616391675 B/ms * 1000 / 1024 =\\ 322,867569995 KiB/s = 0,315300361 MiB/s\\ \underline{ \approx 323 KiB/s \approx 0,3 MiB/s }$\\
+
+\section*{Aufgabe 3}
+
+\subsection*{a)  Größe des Puffers: 1 Byte. Low-Watermark: 0 Byte}
+
+Wenn Puffer leer ist wird ein Interrupt ausgelößt und der Puffer nachgefüllt, dies dauert 5ms.\\
+Der Puffer kann 1Byte an Daten aufnehmen.\\
+Nach 5ms stehen dem Controller also wieder 1Byte an Daten zur verfügung.\\
+Der Controller kann das Gerät mit einer Datenrate von 10000 Byte/s = 10 Byte/ms versorgen.\\
+Der Controller leert den Puffer also in 0,1 ms.\\
+Anschließend muss er wieder 5ms warten um wieder Daten im Puffer zu haben.\\
+Es werden also 1Byte in 5,1 ms an das Gerät gegeben.\\
+\begin{math}
+	Datenrate = {1 Byte}/{5,1 ms} = 0,196078431 B/ms \underline{= 196,078431373 B/s \approx 196 B/s.}
+\end{math}
+
+ 
+
+\subsection*{b)  Größe des Puffers: 1 KiB. Low-Watermark: 0 Byte}
+
+Ein Auffüllen des Puffers auf 1024 Byte dauert 5ms.\\
+Der Controller leer den Puffer in $1024B / (10B/ms) = 102,4ms$.\\
+und muss anschließend wieder 5ms warten.\\
+Es werden also 1024 Byte in 107,4ms an das Gerät übergeben.\\
+\begin{math}
+Datenrate = {1024 Byte}/{107,4ms} = 9,534450652 B/ms \underline{= 9534,450651769 B/s \approx 9534 B/s.}
+\end{math}
+
+
+\subsection*{c)  Größe des Puffers: 1 KiB. Low-Watermark: 25 Byte}
+
+Ein Auffüllen des Puffers auf 1024 Byte dauert 5ms.\\
+Der Controller leer den Puffer in $1024B / (10B/ms) = 102,4ms$.\\
+Die Watermark wird erreicht nach $999B / (10B/ms) = 99,9ms$.\\
+Wenn keine Daten mehr im Puffer befindlich sind muss der Controller noch $102,4ms-99,9ms = 2,5ms$ auf die durch den Interrupt angeforderte Puffer füllung warten.\\
+Es werden also $1024Byte in 2,5ms+102,4ms$ an das Gerät übergeben.\\
+\begin{math}
+Datenrate = {1024 Byte}/{104,9ms} = 9,761677788 B/ms \underline{= 9761,67778837 B/s \approx 9762 B/s.}
+\end{math}\\\\
+Das initiale Füllen des Puffers , auf welches der Controller die vollen 5ms warten muss wurden hier nicht berücksichtigt, da sie die Datenrate abhängig von der Laufzeit des Controllers beeinflussen.\\
+
+
+\subsection*{d)}
+
+Die Datenrate soll 10000 Byte/s betragen.\\
+Wir gehen davon aus, dass die Puffergröße immernoch 1KiB beträgt.\\
+Der Puffer wird also immernoch in 102,4ms geleert.\\
+Nach $102,4ms - 5ms = 97,4ms$ muss also der Interrupt ausgelöst werden.\\
+Nach 97,4ms befinden sich noch $1024B - (10B/ms)*97,4ms = 50Byte$ im Puffer.\\
+\underline{Die Watermark muss also auf 50Byte gesetzt werden.}\\
+
+\end{document}

@@ -1,0 +1,76 @@
+-------------------------------------------------
+Test der korrekten Funktion:
+--------------------------------------
+  kleine Datei (3 Zeichen):
+    Ausführung: solution/mycp solution/littleFile.txt solution/littleFileOut.txt
+    Inhalt von littleFileOut.txt:
+abc\n
+Vergleiche Dateien:
+
+--------------------------------------
+  große Datei (1877443 Zeichen):
+    Ausführung: solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+    Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+Blindtext-Generator Logo
+Mehrsprachig - Übersetzung
+Vergleiche Dateien:
+-------------------------------------------------
+Leistungstest (2 Durchläufe):
+--------------------------------------
+  1. Durchlauf
+-----------------------------
+     Referenzimplementierung:
+       Caches leeren und Ausführung: time uni/mycp uni/bigFile.txt uni/bigFileOut.txt
+0.00user 0.05system 0:00.50elapsed 12%CPU (0avgtext+0avgdata 2240maxresident)k
+11128inputs+3680outputs (20major+84minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+Blindtext-Generator Logo
+Mehrsprachig - Übersetzung
+-----------------------------
+     Lösung:
+       Caches leeren und Ausführung: time solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+0.00user 0.03system 0:00.19elapsed 21%CPU (0avgtext+0avgdata 2220maxresident)k
+11304inputs+3680outputs (23major+1006minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+Blindtext-Generator Logo
+Mehrsprachig - Übersetzung
+Vergleiche Dateien:
+--------------------------------------
+  2. Durchlauf
+-----------------------------
+     Referenzimplementierung:
+       Caches leeren und Ausführung: time uni/mycp uni/bigFile.txt uni/bigFileOut.txt
+0.00user 0.06system 0:00.19elapsed 33%CPU (0avgtext+0avgdata 2160maxresident)k
+11128inputs+3680outputs (20major+84minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+Blindtext-Generator Logo
+Mehrsprachig - Übersetzung
+-----------------------------
+     Lösung:
+       Caches leeren und Ausführung: time solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+0.00user 0.05system 0:00.20elapsed 26%CPU (0avgtext+0avgdata 2272maxresident)k
+11288inputs+3680outputs (23major+1003minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+Blindtext-Generator Logo
+Mehrsprachig - Übersetzung
+Vergleiche Dateien:
+-------------------------------------------------
+Test: Leere Eingabedatei
+--------------------------------------
+  Ausführung: solution/mycp solution/emptyIn.txt solution/emptyOut.txt
+Vergleiche Dateien:
+-------------------------------------------------
+Test: Leere Eingabe
+--------------------------------------
+  Ausführung: solution/mycp
+Usage: solution/mycp source destination
+-------------------------------------------------
+Test: Quelldatei = Zieldatei
+  Ausführung: solution/mycp solution/littleFile.txt solution/littleFile.txt
+source and destination can not be the same
+-------------------------------------------------
+Test: Nur Leserechte
+  Wechsel zum Verzeichnis 'solution'
+  Ausführung: chmod 100 solution/littleFile.txt
+  Ausführung: mycp littleFile.txt littleFileOut.txt
+-------------------------------------------------

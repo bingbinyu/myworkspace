@@ -1,0 +1,259 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{ucs}
+\usepackage{color}
+\usepackage{listingsutf8}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{wrapfig,lipsum,booktabs}
+\usepackage{adjustbox}
+\usepackage{lmodern}
+\usepackage{enumitem}
+\setlist[enumerate,1]{start=0} % only outer nesting level
+% redefine \VerbatimInput
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}%
+{fontsize=\footnotesize,
+	%
+	frame=lines,  % top and bottom rule only
+	framesep=2em, % separation between frame and text
+	rulecolor=\color{Gray},
+	%
+	label=\fbox{\color{Black}test.txt},
+	labelposition=topline,
+	%
+	commandchars=\|\(\), % escape character and argument delimiters for
+	% commands within the verbatim
+	commentchar=*        % comment character
+}
+\lstset{ 
+	language=C++,                % choose the language of the code
+	basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+	numbers=left,                   % where to put the line-numbers
+	numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+	stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	frame=single,           % adds a frame around the code
+	tabsize=2,          % sets default tabsize to 2 spaces
+	captionpos=b,           % sets the caption-position to bottom
+	breaklines=true,        % sets automatic line breaking
+	breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+	escapeinside={\%*}{*)},          % if you want to add a comment within your code
+	inputencoding = latin1,
+	literate={ö}{{\"o}}1
+	{ä}{{\"a}}1
+	{ü}{{\"u}}1
+}
+
+\usepackage{xcolor}
+\definecolor{sx-yellow}{RGB}{249,245,233}
+\definecolor{sx-orange}{RGB}{224,215,188}
+\usepackage[most]{tcolorbox}
+
+\makeatletter
+\renewenvironment{quote}{%
+	\vskip 10\p@
+	\parindent\z@
+	\tcolorbox[
+	breakable, sharp corners,
+	boxrule=\z@, boxsep=\z@,
+	left=\z@, right=\z@,
+	top=\z@, bottom=\z@,
+	colback=sx-yellow
+	]
+	{\color{sx-orange}\d@ublerule}
+	\vskip 5\p@
+	\list{}{\rightmargin\leftmargin}%
+	\item\relax
+}{%
+\endlist
+{\color{sx-orange}\d@ublerule}
+\endtcolorbox
+\vskip 5\p@
+}
+\def\d@ublerule{\hrule\@width\hsize\kern 1.5\p@\hrule\@width\hsize}
+\makeatother
+
+\setlength{\parindent}{0pt}
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{6}{12.12.2016}{Marc/Bingbin}{C02}%
+                {Rene Engel}{Dennis Jacob}%
+                {Jan Schoneberg}%
+                
+
+
+\section*{Aufgabe 1}
+In Aufgabe 1 haben wir ein Programm zum kopieren von Daten erstellt. Dieses basiert auf der gegeben Referenzimplementierung, nutzt allerdings den Befehl \textit{mmap} um die Daten in den virtuellen Adressraum des Prozesses bzw. Hauptspeicher abzubilden. Dabei werden immer nur Blöcke der Größe einer Page abgebildet. Bei der Lösung der Aufgabe haben wir uns auch an folgenden Beispielen orientiert: \url{https://gist.github.com/sanmarcos/991042} und \url{http://openbook.rheinwerk-verlag.de/linux_unix_programmierung/Kap18B-003.htm} orientiert. 
+\subsection*{Implementierung}
+In Allen Fehlerfällen wird versucht alle geöffneten File Deskriptoren und Abbildungen zu löschen. Falls dies nicht gelingt wird darauf nicht weiter eingegangen. Nachdem die Fehlermeldung auf \textit{std::err} ausgegeben wurde beendet das Programm mit der Rückgabe \texttt{-1}\\ \\
+Falls \textit{mmap} aufgrund eines Fehler die Signale \textit{SIGSEGV} oder \textit{SIGBUS} sendet, werden diese von einem Signalhandler behandelt und das Programm mit der Rückgabe -1 beendet. 
+\lstinputlisting[language=C,firstline=14, firstnumber = 14 ,lastline=23]{06/solution/mycp.cc} 
+
+Zunächst werden die Argumente auf gültigkeit geprüft. 
+\lstinputlisting[language=C,firstline=32, firstnumber = 32 ,lastline=40]{06/solution/mycp.cc}
+Und die File Deskriptoren geöffnet: 
+\lstinputlisting[language=C,firstline=42, firstnumber = 42 ,lastline=55]{06/solution/mycp.cc}
+Als nächstes wird die Größe der Quelldatei und die Page Größe ermittelt. Falls die Quelldatei keine Nutzdaten enthält, kann das Programm beendet werden, da mit dem öffnen des File Deskriptors die Datei neu angelegt bzw. geleert wurde:
+\lstinputlisting[language=C,firstline=57, firstnumber = 57 ,lastline=80]{06/solution/mycp.cc}
+Damit die Abbildung klappt, muss die Zieldatei die gleiche Größe haben, wie die Quelldatei. Dafür wird mit \textit{lseek} der File Offset der Zieldatei an die vorletzte Stelle gesetzt und ein Nul Char (Ende einer Zeichenkette) angehängt. 
+\lstinputlisting[language=C,firstline=82, firstnumber = 82 ,lastline=108]{06/solution/mycp.cc}
+In der folgenden for Schleife wird das tatsächlich Kopieren durchgeführt: 
+\lstinputlisting[language=C,firstline=110, firstnumber = 110 ,lastline=172]{06/solution/mycp.cc}
+Dabei wird jeweils ein Bereich, der maximal so groß ist wie eine Page, mittels \textit{mmap} auf den virtuellen Adressraum des Prozesses abgebildet. Falls die Quelldatei größer ist, als eine Page wird mit einem Offset gearbeitet, der ein vielfaches der Page Größe entspricht. Das eigentliche kopieren wird mit dem Befehl memcpy durchgeführt. Eine Fehlerfallbehandlung wird nicht durchgeführt, da die Methode memcpy nur einen Pointer auf den Zielspeicherbereich zurück gibt. Daran kann kein Fehler erkannt werden. Unser erster versuch die Daten Byteweise zu kopieren, wie es im auskommentierten Teil steht, wäre zu langsam. \\
+Nach dem eigentlichen Kopieren wird die Abbildung wieder Entfernt. \\
+Zum Schluss werden die File Deskriptoren geschlossen und noch nicht geschriebene Daten auf die Platte geschrieben:
+\lstinputlisting[language=C,firstline=174, firstnumber = 174]{06/solution/mycp.cc}
+Wenn dies erfolgreich war, beendet das Programm mit der Rückgabe 0. 
+\subsection*{Test}
+Es wurde ein Testskript \texttt{Test.sh} erstellt. Von diesem Skript aus gesehen liegen die eigene Lösung der Aufgabe im Unterverzeichnis \textit{solution} und die Referenzlösung der Uni im Unterverzeichnis \textit{uni}. Für die Tests werden einige Hilfsdateien verwendet. Da für die einige Befehle root Rechte benötigt werden, die uns auf den x-Rechner nicht zur Verfügung stehen, haben wir die Tests auf unseren privaten Computern sowie auf der TI2 Virtuellen Maschine durchgeführt. Die getesteten Fälle stehen mit in dem Skript für alle Fehlerfälle wird eine entsprechende Ausgabe erwartet. Die Dateien werden bei den Tests die erfolgreich verlaufen sollen mittels \textit{diff} miteinander verglichen.\\ \\
+Es werden dabei auch die geforderten Testfälle abgedeckt: Eine ungerade Datei wird mit dem ersten Testfall abgedeckt und auch eine leere Datei bzw. leere Bytes werden getestet.\\
+\textbf{Test.sh}:
+\lstinputlisting[language=bash,inputencoding=utf8/latin1]{06/Test.sh}
+Wie zu erkennen ist werden bei den Testfällen bei denen eine Datei als Ergebnis erwartet wird die Quell- und Zieldatei mittels \texttt{diff} miteinander verglichen. Wenn diff keine Ausgabe hat, sind beide Dateien identisch.\\
+Hier die entsprechende Testausgabe:
+\lstinputlisting[language={},inputencoding=utf8/latin1]{06/testoutput.txt}
+Wie anhand von \texttt{time} zu erkennen ist, benötigt unsere Implementierung in beiden Durchläufen eine ähnliche oder geringe Gesamtzeit als die Referenzimplementierung. Darüber lässt sich allerdings keine direkte Aussage über die tatsächliche Geschwindigkeit treffen, da darin möglicherweise auch die CPU Zeit anderer Prozesse enthalten ist. Allerdings benötigt unsere Implementierung auch eine geringe tatsächliche Zeit im User bzw. Kernel Mode. Dies lässt sich auch bei weiteren Durchläufen der Tests beobachten. Dieser spezielle Test wurde auf einem relativ schwachen Rechner ausgeführt. Bei Leistungsstarken System gibt es ggf. keinen sichtbaren Unterschied. \\ \\
+\begin{tabular}{|l | l | l | }
+	\hline
+	Durchlauf &tatsächliche Zeit unserer Lösung & tatsächliche Zeit Referenz\\
+	\hline
+	1 & 0.03s & 0.05s  \\
+	2& 0.05s & 0.06s  \\
+	\hline
+\end{tabular}
+\\ \\ Die Ausgabe wurde mit diesem Skript in die Datei testoutput umgeleitet. 
+\lstinputlisting[language=bash,inputencoding=utf8/latin1]{06/Test_run.sh}
+\newpage
+\section*{Aufgabe 2}
+Zuerst einige Definitionen von Variablen und ihrer Bedeutung, die ihn folgender Aufgabe zu Vereinfachung genutzt wurden:\\
+\begin{tabular}{cl}
+	$T_{ges}$	& Zeit gesamt (hier für die gesamte Leseoperation) \\
+	$T_{rB}$	& Zeit, die für das Lesen eines Datenblocks benötigt wird \\
+	$T_U$		& Zeit einer Oberflächenumdrehung \\
+	$T_{sw}$	& Dauer eines Spurenwechsels \\
+	$T_{ow}$	& Dauer eines Oberflächenwechsels \\
+	$S_D$		& Größe der Datei \\
+	$S_B$		& Anzahl der Datenblöcke, die durch die Datei belegt sind \\
+	$S_{Sp}$	& Anzahl der Datenblöcke pro Spur \\
+	$S_O$		& Anzahl der Spuren pro Oberfläche \\
+	$N_B$		& Anzahl der Datenblöcke (benötigt durch die Datei) \\
+	$N_{Sp}$	& Anzahl der Spüren (benötigt durch die Datei) \\
+	$N_O$		& Anzahl der Oberflächen (benötigt durch die Datei) \\
+	$L_D$		& Durchschnittliche Lesegeschwindigkeit \\
+\end{tabular}
+\subsection*{a) best-case}
+\begin{quote}
+Wie lange würde es bei bestmöglichen Bedingungen dauern, die genannte Datei von der beschriebenen Festplatte zu lesen und welche durchschnittliche Lesegeschwindigkeit (Datenrate) würde dabei erreicht?
+\end{quote}
+Dies ist der sogenannte \textbf{best-case}. Hier wird angenommen, das die Datei sowohl innerhalb der belegten Spuren sowie auf den belegten Oberflächen sequenziell abgespeichert ist. Außerdem wird angenommen, dass nach einem Spurenwechsel der logisch nächste Datenblock sofort lesbar ist und zu beginn der Lesekopf den ersten logischen Datenblock ohne Wartezeit erreichen kann.\\\\
+\begin{tabular}{cclclcl}
+$N_B$ & $=$ & $\left\lceil\frac{S_D}{S_B}\right\rceil$ & $=$ & $\left\lceil\frac{139586400~B}{512~B}\right\rceil$ & $=$ & $272630$ \\ \\
+
+$N_{Sp}$ & $=$ & $\left\lceil\frac{N_B}{S_{Sp}}\right\rceil$ & $=$ & $\left\lceil\frac{27230}{1200}\right\rceil$ & $=$ & $273$ \\ \\
+
+$N_O$ & $=$ & $\left\lceil\frac{N_{Sp}}{S_O}\right\rceil$ & $=$ & $\left\lceil\frac{273}{100000}\right\rceil$ & $=$ & $1$ \\ \\
+
+$T_{rB}$ & $=$ & $\frac{1}{\frac{7200}{60}}\cdot\frac{1}{1200}~s$ & $=$ & $\frac{1}{144000}~s$ & $=$ & $6,9\overline{4}~ns$ \\ \\
+
+$T_{ges}$ & $=$ & $T_{rB} \cdot N_B + N_{Sp}\cdot 4 \cdot 10^{-3}~s$\\ \\
+& $=$ & $\frac{1}{144000}~s\cdot 272630 + (273 - 1) \cdot 4\cdot10^{-3}~s$\\ \\
+& $=$ & $2,981263889~s$\\\\
+
+$L_D$ & $=$ & $\frac{139586400}{\frac{1}{144000}~s\cdot 272630 + (273 - 1) \cdot 4\cdot10^{-3}}$ \\ \\
+& $=$ & $46821215,83\frac{B}{s}=45723,844\frac{KiB}{s}=44,652\frac{MiB}{s}$
+\end{tabular}
+\subsection*{b) worst-case (512 B Datenblockgröße)}
+\begin{quote}
+Wie lange würde es bei der schlechtest möglichen Verteilung der Datenblöcke auf der Festplatte dauern, bis die genannte Datei von der beschriebenen Festplatte gelesen wurde und welche durchschnittliche Lesegeschwindigkeit (Datenrate) würde dabei erreicht?
+\end{quote}
+Dies ist der sogenannte \textbf{worst-case}. Hierbei wird angenommen, dass jeder Datenblock auf einer eigenen Spur liegt und nach jeden Spurwechsel eine ganze Umdrehung gewartet werden muss, bis der logisch nächste Block verfügbar ist. Außerdem liegt der nächste Block nach einem Oberfläche nicht in dem bisherigem Zylinder. Der Lesekopf startet in einem anderen Zylinder und der aktive Lesekopf befindet sich auf einer anderen Oberfläche.\\ \\
+\begin{tabular}{cclclcl}
+$N_B$ & $=$ & $\left\lceil\frac{S_D}{S_B}\right\rceil$ & $=$ & $\left\lceil\frac{139586400~B}{512~B}\right\rceil$ & $=$ & $272630$ \\ \\
+
+$N_{Sp}$ & $=$ & $N_B$ & $=$ & $272630$ \\ \\
+
+$N_O$ & $=$ & $\left\lceil\frac{N_{Sp}}{S_O}\right\rceil$ & $=$ & $\left\lceil\frac{272630}{100000}\right\rceil$ & $=$ & $3$ \\ \\
+
+$T_{rB}$ & $=$ & $\frac{1}{\frac{7200}{60}}\cdot\frac{1}{1200}~s$ & $=$ & $\frac{1}{144000}~s$ & $=$ & $6,9\overline{4}~ns$ \\ \\
+$T_{ges}$ & $=$ & $T_{rB} \cdot N_B + N_{Sp}\cdot T_{sw} + N_{Sp} \cdot T_U + N_O \cdot T_{ow}$\\ \\
+& $=$ & $N_B\cdot\left(T_{rB} + T_U + T_{sw}\right) + N_O \cdot N_O$\\ \\
+& $=$ & $272630\cdot\left(\frac{1}{144000} + \frac{1}{120} + 4 \cdot 10^{-3}\right)s + 3 \cdot 2,4\cdot10^{-3}~s$ \\ \\
+& $=$ & $3364,337131~s$\\ \\
+
+$L_D$ & $=$ & $\frac{139586400}{272630\cdot\left(\frac{1}{144000}~s + \frac{1}{120}~s + 4 \cdot 10^{-3}~s\right) + 3 \cdot 2,4\cdot10^{-3}~s}$ \\ \\
+& $=$ & $41490,015\frac{B}{s}=40,518\frac{KiB}{s}=0,04\frac{MiB}{s}$
+\end{tabular}
+\newpage
+\subsection*{c) worst-case (4 KiB Datenblockgröße)}
+\begin{quote}
+Wie ändert sich das Ergebnis für b), wenn jeweils acht hintereinander liegende Plattenblöcke
+zu einem logischen Block der Größe 4 KiB zusammengefasst werden (ein logischer Block
+wird immer komplett genutzt, selbst wenn nicht alle Plattenblöcke darin benötigt würden,
+um die Datei zu speichern).
+\end{quote}
+Die Annahme hier ist die gleiche wie in dem vorherigem Abschnitt. Jedoch hat jeder Datenblock nun eine Größe von 4 KiB.\\
+\begin{tabular}{cclclcl}% $ & $
+$N_B$ & $=$ & $\left\lceil\frac{S_D}{S_B}\right\rceil$ & $=$ & $\left\lceil\frac{139586400~B}{4096~B}\right\rceil$ & $=$ & $34079$ \\
+
+$N_{Sp}$ & $=$ & $N_B$ & $=$ & $34079$ \\
+
+$N_O$ & $=$ & $\left\lceil\frac{N_{Sp}}{S_O}\right\rceil$ & $=$ & $\left\lceil\frac{34079}{100000}\right\rceil$ & $=$ & $1$ \\
+
+$T_{rB}$ & $=$ & $\frac{8}{\frac{7200}{60}}\cdot\frac{1}{1200}~s$ & $=$ & $\frac{1}{18000}~s$ & $=$ & $5,\overline{5}~ns$ \\\\
+
+$T_{ges}$ & $=$ & $T_{rB} \cdot N_B + N_{Sp}\cdot T_{sw} + N_{Sp} \cdot T_U + N_O \cdot T_{ow}$\\ \\
+& $=$ & $N_B\cdot\left(T_{rB} + T_U + T_{sw}\right) + N_O \cdot N_O$\\ \\
+& $=$ & $34079\cdot\left(\frac{1}{18000} + \frac{1}{120} + 4 \cdot 10^{-3}\right)s + 3 \cdot 2,4\cdot10^{-3}~s$ \\ \\
+& $=$ & $422,208144~s$\\ \\
+$L_D$ & $=$ & $\frac{139586400}{34079\cdot\left(\frac{1}{18000} + \frac{1}{120} + 4 \cdot 10^{-3}\right)s + 3 \cdot 2,4\cdot10^{-3}~s}$\\\\
+& $=$ & $330610,3917\frac{B}{s}=322,86\frac{KiB}{s}=0,315\frac{MiB}{s}$\\
+\end{tabular}\\
+\\
+Mit einer Blockgröße von 4 KiB erreicht man im \textbf{worst-case} eine ca. 80-fach höhere Lesegeschwindigkeit als mit 512 B.
+\newpage
+\section*{Aufgabe 3}
+	\begin{quote}
+		Welche effektive Datenrate (in Byte/s) zum angeschlossenen Gerät ergibt sich in folgenden Fällen?
+	\end{quote}
+	Der Ausgangszustand ist in allen drei Fällen ein voller Puffer des Gerätecontrollers. Zunächst wird der Puffer geleert. Dazu wird die \textbf{Entleerungszeit} $t_{clear}$ mit der Größe des Puffers $s_{buffer}$, der \textbf{Datenrate des Gerätecontroller} $r_{controller}$ und der \textbf{Low-Wartermark} $l_{watermark}$ berechnet:\\ \\
+	\textbf{Entleerungszeit} $t_{clear} = \frac{s_{buffer} - l_{watermark}}{r_{controller}}$\\ \\
+	Damit und mit der \textbf{Auffüllzeit des Puffers} $t_{fill}$ (hier 5 ms) wird die Zeit berechnet die für das Leeren und Auffüllen des Puffers benötigt wird, also eine \textbf{Periodenzeit} $t_{period}$:\\ \\
+	$t_{period} = t_{clear} + t_{fill}$\\ \\
+	Die tatsächliche Anzahl gesendeter Bytes entspricht immer der Puffergröße, da der Gerätecontroller ab dem Zeitpunkt des Erreichens der \textbf{Low-Watermark} weiter die restlichen Bytes an das Gerät sendet und parallel der Puffer mit neuen Bytes gefüllt wird. Die effektive Datenrate ergibt sich deshalb, wenn die tatsächliche Anzahl gesendeter Bytes (also die Puffergröße) $s_{buffer}$ durch die Periodendauer $t_{period}$ dividiert wird:\\ \\
+	\textbf{effektive Datenrate} $r_{effective} = \frac{s_{buffer}}{t_{period}} = \frac{s_{buffer}}{t_{clear} + t_{fill}} = \frac{s_{buffer}}{\frac{s_{buffer} - l_{watermark}}{r_{controller}} + t_{fill}}$
+	\subsection*{a) Größe des Puffers: 1 Byte. Low-Watermark: 0 Byte.}
+		$r_{effective \text{ } a} = \frac{s_{buffer \text{ } a}}{\frac{s_{buffer \text{ } a} - l_{watermark \text{ } a}}{r_{controller}} + t_{fill}} = \frac{1 \text{ Byte}}{\frac{1 \text{ Byte} - 0 \text{ Byte}}{10000 \frac{ \text{Byte}}{\text{s}}} + 5 \text{ ms}} \approx 196,078 \frac{ \text{Byte}}{\text{s}} \approx 196 \frac{\text{Byte}}{\text{s}}$
+	\subsection*{b) Größe des Puffers: 1 KiB = 1024 Byte. Low-Watermark: 0 Byte.}
+		$r_{effective \text{ } b} = \frac{s_{buffer \text{ } b}}{\frac{s_{buffer \text{ } b} - l_{watermark \text{ } b}}{r_{controller}} + t_{fill}} = \frac{1024 \text{ Byte}}{\frac{1024 \text{ Byte} - 0 \text{ Byte}}{10000 \frac{ \text{Byte}}{\text{s}}} + 5 \text{ ms}} \approx 9534,451 \frac{ \text{Byte}}{\text{s}} \approx 9534 \frac{\text{Byte}}{\text{s}}$
+	\subsection*{c) Größe des Puffers: 1 KiB = 1024 Byte. Low-Watermark: 25 Byte.}
+		$r_{effective \text{ } c} = \frac{s_{buffer \text{ } c}}{\frac{s_{buffer \text{ } c} - l_{watermark \text{ } c}}{r_{controller}} + t_{fill}} = \frac{1024 \text{ Byte}}{\frac{1024 \text{ Byte} - 25 \text{ Byte}}{10000 \frac{ \text{Byte}}{\text{s}}} + 5 \text{ ms}} \approx 9761,678 \frac{ \text{Byte}}{\text{s}} \approx 9762 \frac{\text{Byte}}{\text{s}}$
+	\subsection*{d)}
+		\begin{quote}
+			Wie müsste die Low-Watermark gewählt werden, damit die Netto-Datenrate des Geräts
+			rechnerisch erreicht wird?
+		\end{quote}
+		Es gilt also $r_{effective} = r_{controller}$. Die Formel für die effektive Datenrate muss nur zur \textbf{Low-Watermark} $l_{watermark}$ umgestellt werden:\\ \\
+		\begin{align}
+			r_{effective} = \frac{s_{buffer}}{\frac{s_{buffer} - l_{watermark}}{r_{controller}} + t_{fill}} \quad &|\cdot \bigg(\frac{s_{buffer} - l_{watermark}}{r_{controller}} + t_{fill}\bigg)\\
+			r_{effective} \cdot \frac{s_{buffer} - l_{watermark}}{r_{controller}} + r_{effective} \cdot t_{fill} = s_{buffer} \quad &| \cdot r_{controller}\\
+			r_{effective} \cdot s_{buffer} - r_{effective} \cdot l_{watermark} + r_{effective} \cdot t_{fill} \text{ } \cdot & \text{ }r_{controller} = s_{buffer} \cdot r_{controller}  \nonumber\\ 
+			| + r_{effective} \cdot l_{watermark} &- s_{buffer} \cdot r_{controller}\\
+			r_{effective} \cdot l_{watermark} = r_{effective} \cdot s_{buffer} + r_{effective} \cdot t_{fill} &\cdot r_{controller} - s_{buffer} \cdot r_{controller} \nonumber\\
+			| \div r_{effective}\\
+			l_{watermark} = s_{buffer} + t_{fill} \cdot r_{controller} - \frac{s_{buffer} \cdot r_{controller}}{r_{effective}} \quad &| ()\\
+			l_{watermark} = s_{buffer} \cdot \bigg(1 - \frac{r_{controller}}{r_{effective}}\bigg) + t_{fill} \cdot r_{controller}
+		\end{align}
+		Es ist ersichtlich, dass die \textbf{Low-Watermark} $l_{watermark}$ nur noch abhängig von der \textbf{Auffüllzeit des Puffers} $t_{fill}$ und der \textbf{Datenrate des Gerätecontroller} $r_{controller}$ ist, da sich die Klammer zu 0 auflöst. Es ergibt sich daher folgender Wert:\\ \\
+		$l_{watermark} = 0 + t_{fill} \cdot r_{controller} = 5 \text{ ms} \cdot 10000 \frac{\text{Byte}}{\text{s}} = 50 \text{ Byte}$\\ \\
+		Allerdings muss der Puffer logischerweise Größer sein als die \textbf{Low-Watermark}. Dies ist nur für Aufgabenteile \textbf{b)} und \textbf{c)} der Fall.
+\end{document}

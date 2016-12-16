@@ -1,7 +1,6 @@
 import numpy as np
-#import pylab as p
-import matplotlib.pyplot as p
-#from scipy.signal import butter, lfilter, freqz
+import pylab as p
+samplenum=500
 p.figure()
 p.rcParams.update({'font.size': 16})
 data_filtered=[]
@@ -12,7 +11,8 @@ for i in range(5,len(dat["time"])):
         ob_vec=[dat["time"][i],dat["tau_sensor"][i], dat["tau_ref_traj"][i],dat["q_spring_meas"][i], dat["tau_mod"][i]]
         data_filtered.append(np.array(ob_vec))
 data_lchirp=np.array(data_filtered)
-
+data_size=len(data_lchirp[:,0])
+data_lchirp=data_lchirp[np.linspace(0, data_size-1, num=samplenum, dtype=int),:]
 
 filename = "./dgmm_results/chirp_tautrack_dgmm_taucmd_trained_incl30_01.csv"
 dat = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
@@ -22,6 +22,9 @@ for i in range(5,len(dat["time"])):
         ob_vec=[dat["time"][i],dat["tau_sensor"][i], dat["tau_ref_traj"][i],dat["q_spring_meas"][i], dat["tau_mod"][i]]
         data_filtered.append(np.array(ob_vec))
 data_dchirp=np.array(data_filtered)
+data_size=len(data_dchirp[:,0])
+data_dchirp=data_dchirp[np.linspace(0, data_size-1, num=samplenum, dtype=int),:]
+
 
 filename = "./NN_results_14122016/chirp_NN_14122016_new_result_exp03.csv"
 dat = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
@@ -31,6 +34,9 @@ for i in range(5,len(dat["time"])):
         ob_vec=[dat["time"][i],dat["tau_sensor"][i], dat["tau_ref_traj"][i],dat["q_spring_meas"][i], dat["tau_mod"][i]]
         data_filtered.append(np.array(ob_vec))
 data_nchirp=np.array(data_filtered)
+data_size=len(data_nchirp[:,0])
+data_nchirp=data_nchirp[np.linspace(0, data_size-1, num=samplenum, dtype=int),:]
+
 
 fl=5
 for i in range(fl,len(data_lchirp[:,0])):
@@ -42,29 +48,28 @@ for i in range(fl,len(data_dchirp[:,0])):
 
 p.subplot(2,2,1)
 p.plot(data_lchirp[:,0], data_lchirp[:,2], 'g-', label='desired', linewidth=3) 
-p.plot(data_dchirp[:,0], data_dchirp[:,1], 'r-', label='DGMM', linewidth=2,alpha=0.8)
+p.plot(data_dchirp[:,0], data_dchirp[:,1], 'rp-.', label='DGMM', linewidth=2,alpha=0.8)
 p.plot(data_nchirp[:,0], data_nchirp[:,1], 'y-', label='NN', linewidth=2,alpha=0.8)
 p.plot(data_lchirp[:,0], data_lchirp[:,1], 'b-', label='linear', linewidth=2,alpha=0.8)
 p.grid()
-p.legend(bbox_to_anchor=(1.1, 1.3))
+p.legend(bbox_to_anchor=(1.05, 1.3))
 p.ylabel("Torque (Nm)", fontsize=20)
 p.xlabel("Time (s)", fontsize=20)
 p.xlim([0,160])
-p.suptitle('a', x=0.292, y=0.927, fontsize=25)
+
 
 p.subplot(2,2,3)
 p.plot(data_dchirp[:,0], abs(data_dchirp[:,1]-data_dchirp[:,2]), 'r-', label='tracking error (DGMM)', linewidth=1.5)
 p.plot(data_nchirp[:,0], abs(data_nchirp[:,1]-data_nchirp[:,2]), 'y-', label='tracking error (NN)', linewidth=1.5)
 p.plot(data_lchirp[:,0], abs(data_lchirp[:,1]-data_lchirp[:,2]), 'b-', label='tracking error (linear)', linewidth=1.5)
 p.grid()
-p.legend(bbox_to_anchor=(1.2, 1.2))
+p.legend(bbox_to_anchor=(1.1, 1.2))
 p.ylabel("Torque error (Nm)", fontsize=20)
 p.xlabel("Time (s)", fontsize=20)
 p.xlim([0,160])
-#p.suptitle("Title for second plot")
-p.suptitle('b', x=0.729, y=0.934, fontsize=25)
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 filename = "./linear_results/randomwalk_tautrack_linear_taucmd_trained_incl30_01.csv"
 dat3 = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
@@ -80,7 +85,7 @@ filename = "./dgmm_results/randomwalk_tautrack_dgmm_taucmd_trained_incl30_01.csv
 dat = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
 data_filtered=[]
 for i in range(5,len(dat["time"])):
-    if abs(dat["tau_mod"][i]-dat["tau_ref_traj"][i])<5 and 0.00001<abs(dat["tau_mod"][i])<20: # remove the error sample of the torque measurement
+    if abs(dat["tau_mod"][i]-dat["tau_ref_traj"][i])<5 and 0.00001<abs(dat["tau_sensor"][i])<20: # remove the error sample of the torque measurement
         ob_vec=[dat["time"][i],dat["tau_sensor"][i], dat["tau_ref_traj"][i],dat["q_spring_meas"][i], dat["tau_mod"][i]]
         data_filtered.append(np.array(ob_vec))
 data_drd=np.array(data_filtered)
@@ -89,7 +94,7 @@ filename = "./NN_results_14122016/randomwalk_NN_14122016_new_result_exp03.csv"
 dat = np.recfromcsv(filename, names=True, skip_header=0, dtype=np.float)
 data_filtered=[]
 for i in range(5,len(dat["time"])):
-    if abs(dat["tau_mod"][i]-dat["tau_ref_traj"][i])<5 and 0.00001<abs(dat["tau_mod"][i])<20: # remove the error sample of the torque measurement
+    if abs(dat["tau_mod"][i]-dat["tau_ref_traj"][i])<5 and 0.00001<abs(dat["tau_sensor"][i])<20: # remove the error sample of the torque measurement
         ob_vec=[dat["time"][i],dat["tau_sensor"][i], dat["tau_ref_traj"][i],dat["q_spring_meas"][i], dat["tau_mod"][i]]
         data_filtered.append(np.array(ob_vec))
 data_nrd=np.array(data_filtered)
@@ -105,24 +110,21 @@ p.ylabel("Torque (Nm)", fontsize=20)
 p.xlabel("Time (s)", fontsize=20)
 p.xlim([0,160])
 p.ylim([-15,19])
-p.suptitle('c', x=0.292, y=0.463, fontsize=25)
-
 
 p.subplot(2,2,4)
 p.plot(data_drd[:,0], abs(data_drd[:,4]-data_drd[:,2]), 'r+', label='tracking error (DGMM)', linewidth=1.0, markersize=3)
 p.plot(data_nrd[:,0], abs(data_nrd[:,4]-data_nrd[:,2]), 'y+', label='tracking error (NN)', linewidth=1.0, markersize=3)
 p.plot(data_lrd[:,0], abs(data_lrd[:,4]-data_lrd[:,2]), 'b+', label='tracking error (linear)', linewidth=1.0, markersize=3)
 p.grid()
-p.legend(bbox_to_anchor=(1.2, 1.2))
+p.legend(bbox_to_anchor=(1.1, 1.2))
 p.ylabel("Torque error (Nm)", fontsize=20)
 p.xlabel("Time (s)", fontsize=20)
 p.xlim([0,160])
 p.ylim([0,6])
-p.suptitle('d', x=0.727, y=0.469, fontsize=25)
 
 #p.suptitle("4by3_springmodeling_15092016_Exp%d"%exp_idx)
 #p.savefig("./img/4by3_springmodeling_25102016_filtered_in34.8_pos4%d_v50.png"%exp_idx)
-p.subplots_adjust(wspace=.3, hspace=.4)
+p.subplots_adjust(wspace=.2, hspace=.4)
 p.show()
 p.close("all")		
 

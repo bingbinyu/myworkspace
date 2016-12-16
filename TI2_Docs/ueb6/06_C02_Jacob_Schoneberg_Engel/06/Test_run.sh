@@ -1,0 +1,1 @@
+sudo ./Test.sh 2> testoutput.txt 1>&2

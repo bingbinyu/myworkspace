@@ -1,0 +1,51 @@
+\documentclass{ti2}
+
+% Dateikodierung ist utf8
+\usepackage[utf8]{inputenc} 
+\usepackage{amsmath}  
+
+\begin{document}
+
+% Nr, Abgabedatum, Gruppenleiter, Gruppenname, Name1...Name4
+\Abgabeblatt{6}{12.12.2016}{Marc Hildebrandt}{C/06}%
+                {Niklas Koenen}{Jan Kl"uever}%
+                {Vincent Jankovic}{}%
+\section*{Aufgabe 1}
+Folgt aus 2 und 3.
+\section*{Aufgabe 2}
+
+\subsection*{a)}
+Setup: 8 Oberfl"achen, $800000$ Spuren, $800000 * 1200$ Sektoren pro Spur, $800000*1200*512$ Bytes auf der Platte.
+$1200 * 512 * \frac{7200}{60} \frac{Bytes}{sek}=73728000 \frac{Bytes}{sek} \cong 70,3125 \frac{MiB}{sek}$ Lesegeschwindigkeit ohne Spurwechsel. Spurwechsel-Zeit: $\frac{139586400}{614400}=227,191$ Spuren werden von der Datei beansprucht und damit ergibt sich f"ur die Spurwechselzeit $227,191 * 4 ms = 908,76 ms$. Lesezeit: $\frac{139586400 Bytes}{73728000 \frac{Bytes}{sek}}= 1,893 sek$. Damit ergibt sich die Gesamtzeit von $1,893+0.908 \approx 2.8 Sekunden$. Die Datenrate bel"auft sich auf $47.52 \frac{MiB}{sek}$. Wird kein Kopfwechsel ben"otigt, (was vermutlich auch der Fall ist) so muss in obiger Rechnung die $4ms$ durch $ 4 - 2,4 ms$ ersetzte werden. Die Rechnung "andert sich nur geringf"ugig.
+\subsection*{b)}
+Zuerst die Anzahl der ben"otigten Plattenbl"ocke berechnen: $\frac{139586400}{512}=272629,687$ Plattenbl"ocke. Da es 800000 Spuren gibt, gilt $Spuren > Plattenbl"ocke$ und so kann im schlechtesten Fall pro Spur ein Plattenblock vorkommen. Es gibt also $272629,687$ Spurenwechsel. F"ur die Gesamtzeit gilt nun: $272629,687*(\frac{1}{120}+0,004)=3362,432 sek \cong 56,04$ Minuten. Die Durchschnittsdatenrate bel"auft sich auf $\frac{139586400}{3362,432}=41513,52 \frac{Bytes}{sek} \cong 0,039 \frac{MiB}{sek}$.
+\subsection*{c)}
+Folgt analog aus b), nur dass $\frac{1}{8}*272629,687*(\frac{1}{120}+0,004)=420,303 sek \cong 7 Minuten$. Die Datenrate liegt bei $
+0,039 \frac{MiB}{sek}$.
+
+\section*{Aufgabe 3}
+Der Ger"atecontroller wird mit einer Datenrate von $10.000 \frac{Byte}{s}$ versorgt. Das Nachf"ullen der Warteschlange dauert pauschal $5ms$. Aus der Datenrate folgt, dass 1 Byte in $\frac{Byte}{10.000 \frac{Byte}{s}}=0,0001s=0,1ms$ "ubertragen wird.\\ 
+\\
+\textbf{a)} \textit{Gr"o"se des Puffers:} 1 Byte,     \textit{Low-Watermark:} 0 Byte\\
+Da es hier keine Low-Watermark gibt, wird der Interrupt erst ausgel"ost, wenn der Puffer komplett leer ist. Also dauert es $1 \cdot 0,1ms=0,1ms$, um den vollen Puffer komplett zu leeren. Dann wird der Interrupt ausgel"ost und nach weiteren $5ms$ ist der Puffer wieder voll und das ganze beginnt von neu. Also betr"agt die effektive Datenrate $\frac{1 Byte}{5,1 ms}=\frac{1 Byte}{0,0051s}\approx 196,08 \frac{Byte}{s}$.\\ 
+\\
+\textbf{b)} \textit{Gr"o"se des Puffers:} 1 KiB = 1024 Byte,    \textit{Low-Watermark:} 0 Byte\\
+Es dauert $1024 \cdot 0,1 ms = 102,4 ms$, um den vollen Puffer zu leeren, da die Low-Watermark bei 0 Byte liegt. Dann wird der Interrupt ausgel"ost. Also werden 1024 Bytes in $102,4 ms + 5 ms= 107,4 ms$ "ubertragen. Daraus ergibt sich die effektive Datenrate $\frac{1024 Byte}{107,4 ms}= \frac{1024 Byte}{0,1074s}\approx 9.534,45 \frac{Byte}{s}$.\\
+\\
+\textbf{c)} \textit{Gr"o"se des Puffers:} 1 KiB = 1024 Byte,    \textit{Low-Watermark:} 25 Byte Byte\\
+Es dauert $(1024 Byte-25 Byte) \cdot 0,1 ms=99,9 ms$, um den vollen Puffer bis zur Low-Watermark zu leeren. Dann wird der Interrupt ausgel"ost. In diesen 5 ms wird der Rest des Puffer geleert. Also werden 1024 Bytes in $99,9 ms +5 ms=104,9 ms$ "ubertragen. Daraus ergibt sich die effektive Datenrate von $\frac{1024 Byte}{104,9 ms}=\frac{1024 Byte}{0,1049s}=9.761,68 \frac{Byte}{s}$.\\
+\\
+\textbf{d)} Annahme: Die Gr"o"se des Puffers betr"agt weiterhin 1024 Bytes und die Low-Watermark setzen wir \textit{x}.\\
+Damit folgt die Gleichung:
+\begin{align*}
+& \frac{1024 Byte}{0,1 \frac{ms}{Byte} \cdot (1024 Byte - x)+5ms}= 10.000 \frac{Byte}{s}\\
+\Leftrightarrow\ & \frac{0,1 \frac{ms}{Byte} \cdot (1024 Byte - x)+5ms}{1024 Byte}= \frac{1 s}{10.000 Byte}\\
+\Leftrightarrow\ & 0,1 \frac{ms}{Byte} \cdot (1024 Byte - x)+5ms= 0,1024 s = 102,4 ms \\
+\Leftrightarrow\ & 0,1 \frac{ms}{Byte} \cdot (1024 Byte - x)= 97,4 ms \\
+\Leftrightarrow\ & 1024 Byte - x = 974 Byte \\
+\Leftrightarrow\ & -x = 974 Byte -1024 Byte=-50 Byte \\
+\Leftrightarrow\ & x = 50 Byte \\
+\end{align*}
+Also muss die Low-Watermark 50 Byte betragen.
+\end{document}
+ 
