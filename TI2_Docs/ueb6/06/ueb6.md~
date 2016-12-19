@@ -15,7 +15,7 @@ geschrieben. Ein Aufruf des Programms könnte z.\ B. lauten:
 
     mycp eingabe ausgabe
 
-Euer Programm soll beliebig lange Eingabedateien "on the fly"
+Euer Programm soll beliebig lange Eingabedateien „on the fly“
 verarbeiten können
 (d.\ h. Ihr könnt nicht einfach die gesamte Datei in den Speicher
 laden, sondern müsst diese blockweise bearbeiten). Ein Block soll der
