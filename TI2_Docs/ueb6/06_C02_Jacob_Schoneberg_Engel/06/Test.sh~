@@ -77,7 +77,7 @@ sudo ./solution/mycp
 echo "-------------------------------------------------"
 echo "Test: Quelldatei = Zieldatei"
 echo "  Ausführung: solution/mycp solution/littleFile.txt solution/littleFile.txt"
-sudo ./solution/mycp solution/littleFile.txt ./solution/littleFile.txt
+sudo ./solution/mycp solution/littleFile.txt solution/littleFile.txt
 echo "-------------------------------------------------"
 echo "Test: Nur Leserechte"
 echo "  Wechsel zum Verzeichnis 'solution'"

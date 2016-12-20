@@ -1,0 +1,98 @@
+-------------------------------------------------
+Test der korrekten Funktion:
+--------------------------------------
+  kleine Datei (3 Zeichen):
+    Ausführung: solution/mycp solution/littleFile.txt solution/littleFileOut.txt
+sudo: ./solution/mycp: command not found
+    Inhalt von littleFileOut.txt:
+cat: ./solution/littleFileOut.txt: No such file or directory
+
+
+Vergleiche Dateien:
+diff: solution/littleFileOut.txt: No such file or directory
+-e 
+--------------------------------------
+  große Datei (1877443 Zeichen):
+    Ausführung: solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+sudo: ./solution/mycp: command not found
+    Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+head: cannot open `./solution/bigFileOut.txt' for reading: No such file or directory
+Vergleiche Dateien:
+diff: solution/bigFileOut.txt: No such file or directory
+rm: cannot remove `./solution/littleFileOut.txt': No such file or directory
+rm: cannot remove `./solution/bigFileOut.txt': No such file or directory
+-------------------------------------------------
+Leistungstest (2 Durchläufe):
+--------------------------------------
+  1. Durchlauf
+-----------------------------
+     Referenzimplementierung:
+       Caches leeren und Ausführung: time uni/mycp uni/bigFile.txt uni/bigFileOut.txt
+time: cannot run ./uni/mycp: Permission denied
+Command exited with non-zero status 126
+0.00user 0.00system 0:00.09elapsed 0%CPU (0avgtext+0avgdata 1408maxresident)k
+544inputs+8outputs (0major+74minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+head: cannot open `./uni/bigFileOut.txt' for reading: No such file or directory
+rm: cannot remove `./uni/bigFileOut.txt': No such file or directory
+-----------------------------
+     Lösung:
+       Caches leeren und Ausführung: time solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+time: cannot run ./solution/mycp: Permission denied
+Command exited with non-zero status 126
+0.00user 0.00system 0:00.05elapsed 0%CPU (0avgtext+0avgdata 1392maxresident)k
+552inputs+8outputs (0major+75minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+head: cannot open `./solution/bigFileOut.txt' for reading: No such file or directory
+Vergleiche Dateien:
+diff: ./solution/bigFileOut.txt: No such file or directory
+rm: cannot remove `./solution/bigFileOut.txt': No such file or directory
+--------------------------------------
+  2. Durchlauf
+-----------------------------
+     Referenzimplementierung:
+       Caches leeren und Ausführung: time uni/mycp uni/bigFile.txt uni/bigFileOut.txt
+time: cannot run ./uni/mycp: Permission denied
+Command exited with non-zero status 126
+0.00user 0.00system 0:00.01elapsed 0%CPU (0avgtext+0avgdata 1392maxresident)k
+8inputs+8outputs (0major+74minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+head: cannot open `./uni/bigFileOut.txt' for reading: No such file or directory
+rm: cannot remove `./uni/bigFileOut.txt': No such file or directory
+-----------------------------
+     Lösung:
+       Caches leeren und Ausführung: time solution/mycp solution/bigFile.txt solution/bigFileOut.txt
+time: cannot run ./solution/mycp: Permission denied
+Command exited with non-zero status 126
+0.00user 0.00system 0:00.01elapsed 0%CPU (0avgtext+0avgdata 1424maxresident)k
+8inputs+8outputs (0major+75minor)pagefaults 0swaps
+       Inhalt (Erste 2 Zeilen) von bigFileOut.txt:
+head: cannot open `./solution/bigFileOut.txt' for reading: No such file or directory
+Vergleiche Dateien:
+diff: ./solution/bigFileOut.txt: No such file or directory
+rm: cannot remove `./solution/bigFileOut.txt': No such file or directory
+-------------------------------------------------
+Test: Leere Eingabedatei
+--------------------------------------
+  Ausführung: solution/mycp solution/emptyIn.txt solution/emptyOut.txt
+sudo: ./solution/mycp: command not found
+Vergleiche Dateien:
+diff: ./solution/emptyOut.txt: No such file or directory
+rm: cannot remove `./solution/emptyOut.txt': No such file or directory
+-------------------------------------------------
+Test: Leere Eingabe
+--------------------------------------
+  Ausführung: solution/mycp
+sudo: ./solution/mycp: command not found
+-------------------------------------------------
+Test: Quelldatei = Zieldatei
+  Ausführung: solution/mycp solution/littleFile.txt solution/littleFile.txt
+sudo: ./solution/mycp: command not found
+-------------------------------------------------
+Test: Nur Leserechte
+  Wechsel zum Verzeichnis 'solution'
+  Ausführung: chmod 100 solution/littleFile.txt
+  Ausführung: mycp littleFile.txt littleFileOut.txt
+sudo: ./mycp: command not found
+rm: cannot remove `littleFileOut.txt': No such file or directory
+-------------------------------------------------
